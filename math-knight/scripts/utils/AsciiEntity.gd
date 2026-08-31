@@ -295,7 +295,7 @@ func _build_entity() -> void:
 			glow_color = Color("#4fc3f7")
 			eq_color = Color("#ffd600")
 			part_colors = {
-				0: Color("#b0b0be"), # Polished Silver / Gray Helmet
+				0: Color("#d79a42"), # Long Flowing Golden Brown Hair
 				1: Color("#29b6f6"), # Steel Chestplate
 				2: Color("#1e88e5"), # Left Leg Greave
 				3: Color("#1e88e5"), # Right Leg Greave
@@ -304,9 +304,9 @@ func _build_entity() -> void:
 			}
 			has_sword = true
 			eyes = {
-				"positions": [Vector2(-3.0, -41.0), Vector2(3.0, -41.0)],
-				"color": Color("#00ffff"),
-				"size": 1.4,
+				"positions": [Vector2(-3.5, -41.0), Vector2(2.5, -41.0)],
+				"color": Color("#00e5ff"),
+				"size": 1.6,
 				"style": "visor_glow",
 				"blink_timer": randf_range(2.5, 4.0),
 				"blink_progress": 0.0,
@@ -411,10 +411,11 @@ func _rebuild_equation() -> void:
 # ---------------------------------------------------------------------------
 func _knight_polys() -> Array:
 	return [
-		# 0. Solid Closed Helmet (Dense Dome)
+		# 0. Long Flowing Golden Brown Hair
 		PackedVector2Array([
-			Vector2(-10, -56), Vector2(10, -56), Vector2(14, -47),
-			Vector2(13, -37), Vector2(-13, -37), Vector2(-14, -47)]),
+			Vector2(-12, -56), Vector2(12, -56), Vector2(16, -46),
+			Vector2(16, -24), Vector2(6, -18), Vector2(-2, -26),
+			Vector2(-16, -22), Vector2(-18, -44)]),
 		# 1. Torso / Breastplate
 		PackedVector2Array([
 			Vector2(-20, -37), Vector2(20, -37),
@@ -523,12 +524,12 @@ func _fill_body_slots() -> void:
 		var poly: PackedVector2Array = polys[pi]
 		var rect := _poly_rect(poly)
 		
-		# Dense high-resolution grid for Knight Helmet
+		# Fine grid for flowing hair
 		var step_x: float = SP.x
 		var step_y: float = SP.y
 		if entity_type == "knight" and pi == 0:
-			step_x = 3.0
-			step_y = 3.6
+			step_x = 3.2
+			step_y = 3.8
 
 		var y: float = rect.position.y
 		while y < rect.end.y:
@@ -549,27 +550,34 @@ func _fill_body_slots() -> void:
 
 					if entity_type == "knight":
 						if pi == 0:
-							# Keep eye and visor slot area completely clear and unobstructed
-							if p.y >= -44.0 and p.y <= -38.0 and abs(p.x) <= 7.0:
+							# Keep eye and face area completely clear and unobstructed
+							if p.y >= -44.0 and p.y <= -38.0 and abs(p.x) <= 6.5:
 								x += step_x
 								continue
 
-							# Polished Silver / Steel Gray Knight Helmet
-							var helmet_glyphs: Array[String] = ["#", "8", "B", "M", "H", "0", "X", "=", "%", "&", "1", "T"]
-							glyph_char = helmet_glyphs[randi() % helmet_glyphs.size()]
+							# Long Flowing Golden Brown Hair Glyphs
+							var hair_glyphs: Array[String] = ["~", ")", "(", "S", "s", "3", "8", "2", "0", "1", "/", "\\", "%", "§"]
+							glyph_char = hair_glyphs[randi() % hair_glyphs.size()]
 							
-							var silver_shades: Array[Color] = [
-								Color("#6c6c7d"), Color("#828294"), Color("#9898aa"),
-								Color("#b0b0c2"), Color("#c8c8da"), Color("#dfdfea"),
-								Color("#f2f2fa")
+							var golden_brown_shades: Array[Color] = [
+								Color("#5d4037"), # Deep chestnut shadow
+								Color("#6d4c41"), # Warm brown
+								Color("#8d5b24"), # Amber brown
+								Color("#a66d28"), # Golden chestnut
+								Color("#b87d2e"), # Rich golden brown
+								Color("#cb8e36"), # Warm caramel
+								Color("#dc9f40"), # Honey amber
+								Color("#eab248"), # Golden highlight
+								Color("#f7c65c"), # Sunlit honey blonde
+								Color("#ffda78")  # Golden glint
 							]
-							slot_color = silver_shades[randi() % silver_shades.size()]
-							slot_alpha = randf_range(0.65, 0.95)
+							slot_color = golden_brown_shades[randi() % golden_brown_shades.size()]
+							slot_alpha = randf_range(0.70, 0.98)
 							
-							# 3D Sphere / Dome curvature
-							var dist_from_center: float = clampf(abs(p.x) / 13.0, 0.0, 1.0)
-							var dome_rad: float = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 8.0
-							z_coord = dome_rad if randf() < 0.65 else -dome_rad
+							# 3D Depth curvature for hair volume
+							var dist_from_center: float = clampf(abs(p.x) / 14.0, 0.0, 1.0)
+							var dome_rad: float = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 7.0
+							z_coord = dome_rad if randf() < 0.6 else -dome_rad
 
 						elif pi == 5:
 							# Royal Purple Cape with multi-tone depth
@@ -1993,21 +2001,25 @@ func _draw_entity_body() -> void:
 				# 3D Purple Cape Wave Kinematics
 				var v: float = clamp((s.p.y - (-34.0)) / 62.0, 0.0, 1.0)
 				var u: float = clamp((s.p.x - (-30.0)) / 22.0, 0.0, 1.0)
-				var wave_x: float = cos(_t * 3.5 - v * 2.0 + u * 0.6) * (2.5 + v * 7.5)
+				var wave_x: float = cos(_t * 3.5 - v * 2.0 + u * 0.6) * (2.5 + v * 7.5) * facing_direction
 				var wave_z: float = -6.0 + sin(_t * 4.2 - v * 2.4 + u * 0.8) * (3.5 + v * 9.5)
 				var wave_y: float = sin(_t * 2.8 - v * 1.4) * 1.8
 
 				# Attack Wind Drag & Cape Flaring in 3D
 				if _swing_blend > 0.01:
-					wave_x += -14.0 * _swing_blend * v
+					wave_x += -14.0 * facing_direction * _swing_blend * v
 					wave_z += sin(_atk_timer * PI / 0.12) * 8.0 * v
 
 				p3.x += wave_x
 				p3.y += wave_y
 				p3.z = wave_z
 			elif s.pi == 0:
-				# 3D Black Helmet Breathing Parallax
+				# 3D Long Flowing Golden Brown Hair waving in the wind
+				var hair_v: float = clampf((s.p.y - (-56.0)) / 38.0, 0.0, 1.0)
+				var hair_wave: float = sin(_t * 3.2 - hair_v * 2.2 + s.p.x * 0.12) * (1.2 + hair_v * 3.8) * facing_direction
+				p3.x += hair_wave
 				p3.y += sin(_t * 2.2) * 0.8
+				p3.z += cos(_t * 2.8 - hair_v * 1.8) * (1.0 + hair_v * 2.5)
 
 			# 3D Yaw & Pitch Transformation
 			var x1: float = p3.x * cos_yaw + p3.z * sin_yaw
@@ -2116,36 +2128,11 @@ func _draw_eyes(entity_anchor: Vector2, scale_m: Vector2, rot_m: float) -> void:
 		v_scale = max(0.08, v_scale)
 
 	for ep in eyes.positions:
-		var eye_world_pos: Vector2
-		if entity_type == "knight":
-			var current_yaw: float = rotation_yaw
-			if abs(current_yaw) < 0.0001:
-				current_yaw = 0.0 if facing_direction > 0 else PI
-			current_yaw += sin(_t * 2.2) * 0.04
+		var local_p: Vector2 = (Vector2(ep.x * facing_direction, ep.y) * scale_mod).rotated(rot_m)
+		var eye_world_pos: Vector2 = entity_anchor + local_p
 
-			var ep3 := Vector3(ep.x, ep.y, 7.5) # Eye on front visor surface
-			var x1: float = ep3.x * cos(current_yaw) + ep3.z * sin(current_yaw)
-			var z1: float = -ep3.x * sin(current_yaw) + ep3.z * cos(current_yaw)
-			var y1: float = ep3.y + sin(_t * 2.2) * 0.8
-
-			var cos_p: float = cos(rotation_pitch)
-			var sin_p: float = sin(rotation_pitch)
-			var x2: float = x1
-			var y2: float = y1 * cos_p - z1 * sin_p
-			var z2: float = y1 * sin_p + z1 * cos_p
-
-			# Occlusion check: when facing away, visor eyes are hidden behind the solid black helmet
-			if z2 < -0.5:
-				continue
-
-			var persp: float = 260.0 / maxf(30.0, 260.0 + z2)
-			eye_world_pos = entity_anchor + Vector2(x2 * persp * scale_mod.x, y2 * persp * scale_mod.y).rotated(rot_m)
-		else:
-			var local_p: Vector2 = (Vector2(ep) * scale_m).rotated(rot_m)
-			eye_world_pos = entity_anchor + local_p
-
-		draw_circle(eye_world_pos, sz * 2.4, Color(eye_col.r, eye_col.g, eye_col.b, 0.18))
-		draw_circle(eye_world_pos, sz * 1.3, Color(eye_col.r, eye_col.g, eye_col.b, 0.38))
+		draw_circle(eye_world_pos, sz * 2.4, Color(eye_col.r, eye_col.g, eye_col.b, 0.22))
+		draw_circle(eye_world_pos, sz * 1.3, Color(eye_col.r, eye_col.g, eye_col.b, 0.45))
 
 		if v_scale < 0.35:
 			draw_line(eye_world_pos + Vector2(-sz * 1.1, 0), eye_world_pos + Vector2(sz * 1.1, 0), Color.WHITE, 1.0)
