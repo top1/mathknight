@@ -292,7 +292,14 @@ func _build_entity() -> void:
 			base_color = Color("#29b6f6")
 			glow_color = Color("#4fc3f7")
 			eq_color = Color("#ffd600")
-			part_colors = { 4: Color("#5c6bc0"), 5: Color("#0288d1") }
+			part_colors = {
+				0: Color("#222230"), # Dark Charcoal/Black Helmet
+				1: Color("#29b6f6"), # Steel Chestplate
+				2: Color("#1e88e5"), # Left Leg Greave
+				3: Color("#1e88e5"), # Right Leg Greave
+				4: Color("#5c6bc0"), # Shoulder/Arm
+				5: Color("#9c27b0")  # Royal Purple Cape
+			}
 			has_sword = true
 			eyes = {
 				"positions": [Vector2(-3.0, -41.0), Vector2(3.0, -41.0)],
@@ -522,11 +529,40 @@ func _fill_body_slots() -> void:
 					var slot_color: Color = base_color
 					if part_colors.has(pi):
 						slot_color = part_colors[pi]
+
+					# Specialized 3D Palette Nuances for Knight
+					var z_coord: float = 0.0
+					if entity_type == "knight":
+						if pi == 0:
+							# Dark Charcoal / Black Helmet with metallic variation
+							var dark_shades: Array[Color] = [
+								Color("#12121c"), Color("#1a1a26"), Color("#242434"),
+								Color("#2f2f42"), Color("#3d3d52"), Color("#4e4e64")
+							]
+							slot_color = dark_shades[randi() % dark_shades.size()]
+							# Dome curvature z
+							var dist_from_center: float = abs(p.x) / 12.0
+							z_coord = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 6.0
+						elif pi == 5:
+							# Royal Purple Cape with multi-tone depth
+							var purple_shades: Array[Color] = [
+								Color("#3b0b59"), Color("#4a148c"), Color("#6a1b9a"),
+								Color("#7b1fa2"), Color("#8e24aa"), Color("#9c27b0"),
+								Color("#ab47bc"), Color("#ba68c8"), Color("#ce93d8")
+							]
+							slot_color = purple_shades[randi() % purple_shades.size()]
+							z_coord = -6.0
+						elif pi == 1:
+							# Steel Chestplate
+							z_coord = 2.0
+
 					slots.append({
 						"p": p,
+						"z": z_coord,
 						"c": MC[randi() % MC.size()],
 						"col": slot_color,
-						"a": randf_range(0.35, 0.85),
+						"base_col": slot_color,
+						"a": randf_range(0.45, 0.95),
 						"ph": randf() * TAU,
 						"fcd": randf_range(0.06, 0.45),
 						"eq": false,
@@ -677,8 +713,13 @@ func _tick_animation(delta: float) -> void:
 				s.a = 1.0
 				s.col = Color.WHITE
 			else:
-				s.col = base_color if not part_colors.has(s.pi) else part_colors[s.pi]
-				s.a = randf_range(0.35, 0.85)
+				var restore_col: Color = base_color
+				if s.has("base_col"):
+					restore_col = s.base_col
+				elif part_colors.has(s.pi):
+					restore_col = part_colors[s.pi]
+				s.col = restore_col
+				s.a = randf_range(0.45, 0.95)
 
 		var dist_scan: float = abs(float(s.p.y) - scan_y)
 		if dist_scan < 10.0:
@@ -1900,28 +1941,95 @@ func _draw_entity_body() -> void:
 				fill_col = part_colors[pi]
 			draw_colored_polygon(wp, Color(fill_col, 0.05))
 
-	# 2. Scattered Body Characters
-	for s in slots:
-		if s.eq:
-			continue
-		if s.a < 0.01:
-			continue
+	# 2. Scattered Body Characters (3D Manikin Projected & Depth Sorted for Knight)
+	if entity_type == "knight" and not _is_splatting:
+		var yaw: float = sin(_t * 2.2) * 0.08 * facing_direction
+		var cos_yaw: float = cos(yaw)
+		var sin_yaw: float = sin(yaw)
+		var dist_cam: float = 240.0
 
-		var cp: Vector2
-		if _is_splatting:
-			cp = Vector2(s.p)
-		else:
-			var base_local: Vector2 = Vector2(s.p) * scale_m
-			base_local = base_local.rotated(rot_m)
-			cp = base_local + pos
-			cp += Vector2(
-				sin(_t * 1.6 + float(s.ph)) * 1.6,
-				cos(_t * 1.3 + float(s.ph) * 0.7) * 1.2)
-			if s.pi == 5 and part_colors.has(5):
-				cp.x += sin(_t * 2.0 + float(s.p.y) * 0.12) * 3.5 * facing_direction
+		var render_list: Array = []
+		for s in slots:
+			if s.eq or s.a < 0.01:
+				continue
 
-		var draw_col := Color(s.col, s.a)
-		draw_char(font, cp, s.c, BFS, draw_col)
+			var p3: Vector3 = Vector3(s.p.x, s.p.y, s.get("z", 0.0))
+
+			if s.pi == 5:
+				# 3D Purple Cape Wave Kinematics
+				var v: float = clamp((s.p.y - (-34.0)) / 62.0, 0.0, 1.0)
+				var u: float = clamp((s.p.x - (-30.0)) / 22.0, 0.0, 1.0)
+				var wave_x: float = cos(_t * 3.5 - v * 2.0 + u * 0.6) * (2.5 + v * 7.5) * facing_direction
+				var wave_z: float = -6.0 + sin(_t * 4.2 - v * 2.4 + u * 0.8) * (3.5 + v * 9.5)
+				var wave_y: float = sin(_t * 2.8 - v * 1.4) * 1.8
+
+				# Attack Wind Drag & Cape Flaring in 3D
+				if _swing_blend > 0.01:
+					wave_x += -14.0 * facing_direction * _swing_blend * v
+					wave_z += sin(_atk_timer * PI / 0.12) * 8.0 * v
+
+				p3.x += wave_x
+				p3.y += wave_y
+				p3.z = wave_z
+			elif s.pi == 0:
+				# 3D Black Helmet Breathing Parallax
+				p3.y += sin(_t * 2.2) * 0.8
+
+			# 3D Yaw Rotation & Perspective
+			var rx: float = p3.x * cos_yaw + p3.z * sin_yaw
+			var rz: float = -p3.x * sin_yaw + p3.z * cos_yaw
+			var ry: float = p3.y
+			var persp: float = dist_cam / maxf(30.0, dist_cam + rz)
+
+			var screen_p: Vector2 = Vector2(rx * persp * scale_m.x, ry * persp * scale_m.y).rotated(rot_m) + pos
+			screen_p += Vector2(
+				sin(_t * 1.6 + float(s.ph)) * 0.8,
+				cos(_t * 1.3 + float(s.ph) * 0.7) * 0.6
+			)
+
+			render_list.append({
+				"screen_p": screen_p,
+				"depth": rz,
+				"c": s.c,
+				"col": s.col,
+				"a": s.a,
+				"pi": s.pi
+			})
+
+		# Depth Sort (Back-to-Front)
+		render_list.sort_custom(func(a, b): return a.depth < b.depth)
+
+		for item in render_list:
+			# Depth lighting modulation: +15% brightness for foreground, subtle shadow for background
+			var depth_factor: float = clamp((item.depth + 15.0) / 30.0, 0.7, 1.25)
+			var final_col: Color = Color(
+				clampf(item.col.r * depth_factor, 0.0, 1.0),
+				clampf(item.col.g * depth_factor, 0.0, 1.0),
+				clampf(item.col.b * depth_factor, 0.0, 1.0),
+				item.a
+			)
+			draw_char(font, item.screen_p, item.c, BFS, final_col)
+	else:
+		# Standard 2D rendering for other entities or splatter mode
+		for s in slots:
+			if s.eq or s.a < 0.01:
+				continue
+
+			var cp: Vector2
+			if _is_splatting:
+				cp = Vector2(s.p)
+			else:
+				var base_local: Vector2 = Vector2(s.p) * scale_m
+				base_local = base_local.rotated(rot_m)
+				cp = base_local + pos
+				cp += Vector2(
+					sin(_t * 1.6 + float(s.ph)) * 1.6,
+					cos(_t * 1.3 + float(s.ph) * 0.7) * 1.2)
+				if s.pi == 5 and part_colors.has(5):
+					cp.x += sin(_t * 2.0 + float(s.p.y) * 0.12) * 3.5 * facing_direction
+
+			var draw_col := Color(s.col, s.a)
+			draw_char(font, cp, s.c, BFS, draw_col)
 
 	# 3. Foreground Math Calculation
 	var eq_alpha_pulse: float = 0.92 + sin(_t * 3.5) * 0.08

@@ -15,15 +15,11 @@ func _init() -> void:
 
 func _process(delta: float) -> bool:
 	_frames += 1
-	if _frames == 10:
-		if _inv_instance and _inv_instance.has_method("_select_item"):
-			var pan_item = CosmeticDatabase.get_item("sword_pan")
-			_inv_instance._select_item(pan_item)
 	if _frames >= 40:
 		var image = root.get_viewport().get_texture().get_image()
 		if image:
-			var err = image.save_png("c:/MathKnight/cosmetic_pan_preview.png")
-			print("Saved screenshot to c:/MathKnight/cosmetic_pan_preview.png, status: ", err)
+			var err = image.save_png("c:/MathKnight/cosmetic_preview_new.png")
+			print("Saved screenshot to c:/MathKnight/cosmetic_preview_new.png, status: ", err)
 		quit(0)
 		return true
 	return false
