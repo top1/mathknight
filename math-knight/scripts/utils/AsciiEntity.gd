@@ -304,7 +304,7 @@ func _build_entity() -> void:
 			}
 			has_sword = true
 			eyes = {
-				"positions": [Vector2(-3.5, -45.0), Vector2(2.5, -45.0)],
+				"positions": [Vector2(-3.5, -48.0), Vector2(2.5, -48.0)],
 				"color": Color("#00ffff"),
 				"size": 1.5,
 				"style": "visor_glow",
@@ -411,11 +411,11 @@ func _rebuild_equation() -> void:
 # ---------------------------------------------------------------------------
 func _knight_polys() -> Array:
 	return [
-		# 0. Heroic Knight Head (Crisp Oval/Jaw Silhouette)
+		# 0. Heroic Knight Head & Hair (Crisp Oval/Jaw with Crown)
 		PackedVector2Array([
-			Vector2(-7, -56), Vector2(7, -56), Vector2(10, -48),
-			Vector2(8, -42), Vector2(4, -36), Vector2(-4, -36),
-			Vector2(-8, -42), Vector2(-10, -48)]),
+			Vector2(-8, -58), Vector2(0, -60), Vector2(8, -58),
+			Vector2(11, -48), Vector2(8, -42), Vector2(4, -36),
+			Vector2(-4, -36), Vector2(-8, -42), Vector2(-11, -48)]),
 		# 1. Torso & Neck & Breastplate (Distinct separation below neck)
 		PackedVector2Array([
 			Vector2(-4, -36), Vector2(4, -36), Vector2(18, -31),
@@ -551,25 +551,42 @@ func _fill_body_slots() -> void:
 					if entity_type == "knight":
 						if pi == 0:
 							# Keep eye zone completely clear and open
-							if p.y >= -48.0 and p.y <= -42.0 and abs(p.x) <= 5.5:
+							if p.y >= -51.0 and p.y <= -45.0 and abs(p.x) <= 5.5:
 								x += step_x
 								continue
 
-							# Structured Head Glyphs
-							var head_glyphs: Array[String] = ["0", "1", "8", "B", "M", "H", "X", "=", "+", "#", "O"]
-							glyph_char = head_glyphs[randi() % head_glyphs.size()]
+							# Check if top crown or temple hair
+							var is_hair_strand: bool = (p.y <= -50.0) or (abs(p.x) >= 7.0 and p.y <= -42.0)
 							
-							var head_shades: Array[Color] = [
-								Color("#e0f7fa"), # Light Titanium Cyan
-								Color("#b2ebf2"),
-								Color("#80deea"),
-								Color("#4dd0e1"),
-								Color("#26c6da"),
-								Color("#00bcd4"),
-								Color("#0097a7")
-							]
-							slot_color = head_shades[randi() % head_shades.size()]
-							slot_alpha = randf_range(0.75, 1.0)
+							if is_hair_strand:
+								# Golden Brown Hair Strands & Bangs on Crown
+								var hair_glyphs: Array[String] = ["~", ")", "(", "S", "s", "3", "8", "/", "\\", "1"]
+								glyph_char = hair_glyphs[randi() % hair_glyphs.size()]
+								var hair_shades: Array[Color] = [
+									Color("#5d4037"), # Chestnut
+									Color("#795548"),
+									Color("#a66d28"), # Golden Brown
+									Color("#cb8e36"), # Warm Caramel
+									Color("#dc9f40"), # Amber
+									Color("#eab248"), # Golden
+									Color("#f7c65c")  # Honey highlight
+								]
+								slot_color = hair_shades[randi() % hair_shades.size()]
+								slot_alpha = randf_range(0.80, 1.0)
+							else:
+								# Structured Face & Jaw Glyphs
+								var head_glyphs: Array[String] = ["0", "1", "8", "B", "M", "H", "X", "=", "+", "#", "O"]
+								glyph_char = head_glyphs[randi() % head_glyphs.size()]
+								var head_shades: Array[Color] = [
+									Color("#e0f7fa"), # Light Titanium Cyan
+									Color("#b2ebf2"),
+									Color("#80deea"),
+									Color("#4dd0e1"),
+									Color("#26c6da"),
+									Color("#00bcd4")
+								]
+								slot_color = head_shades[randi() % head_shades.size()]
+								slot_alpha = randf_range(0.75, 1.0)
 							
 							# 3D Dome curvature for head
 							var dist_from_center: float = clampf(abs(p.x) / 10.0, 0.0, 1.0)
