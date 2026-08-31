@@ -295,8 +295,8 @@ func _build_entity() -> void:
 			glow_color = Color("#4fc3f7")
 			eq_color = Color("#ffd600")
 			part_colors = {
-				0: Color("#d79a42"), # Long Flowing Golden Brown Hair
-				1: Color("#29b6f6"), # Steel Chestplate
+				0: Color("#80deea"), # Titanium / Cyan-Silver Head
+				1: Color("#29b6f6"), # Steel Chestplate & Shoulders
 				2: Color("#1e88e5"), # Left Leg Greave
 				3: Color("#1e88e5"), # Right Leg Greave
 				4: Color("#5c6bc0"), # Shoulder/Arm
@@ -304,9 +304,9 @@ func _build_entity() -> void:
 			}
 			has_sword = true
 			eyes = {
-				"positions": [Vector2(-3.5, -41.0), Vector2(2.5, -41.0)],
-				"color": Color("#00e5ff"),
-				"size": 1.6,
+				"positions": [Vector2(-3.5, -45.0), Vector2(2.5, -45.0)],
+				"color": Color("#00ffff"),
+				"size": 1.5,
 				"style": "visor_glow",
 				"blink_timer": randf_range(2.5, 4.0),
 				"blink_progress": 0.0,
@@ -411,31 +411,31 @@ func _rebuild_equation() -> void:
 # ---------------------------------------------------------------------------
 func _knight_polys() -> Array:
 	return [
-		# 0. Long Flowing Golden Brown Hair
+		# 0. Heroic Knight Head (Crisp Oval/Jaw Silhouette)
 		PackedVector2Array([
-			Vector2(-12, -56), Vector2(12, -56), Vector2(16, -46),
-			Vector2(16, -24), Vector2(6, -18), Vector2(-2, -26),
-			Vector2(-16, -22), Vector2(-18, -44)]),
-		# 1. Torso / Breastplate
+			Vector2(-7, -56), Vector2(7, -56), Vector2(10, -48),
+			Vector2(8, -42), Vector2(4, -36), Vector2(-4, -36),
+			Vector2(-8, -42), Vector2(-10, -48)]),
+		# 1. Torso & Neck & Breastplate (Distinct separation below neck)
 		PackedVector2Array([
-			Vector2(-20, -37), Vector2(20, -37),
-			Vector2(18, 8), Vector2(-18, 8)]),
+			Vector2(-4, -36), Vector2(4, -36), Vector2(18, -31),
+			Vector2(16, 8), Vector2(-16, 8), Vector2(-18, -31)]),
 		# 2. Left Leg
 		PackedVector2Array([
-			Vector2(-16, 8), Vector2(-4, 8),
-			Vector2(-4, 36), Vector2(-16, 36)]),
+			Vector2(-14, 8), Vector2(-3, 8),
+			Vector2(-3, 36), Vector2(-14, 36)]),
 		# 3. Right Leg
 		PackedVector2Array([
-			Vector2(4, 8), Vector2(16, 8),
-			Vector2(16, 36), Vector2(4, 36)]),
+			Vector2(3, 8), Vector2(14, 8),
+			Vector2(14, 36), Vector2(3, 36)]),
 		# 4. Left Arm / Shoulder
 		PackedVector2Array([
-			Vector2(-28, -22), Vector2(-18, -22),
-			Vector2(-18, 6), Vector2(-28, 6)]),
+			Vector2(-26, -28), Vector2(-18, -28),
+			Vector2(-18, 4), Vector2(-26, 4)]),
 		# 5. Cape / Umhang
 		PackedVector2Array([
-			Vector2(-18, -34), Vector2(-12, -34),
-			Vector2(-8, 28), Vector2(-28, 22), Vector2(-30, -2)]),
+			Vector2(-16, -30), Vector2(-10, -30),
+			Vector2(-6, 28), Vector2(-26, 22), Vector2(-28, -2)]),
 	]
 
 
@@ -524,20 +524,20 @@ func _fill_body_slots() -> void:
 		var poly: PackedVector2Array = polys[pi]
 		var rect := _poly_rect(poly)
 		
-		# Fine grid for flowing hair
+		# Structured grid for Knight Head
 		var step_x: float = SP.x
 		var step_y: float = SP.y
 		if entity_type == "knight" and pi == 0:
-			step_x = 3.2
-			step_y = 3.8
+			step_x = 3.4
+			step_y = 3.6
 
 		var y: float = rect.position.y
 		while y < rect.end.y:
 			var x: float = rect.position.x
 			while x < rect.end.x:
 				var p := Vector2(
-					x + randf_range(-1.2, 1.2),
-					y + randf_range(-1.2, 1.2))
+					x + randf_range(-1.0, 1.0),
+					y + randf_range(-1.0, 1.0))
 
 				if Geometry2D.is_point_in_polygon(p, poly):
 					var slot_color: Color = base_color
@@ -550,34 +550,31 @@ func _fill_body_slots() -> void:
 
 					if entity_type == "knight":
 						if pi == 0:
-							# Keep eye and face area completely clear and unobstructed
-							if p.y >= -44.0 and p.y <= -38.0 and abs(p.x) <= 6.5:
+							# Keep eye zone completely clear and open
+							if p.y >= -48.0 and p.y <= -42.0 and abs(p.x) <= 5.5:
 								x += step_x
 								continue
 
-							# Long Flowing Golden Brown Hair Glyphs
-							var hair_glyphs: Array[String] = ["~", ")", "(", "S", "s", "3", "8", "2", "0", "1", "/", "\\", "%", "§"]
-							glyph_char = hair_glyphs[randi() % hair_glyphs.size()]
+							# Structured Head Glyphs
+							var head_glyphs: Array[String] = ["0", "1", "8", "B", "M", "H", "X", "=", "+", "#", "O"]
+							glyph_char = head_glyphs[randi() % head_glyphs.size()]
 							
-							var golden_brown_shades: Array[Color] = [
-								Color("#5d4037"), # Deep chestnut shadow
-								Color("#6d4c41"), # Warm brown
-								Color("#8d5b24"), # Amber brown
-								Color("#a66d28"), # Golden chestnut
-								Color("#b87d2e"), # Rich golden brown
-								Color("#cb8e36"), # Warm caramel
-								Color("#dc9f40"), # Honey amber
-								Color("#eab248"), # Golden highlight
-								Color("#f7c65c"), # Sunlit honey blonde
-								Color("#ffda78")  # Golden glint
+							var head_shades: Array[Color] = [
+								Color("#e0f7fa"), # Light Titanium Cyan
+								Color("#b2ebf2"),
+								Color("#80deea"),
+								Color("#4dd0e1"),
+								Color("#26c6da"),
+								Color("#00bcd4"),
+								Color("#0097a7")
 							]
-							slot_color = golden_brown_shades[randi() % golden_brown_shades.size()]
-							slot_alpha = randf_range(0.70, 0.98)
+							slot_color = head_shades[randi() % head_shades.size()]
+							slot_alpha = randf_range(0.75, 1.0)
 							
-							# 3D Depth curvature for hair volume
-							var dist_from_center: float = clampf(abs(p.x) / 14.0, 0.0, 1.0)
-							var dome_rad: float = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 7.0
-							z_coord = dome_rad if randf() < 0.6 else -dome_rad
+							# 3D Dome curvature for head
+							var dist_from_center: float = clampf(abs(p.x) / 10.0, 0.0, 1.0)
+							var dome_rad: float = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 6.5
+							z_coord = dome_rad if randf() < 0.65 else -dome_rad
 
 						elif pi == 5:
 							# Royal Purple Cape with multi-tone depth
@@ -1975,7 +1972,12 @@ func _draw_entity_body() -> void:
 			var fill_col: Color = base_color
 			if part_colors.has(pi):
 				fill_col = part_colors[pi]
-			draw_colored_polygon(wp, Color(fill_col, 0.05))
+			draw_colored_polygon(wp, Color(fill_col, 0.06))
+			if entity_type == "knight" and pi == 0:
+				var closed_wp: PackedVector2Array = wp.duplicate()
+				if not closed_wp.is_empty():
+					closed_wp.append(closed_wp[0])
+					draw_polyline(closed_wp, Color(fill_col.r, fill_col.g, fill_col.b, 0.35), 1.0)
 
 	# 2. Scattered Body Characters (3D Manikin Projected & Depth Sorted for Knight)
 	if entity_type == "knight" and not _is_splatting:
@@ -2014,12 +2016,8 @@ func _draw_entity_body() -> void:
 				p3.y += wave_y
 				p3.z = wave_z
 			elif s.pi == 0:
-				# 3D Long Flowing Golden Brown Hair waving in the wind
-				var hair_v: float = clampf((s.p.y - (-56.0)) / 38.0, 0.0, 1.0)
-				var hair_wave: float = sin(_t * 3.2 - hair_v * 2.2 + s.p.x * 0.12) * (1.2 + hair_v * 3.8) * facing_direction
-				p3.x += hair_wave
+				# Head Breathing Motion
 				p3.y += sin(_t * 2.2) * 0.8
-				p3.z += cos(_t * 2.8 - hair_v * 1.8) * (1.0 + hair_v * 2.5)
 
 			# 3D Yaw & Pitch Transformation
 			var x1: float = p3.x * cos_yaw + p3.z * sin_yaw
