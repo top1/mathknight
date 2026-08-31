@@ -144,11 +144,13 @@ func _load_rotation_textures() -> void:
 
 
 func _process(delta: float) -> void:
-	# 3D Knight Free Auto-Turntable Rotation
-	if ascii_knight:
-		if not _is_dragging:
-			ascii_knight.rotation_yaw += delta * 0.95 # Smooth 360° turntable spin
-			ascii_knight.rotation_pitch = move_toward(ascii_knight.rotation_pitch, 0.0, delta * 0.4)
+	# Knight Auto-Rotation
+	if not _is_dragging:
+		_rotation_timer += delta
+		if _rotation_timer >= _rotation_interval:
+			_rotation_timer = 0.0
+			_current_dir_index = (_current_dir_index + 1) % _rotation_directions.size()
+			_update_knight_direction()
 
 	# Rotating Rune Ring
 	_rune_angle += delta * 1.2
@@ -322,19 +324,6 @@ func _on_title_gui_input(event: InputEvent) -> void:
 		tween.tween_property(title_label, "scale", Vector2(1.2, 1.2), 0.1).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tween.tween_property(title_label, "scale", Vector2(1.0, 1.0), 0.25).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
-
-func _update_knight_direction() -> void:
-	if ascii_knight:
-		# Flip facing direction based on rotation cycle
-		var dir_name = _rotation_directions[_current_dir_index]
-		if dir_name == "east":
-			ascii_knight.facing_direction = 1.0
-		elif dir_name == "west":
-			ascii_knight.facing_direction = -1.0
-		elif dir_name == "south":
-			ascii_knight.facing_direction = -1.0
-		elif dir_name == "north":
-			ascii_knight.facing_direction = 1.0
 
 
 func _setup_styles() -> void:
@@ -540,10 +529,33 @@ func _on_knight_dais_gui_input(event: InputEvent) -> void:
 			else:
 				_is_dragging = false
 	elif event is InputEventMouseMotion and _is_dragging:
-		if ascii_knight:
-			var rel = event.relative
-			ascii_knight.rotation_yaw += rel.x * 0.022
-			ascii_knight.rotation_pitch = clampf(ascii_knight.rotation_pitch - rel.y * 0.015, -0.35, 0.35)
+		var diff_x = event.position.x - _drag_start_x
+		if abs(diff_x) > 28.0:
+			if diff_x > 0:
+				_current_dir_index = (_current_dir_index - 1 + _rotation_directions.size()) % _rotation_directions.size()
+			else:
+				_current_dir_index = (_current_dir_index + 1) % _rotation_directions.size()
+			_update_knight_direction()
+			_drag_start_x = event.position.x
+
+
+func _update_knight_direction() -> void:
+	if ascii_knight:
+		# Flip facing direction based on rotation cycle
+		var dir_name = _rotation_directions[_current_dir_index]
+		if dir_name == "east":
+			ascii_knight.facing_direction = 1.0
+			ascii_knight.rotation_yaw = 0.0
+		elif dir_name == "west":
+			ascii_knight.facing_direction = -1.0
+			ascii_knight.rotation_yaw = 0.0
+		elif dir_name == "south":
+			ascii_knight.facing_direction = -1.0
+			ascii_knight.rotation_yaw = 0.0
+		elif dir_name == "north":
+			ascii_knight.facing_direction = 1.0
+			ascii_knight.rotation_yaw = 0.0
+		ascii_knight.rotation_pitch = 0.0
 
 
 func _update_header() -> void:

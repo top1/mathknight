@@ -295,7 +295,7 @@ func _build_entity() -> void:
 			glow_color = Color("#4fc3f7")
 			eq_color = Color("#ffd600")
 			part_colors = {
-				0: Color("#222230"), # Dark Charcoal/Black Helmet
+				0: Color("#b0b0be"), # Polished Silver / Gray Helmet
 				1: Color("#29b6f6"), # Steel Chestplate
 				2: Color("#1e88e5"), # Left Leg Greave
 				3: Color("#1e88e5"), # Right Leg Greave
@@ -549,29 +549,27 @@ func _fill_body_slots() -> void:
 
 					if entity_type == "knight":
 						if pi == 0:
-							# Dense Dark Matte Black / Charcoal Knight Helmet
-							var helmet_glyphs: Array[String] = ["#", "8", "B", "M", "H", "0", "X", "=", "%", "&"]
+							# Keep eye and visor slot area completely clear and unobstructed
+							if p.y >= -44.0 and p.y <= -38.0 and abs(p.x) <= 7.0:
+								x += step_x
+								continue
+
+							# Polished Silver / Steel Gray Knight Helmet
+							var helmet_glyphs: Array[String] = ["#", "8", "B", "M", "H", "0", "X", "=", "%", "&", "1", "T"]
 							glyph_char = helmet_glyphs[randi() % helmet_glyphs.size()]
 							
-							var dark_shades: Array[Color] = [
-								Color("#080810"), Color("#0f0f18"), Color("#171722"),
-								Color("#20202c"), Color("#2b2b3c"), Color("#38384c"),
-								Color("#48485e")
+							var silver_shades: Array[Color] = [
+								Color("#6c6c7d"), Color("#828294"), Color("#9898aa"),
+								Color("#b0b0c2"), Color("#c8c8da"), Color("#dfdfea"),
+								Color("#f2f2fa")
 							]
-							slot_color = dark_shades[randi() % dark_shades.size()]
-							slot_alpha = randf_range(0.82, 1.0)
+							slot_color = silver_shades[randi() % silver_shades.size()]
+							slot_alpha = randf_range(0.65, 0.95)
 							
 							# 3D Sphere / Dome curvature
 							var dist_from_center: float = clampf(abs(p.x) / 13.0, 0.0, 1.0)
 							var dome_rad: float = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 8.0
 							z_coord = dome_rad if randf() < 0.65 else -dome_rad
-
-							# Glowing Visor Slit
-							if p.y >= -44.0 and p.y <= -40.0 and abs(p.x) <= 8.0:
-								glyph_char = "=" if randf() > 0.4 else "#"
-								slot_color = Color("#00ffff") if randf() > 0.3 else Color("#ffd700")
-								slot_alpha = 1.0
-								z_coord = 7.5
 
 						elif pi == 5:
 							# Royal Purple Cape with multi-tone depth
@@ -1958,7 +1956,7 @@ func _draw_entity_body() -> void:
 	var scale_m: Vector2 = Vector2(scale_mod.x * facing_direction, scale_mod.y)
 	var rot_m: float = rot_mod
 
-	# 1. Polygon Silhouette Underlay (Solid Dark Helmet Backing + Subtle Body Underlays)
+	# 1. Polygon Silhouette Underlay (0.05 alpha)
 	if not _is_splatting:
 		for pi in range(polys.size()):
 			var poly: PackedVector2Array = polys[pi]
@@ -1967,13 +1965,9 @@ func _draw_entity_body() -> void:
 				var transformed_pt := (pt * scale_m).rotated(rot_m) + pos
 				wp.append(transformed_pt)
 			var fill_col: Color = base_color
-			var fill_alpha: float = 0.05
-			if entity_type == "knight" and pi == 0:
-				fill_col = Color("#0a0a14")
-				fill_alpha = 0.94 # Solid impenetrable dark helmet backing
-			elif part_colors.has(pi):
+			if part_colors.has(pi):
 				fill_col = part_colors[pi]
-			draw_colored_polygon(wp, Color(fill_col, fill_alpha))
+			draw_colored_polygon(wp, Color(fill_col, 0.05))
 
 	# 2. Scattered Body Characters (3D Manikin Projected & Depth Sorted for Knight)
 	if entity_type == "knight" and not _is_splatting:
