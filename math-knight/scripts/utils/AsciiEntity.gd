@@ -42,6 +42,8 @@ const SWORD_CHARS: Array[String] = [
 			_build_entity()
 
 @export var facing_direction: float = 1.0 # 1.0 = Facing Right, -1.0 = Facing Left
+@export var rotation_yaw: float = 0.0 # Free 3D turntable yaw in radians (0 to TAU)
+@export var rotation_pitch: float = 0.0 # 3D tilt pitch in radians (-0.4 to 0.4)
 @export var equation_text: String = "":
 	set(val):
 		equation_text = val
@@ -409,21 +411,27 @@ func _rebuild_equation() -> void:
 # ---------------------------------------------------------------------------
 func _knight_polys() -> Array:
 	return [
+		# 0. Solid Closed Helmet (Dense Dome)
 		PackedVector2Array([
-			Vector2(-8, -54), Vector2(8, -54), Vector2(12, -46),
-			Vector2(12, -38), Vector2(-12, -38), Vector2(-12, -46)]),
+			Vector2(-10, -56), Vector2(10, -56), Vector2(14, -47),
+			Vector2(13, -37), Vector2(-13, -37), Vector2(-14, -47)]),
+		# 1. Torso / Breastplate
 		PackedVector2Array([
-			Vector2(-20, -38), Vector2(20, -38),
+			Vector2(-20, -37), Vector2(20, -37),
 			Vector2(18, 8), Vector2(-18, 8)]),
+		# 2. Left Leg
 		PackedVector2Array([
 			Vector2(-16, 8), Vector2(-4, 8),
 			Vector2(-4, 36), Vector2(-16, 36)]),
+		# 3. Right Leg
 		PackedVector2Array([
 			Vector2(4, 8), Vector2(16, 8),
 			Vector2(16, 36), Vector2(4, 36)]),
+		# 4. Left Arm / Shoulder
 		PackedVector2Array([
 			Vector2(-28, -22), Vector2(-18, -22),
 			Vector2(-18, 6), Vector2(-28, 6)]),
+		# 5. Cape / Umhang
 		PackedVector2Array([
 			Vector2(-18, -34), Vector2(-12, -34),
 			Vector2(-8, 28), Vector2(-28, 22), Vector2(-30, -2)]),
@@ -514,35 +522,57 @@ func _fill_body_slots() -> void:
 	for pi in range(polys.size()):
 		var poly: PackedVector2Array = polys[pi]
 		var rect := _poly_rect(poly)
+		
+		# Dense high-resolution grid for Knight Helmet
+		var step_x: float = SP.x
+		var step_y: float = SP.y
+		if entity_type == "knight" and pi == 0:
+			step_x = 3.0
+			step_y = 3.6
+
 		var y: float = rect.position.y
 		while y < rect.end.y:
 			var x: float = rect.position.x
 			while x < rect.end.x:
 				var p := Vector2(
-					x + randf_range(-2.0, 2.0),
-					y + randf_range(-2.0, 2.0))
+					x + randf_range(-1.2, 1.2),
+					y + randf_range(-1.2, 1.2))
 
 				if Geometry2D.is_point_in_polygon(p, poly):
-					if randf() < 0.05:
-						x += SP.x
-						continue
 					var slot_color: Color = base_color
 					if part_colors.has(pi):
 						slot_color = part_colors[pi]
 
-					# Specialized 3D Palette Nuances for Knight
+					var glyph_char: String = MC[randi() % MC.size()]
+					var slot_alpha: float = randf_range(0.45, 0.95)
 					var z_coord: float = 0.0
+
 					if entity_type == "knight":
 						if pi == 0:
-							# Dark Charcoal / Black Helmet with metallic variation
+							# Dense Dark Matte Black / Charcoal Knight Helmet
+							var helmet_glyphs: Array[String] = ["#", "8", "B", "M", "H", "0", "X", "=", "%", "&"]
+							glyph_char = helmet_glyphs[randi() % helmet_glyphs.size()]
+							
 							var dark_shades: Array[Color] = [
-								Color("#12121c"), Color("#1a1a26"), Color("#242434"),
-								Color("#2f2f42"), Color("#3d3d52"), Color("#4e4e64")
+								Color("#080810"), Color("#0f0f18"), Color("#171722"),
+								Color("#20202c"), Color("#2b2b3c"), Color("#38384c"),
+								Color("#48485e")
 							]
 							slot_color = dark_shades[randi() % dark_shades.size()]
-							# Dome curvature z
-							var dist_from_center: float = abs(p.x) / 12.0
-							z_coord = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 6.0
+							slot_alpha = randf_range(0.82, 1.0)
+							
+							# 3D Sphere / Dome curvature
+							var dist_from_center: float = clampf(abs(p.x) / 13.0, 0.0, 1.0)
+							var dome_rad: float = sqrt(maxf(0.0, 1.0 - dist_from_center * dist_from_center)) * 8.0
+							z_coord = dome_rad if randf() < 0.65 else -dome_rad
+
+							# Glowing Visor Slit
+							if p.y >= -44.0 and p.y <= -40.0 and abs(p.x) <= 8.0:
+								glyph_char = "=" if randf() > 0.4 else "#"
+								slot_color = Color("#00ffff") if randf() > 0.3 else Color("#ffd700")
+								slot_alpha = 1.0
+								z_coord = 7.5
+
 						elif pi == 5:
 							# Royal Purple Cape with multi-tone depth
 							var purple_shades: Array[Color] = [
@@ -559,10 +589,10 @@ func _fill_body_slots() -> void:
 					slots.append({
 						"p": p,
 						"z": z_coord,
-						"c": MC[randi() % MC.size()],
+						"c": glyph_char,
 						"col": slot_color,
 						"base_col": slot_color,
-						"a": randf_range(0.45, 0.95),
+						"a": slot_alpha,
 						"ph": randf() * TAU,
 						"fcd": randf_range(0.06, 0.45),
 						"eq": false,
@@ -572,8 +602,8 @@ func _fill_body_slots() -> void:
 						"r": 0.0,
 						"rs": 0.0,
 					})
-				x += SP.x
-			y += SP.y
+				x += step_x
+			y += step_y
 
 	_insert_equation_slots()
 
@@ -1928,7 +1958,7 @@ func _draw_entity_body() -> void:
 	var scale_m: Vector2 = Vector2(scale_mod.x * facing_direction, scale_mod.y)
 	var rot_m: float = rot_mod
 
-	# 1. Polygon Silhouette Underlay (0.05 alpha)
+	# 1. Polygon Silhouette Underlay (Solid Dark Helmet Backing + Subtle Body Underlays)
 	if not _is_splatting:
 		for pi in range(polys.size()):
 			var poly: PackedVector2Array = polys[pi]
@@ -1937,16 +1967,26 @@ func _draw_entity_body() -> void:
 				var transformed_pt := (pt * scale_m).rotated(rot_m) + pos
 				wp.append(transformed_pt)
 			var fill_col: Color = base_color
-			if part_colors.has(pi):
+			var fill_alpha: float = 0.05
+			if entity_type == "knight" and pi == 0:
+				fill_col = Color("#0a0a14")
+				fill_alpha = 0.94 # Solid impenetrable dark helmet backing
+			elif part_colors.has(pi):
 				fill_col = part_colors[pi]
-			draw_colored_polygon(wp, Color(fill_col, 0.05))
+			draw_colored_polygon(wp, Color(fill_col, fill_alpha))
 
 	# 2. Scattered Body Characters (3D Manikin Projected & Depth Sorted for Knight)
 	if entity_type == "knight" and not _is_splatting:
-		var yaw: float = sin(_t * 2.2) * 0.08 * facing_direction
-		var cos_yaw: float = cos(yaw)
-		var sin_yaw: float = sin(yaw)
-		var dist_cam: float = 240.0
+		var current_yaw: float = rotation_yaw
+		if abs(current_yaw) < 0.0001:
+			current_yaw = 0.0 if facing_direction > 0 else PI
+		current_yaw += sin(_t * 2.2) * 0.04
+
+		var cos_yaw: float = cos(current_yaw)
+		var sin_yaw: float = sin(current_yaw)
+		var cos_pitch: float = cos(rotation_pitch)
+		var sin_pitch: float = sin(rotation_pitch)
+		var dist_cam: float = 260.0
 
 		var render_list: Array = []
 		for s in slots:
@@ -1959,13 +1999,13 @@ func _draw_entity_body() -> void:
 				# 3D Purple Cape Wave Kinematics
 				var v: float = clamp((s.p.y - (-34.0)) / 62.0, 0.0, 1.0)
 				var u: float = clamp((s.p.x - (-30.0)) / 22.0, 0.0, 1.0)
-				var wave_x: float = cos(_t * 3.5 - v * 2.0 + u * 0.6) * (2.5 + v * 7.5) * facing_direction
+				var wave_x: float = cos(_t * 3.5 - v * 2.0 + u * 0.6) * (2.5 + v * 7.5)
 				var wave_z: float = -6.0 + sin(_t * 4.2 - v * 2.4 + u * 0.8) * (3.5 + v * 9.5)
 				var wave_y: float = sin(_t * 2.8 - v * 1.4) * 1.8
 
 				# Attack Wind Drag & Cape Flaring in 3D
 				if _swing_blend > 0.01:
-					wave_x += -14.0 * facing_direction * _swing_blend * v
+					wave_x += -14.0 * _swing_blend * v
 					wave_z += sin(_atk_timer * PI / 0.12) * 8.0 * v
 
 				p3.x += wave_x
@@ -1975,21 +2015,25 @@ func _draw_entity_body() -> void:
 				# 3D Black Helmet Breathing Parallax
 				p3.y += sin(_t * 2.2) * 0.8
 
-			# 3D Yaw Rotation & Perspective
-			var rx: float = p3.x * cos_yaw + p3.z * sin_yaw
-			var rz: float = -p3.x * sin_yaw + p3.z * cos_yaw
-			var ry: float = p3.y
-			var persp: float = dist_cam / maxf(30.0, dist_cam + rz)
+			# 3D Yaw & Pitch Transformation
+			var x1: float = p3.x * cos_yaw + p3.z * sin_yaw
+			var z1: float = -p3.x * sin_yaw + p3.z * cos_yaw
+			var y1: float = p3.y
 
-			var screen_p: Vector2 = Vector2(rx * persp * scale_m.x, ry * persp * scale_m.y).rotated(rot_m) + pos
+			var x2: float = x1
+			var y2: float = y1 * cos_pitch - z1 * sin_pitch
+			var z2: float = y1 * sin_pitch + z1 * cos_pitch
+
+			var persp: float = dist_cam / maxf(30.0, dist_cam + z2)
+			var screen_p: Vector2 = Vector2(x2 * persp * scale_mod.x, y2 * persp * scale_mod.y).rotated(rot_m) + pos
 			screen_p += Vector2(
-				sin(_t * 1.6 + float(s.ph)) * 0.8,
-				cos(_t * 1.3 + float(s.ph) * 0.7) * 0.6
+				sin(_t * 1.6 + float(s.ph)) * 0.6,
+				cos(_t * 1.3 + float(s.ph) * 0.7) * 0.5
 			)
 
 			render_list.append({
 				"screen_p": screen_p,
-				"depth": rz,
+				"depth": z2,
 				"c": s.c,
 				"col": s.col,
 				"a": s.a,
@@ -2000,8 +2044,8 @@ func _draw_entity_body() -> void:
 		render_list.sort_custom(func(a, b): return a.depth < b.depth)
 
 		for item in render_list:
-			# Depth lighting modulation: +15% brightness for foreground, subtle shadow for background
-			var depth_factor: float = clamp((item.depth + 15.0) / 30.0, 0.7, 1.25)
+			# Depth lighting modulation: +18% brightness for foreground, subtle shadow for background
+			var depth_factor: float = clamp((item.depth + 18.0) / 36.0, 0.65, 1.3)
 			var final_col: Color = Color(
 				clampf(item.col.r * depth_factor, 0.0, 1.0),
 				clampf(item.col.g * depth_factor, 0.0, 1.0),
@@ -2078,8 +2122,33 @@ func _draw_eyes(entity_anchor: Vector2, scale_m: Vector2, rot_m: float) -> void:
 		v_scale = max(0.08, v_scale)
 
 	for ep in eyes.positions:
-		var local_p: Vector2 = (Vector2(ep) * scale_m).rotated(rot_m)
-		var eye_world_pos: Vector2 = entity_anchor + local_p
+		var eye_world_pos: Vector2
+		if entity_type == "knight":
+			var current_yaw: float = rotation_yaw
+			if abs(current_yaw) < 0.0001:
+				current_yaw = 0.0 if facing_direction > 0 else PI
+			current_yaw += sin(_t * 2.2) * 0.04
+
+			var ep3 := Vector3(ep.x, ep.y, 7.5) # Eye on front visor surface
+			var x1: float = ep3.x * cos(current_yaw) + ep3.z * sin(current_yaw)
+			var z1: float = -ep3.x * sin(current_yaw) + ep3.z * cos(current_yaw)
+			var y1: float = ep3.y + sin(_t * 2.2) * 0.8
+
+			var cos_p: float = cos(rotation_pitch)
+			var sin_p: float = sin(rotation_pitch)
+			var x2: float = x1
+			var y2: float = y1 * cos_p - z1 * sin_p
+			var z2: float = y1 * sin_p + z1 * cos_p
+
+			# Occlusion check: when facing away, visor eyes are hidden behind the solid black helmet
+			if z2 < -0.5:
+				continue
+
+			var persp: float = 260.0 / maxf(30.0, 260.0 + z2)
+			eye_world_pos = entity_anchor + Vector2(x2 * persp * scale_mod.x, y2 * persp * scale_mod.y).rotated(rot_m)
+		else:
+			var local_p: Vector2 = (Vector2(ep) * scale_m).rotated(rot_m)
+			eye_world_pos = entity_anchor + local_p
 
 		draw_circle(eye_world_pos, sz * 2.4, Color(eye_col.r, eye_col.g, eye_col.b, 0.18))
 		draw_circle(eye_world_pos, sz * 1.3, Color(eye_col.r, eye_col.g, eye_col.b, 0.38))

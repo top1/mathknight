@@ -144,13 +144,11 @@ func _load_rotation_textures() -> void:
 
 
 func _process(delta: float) -> void:
-	# Knight Auto-Rotation
-	if not _is_dragging:
-		_rotation_timer += delta
-		if _rotation_timer >= _rotation_interval:
-			_rotation_timer = 0.0
-			_current_dir_index = (_current_dir_index + 1) % _rotation_directions.size()
-			_update_knight_direction()
+	# 3D Knight Free Auto-Turntable Rotation
+	if ascii_knight:
+		if not _is_dragging:
+			ascii_knight.rotation_yaw += delta * 0.95 # Smooth 360° turntable spin
+			ascii_knight.rotation_pitch = move_toward(ascii_knight.rotation_pitch, 0.0, delta * 0.4)
 
 	# Rotating Rune Ring
 	_rune_angle += delta * 1.2
@@ -542,14 +540,10 @@ func _on_knight_dais_gui_input(event: InputEvent) -> void:
 			else:
 				_is_dragging = false
 	elif event is InputEventMouseMotion and _is_dragging:
-		var diff_x = event.position.x - _drag_start_x
-		if abs(diff_x) > 28.0:
-			if diff_x > 0:
-				_current_dir_index = (_current_dir_index - 1 + _rotation_directions.size()) % _rotation_directions.size()
-			else:
-				_current_dir_index = (_current_dir_index + 1) % _rotation_directions.size()
-			_update_knight_direction()
-			_drag_start_x = event.position.x
+		if ascii_knight:
+			var rel = event.relative
+			ascii_knight.rotation_yaw += rel.x * 0.022
+			ascii_knight.rotation_pitch = clampf(ascii_knight.rotation_pitch - rel.y * 0.015, -0.35, 0.35)
 
 
 func _update_header() -> void:
