@@ -819,6 +819,9 @@ var sword_arc_ribbon: Array = []
 var sword_number_ghosts: Array = []
 var _last_ghost_sample_tip: Vector2 = Vector2.ZERO
 
+var _swing_blend: float = 0.0
+var _swing_angle: float = 0.0
+
 func _update_sword_animation(delta: float) -> void:
 	_atk_timer += delta
 
@@ -828,22 +831,21 @@ func _update_sword_animation(delta: float) -> void:
 			_arm_angle_upper = 0.35 + idle_breath
 			_arm_angle_lower = -0.55 - idle_breath * 0.5
 			_sword_angle = -0.35 + idle_breath * 0.4
+			_swing_blend = move_toward(_swing_blend, 0.0, delta * 8.0)
 
 		AttackState.WINDUP:
-			var p: float = clamp(_atk_timer / 0.12, 0.0, 1.0)
+			_swing_blend = move_toward(_swing_blend, 1.0, delta * 12.0)
+			var p: float = clamp(_atk_timer / 0.11, 0.0, 1.0)
 			var ep: float = ease(p, 0.5) # Smooth anticipation pull-back
-			_arm_angle_upper = lerp(0.35, -2.1, ep)
-			_arm_angle_lower = lerp(-0.55, -0.75, ep)
-			_sword_angle = lerp(-0.35, -2.4, ep)
+			_swing_angle = lerp(-0.35, -2.2, ep)
 			_sample_sword_number_ghosts(false)
 
 		AttackState.SLASH:
-			# Smooth, powerful, readable swing across the full arc (0.12s)
+			_swing_blend = 1.0
+			# Smooth, powerful, perfectly circular uniform arc (0.12s)
 			var p: float = clamp(_atk_timer / 0.12, 0.0, 1.0)
 			var ep: float = sin(p * (PI * 0.5)) # Strong smooth forward acceleration curve
-			_arm_angle_upper = lerp(-2.1, 0.75, ep)
-			_arm_angle_lower = lerp(-0.75, 1.15, ep)
-			_sword_angle = lerp(-2.4, 1.15, ep)
+			_swing_angle = lerp(-2.2, 0.75, ep)
 
 			_sample_sword_number_ghosts(true)
 			_sample_tip_trace()
@@ -853,31 +855,32 @@ func _update_sword_animation(delta: float) -> void:
 				_atk_timer = 0.0
 
 		AttackState.RECOVER:
-			var p: float = clamp(_atk_timer / 0.14, 0.0, 1.0)
+			var p: float = clamp(_atk_timer / 0.13, 0.0, 1.0)
 			var ep: float = ease(p, 0.4) # Smooth follow-through returning to ready stance
-			_arm_angle_upper = lerp(0.75, 0.35, ep)
-			_arm_angle_lower = lerp(1.15, -0.55, ep)
-			_sword_angle = lerp(1.15, -0.35, ep)
+			_swing_angle = lerp(0.75, -0.35, ep)
+			_swing_blend = lerp(1.0, 0.0, ep)
 			_sample_sword_number_ghosts(false)
 
-			if _atk_timer >= 0.14:
+			if _atk_timer >= 0.13:
 				_atk_state = AttackState.IDLE
 				_atk_timer = 0.0
+				_swing_blend = 0.0
 
 		AttackState.SPECIAL:
 			# Sword flourish & triumphant pose
 			var p: float = clamp(_atk_timer / 0.85, 0.0, 1.0)
-			_arm_angle_upper = lerp(0.35, -2.5, sin(p * PI))
-			_sword_angle = lerp(-0.35, -2.8, sin(p * PI))
+			_swing_blend = 1.0
+			_swing_angle = lerp(-0.35, -2.4, sin(p * PI))
 			_sample_sword_number_ghosts(false)
 
 			if _atk_timer >= 0.85:
 				_atk_state = AttackState.IDLE
 				_atk_timer = 0.0
+				_swing_blend = 0.0
 
 
 func _sample_tip_trace() -> void:
-	if equipped_sword == "sword_gold":
+	if equipped_sword != "sword_lightsaber":
 		return
 	var tip := _get_sword_tip()
 	sword_arc_ribbon.append({
@@ -893,8 +896,9 @@ var _last_ghost_hand: Vector2 = Vector2.ZERO
 func _sample_sword_number_ghosts(force: bool = false) -> void:
 	if not has_sword or not font:
 		return
-	if equipped_sword == "sword_gold":
-		return # Gold sword stays 100% clean and sharp
+	# Ghosting trail is exclusive to the Plasma Lightsaber
+	if equipped_sword != "sword_lightsaber":
+		return
 
 	var tip := _get_sword_tip()
 	var hand := _get_hand_pos()
@@ -909,8 +913,7 @@ func _sample_sword_number_ghosts(force: bool = false) -> void:
 		_last_ghost_sample_tip = tip
 		_last_ghost_hand = hand
 
-	var is_ls: bool = (equipped_sword == "sword_lightsaber")
-	var max_life: float = 0.85 if is_ls else 0.65
+	var max_life: float = 0.85
 
 	# Subdivide movement into smooth interpolated steps (10x denser coverage with zero gaps)
 	var steps: int = clamp(int(dist / 3.5), 1, 8) if (force or dist > 4.0) else 1
@@ -925,44 +928,29 @@ func _sample_sword_number_ghosts(force: bool = false) -> void:
 		var blade_dir := blade_vec.normalized()
 		var blade_norm := Vector2(-blade_dir.y, blade_dir.x)
 
-		if equipped_sword == "sword_pan":
-			var pan_center := h + blade_dir * 30.0
+		for s in sword_slots:
+			var p: Vector2 = Vector2.ZERO
+			if s.type == "blade":
+				p = h + blade_dir * (blade_len * float(s.t_pos))
+			elif s.type == "guard":
+				p = h + blade_dir * (blade_len * float(s.t_pos)) + blade_norm * float(s.offset_side)
+			elif s.type == "pommel":
+				p = h + blade_dir * (blade_len * float(s.t_pos))
+
+			var ghost_col: Color = Color.WHITE
+			var drift: Vector2 = blade_norm * randf_range(-5.0, 5.0) + Vector2(randf_range(-2.0, 2.0), randf_range(-4.0, -1.0))
+
 			sword_number_ghosts.append({
-				"p": pan_center,
-				"c": "O",
-				"size": 10,
-				"col": Color(0.85, 0.85, 0.9),
-				"a": 0.75,
+				"p": p,
+				"c": s.c,
+				"size": 8,
+				"col": ghost_col,
+				"a": 0.95,
 				"life": max_life,
 				"max_life": max_life,
-				"v": blade_norm * randf_range(-4.0, 4.0) + Vector2(randf_range(-2, 2), randf_range(-3, -1)),
-				"glow": false
+				"v": drift,
+				"glow": true
 			})
-		else:
-			for s in sword_slots:
-				var p: Vector2 = Vector2.ZERO
-				if s.type == "blade":
-					p = h + blade_dir * (blade_len * float(s.t_pos))
-				elif s.type == "guard":
-					p = h + blade_dir * (blade_len * float(s.t_pos)) + blade_norm * float(s.offset_side)
-				elif s.type == "pommel":
-					p = h + blade_dir * (blade_len * float(s.t_pos))
-
-				var ghost_col: Color = Color.WHITE if is_ls else sword_core_color
-				# Gentle micro-drift perpendicular to swing + slight upward float
-				var drift: Vector2 = blade_norm * randf_range(-5.0, 5.0) + Vector2(randf_range(-2.0, 2.0), randf_range(-4.0, -1.0))
-
-				sword_number_ghosts.append({
-					"p": p,
-					"c": s.c,
-					"size": 8,
-					"col": ghost_col,
-					"a": 0.95 if is_ls else 0.75,
-					"life": max_life,
-					"max_life": max_life,
-					"v": drift,
-					"glow": is_ls
-				})
 
 	_last_ghost_sample_tip = tip
 	_last_ghost_hand = hand
@@ -975,25 +963,49 @@ func _get_shoulder_pos() -> Vector2:
 
 func _get_elbow_pos() -> Vector2:
 	var shoulder := _get_shoulder_pos()
-	var upper_len: float = 16.0
-	var ang := _arm_angle_upper if facing_direction > 0 else (PI - _arm_angle_upper)
-	return shoulder + Vector2(cos(ang), sin(ang)) * upper_len
+	var hand := _get_hand_pos()
+	if _swing_blend > 0.001:
+		var ang := _swing_angle if facing_direction > 0 else (PI - _swing_angle)
+		var swing_norm := Vector2(-sin(ang), cos(ang)) * (4.0 * facing_direction)
+		return shoulder.lerp(hand, 0.5) + swing_norm
+	else:
+		var upper_len: float = 16.0
+		var ang := _arm_angle_upper if facing_direction > 0 else (PI - _arm_angle_upper)
+		return shoulder + Vector2(cos(ang), sin(ang)) * upper_len
 
 
 func _get_hand_pos() -> Vector2:
-	var elbow := _get_elbow_pos()
+	var shoulder := _get_shoulder_pos()
+	var upper_len: float = 16.0
 	var lower_len: float = 15.0
+	var ang_u := _arm_angle_upper if facing_direction > 0 else (PI - _arm_angle_upper)
+	var elbow_idle := shoulder + Vector2(cos(ang_u), sin(ang_u)) * upper_len
+
 	var total_angle: float = _arm_angle_upper + _arm_angle_lower
 	if facing_direction < 0:
 		total_angle = PI - total_angle
-	return elbow + Vector2(cos(total_angle), sin(total_angle)) * lower_len
+	var idle_hand := elbow_idle + Vector2(cos(total_angle), sin(total_angle)) * lower_len
+
+	if _swing_blend <= 0.001:
+		return idle_hand
+
+	# Uniform radial reach (22px) during swing for perfect circular symmetry
+	var ang := _swing_angle if facing_direction > 0 else (PI - _swing_angle)
+	var swing_hand := shoulder + Vector2(cos(ang), sin(ang)) * 22.0
+	return idle_hand.lerp(swing_hand, _swing_blend)
 
 
 func _get_sword_tip() -> Vector2:
 	var hand := _get_hand_pos()
 	var blade_len: float = 48.0
-	var ang := _sword_angle if facing_direction > 0 else (PI - _sword_angle)
-	return hand + Vector2(cos(ang), sin(ang)) * blade_len
+	if _swing_blend > 0.001:
+		var ang := _swing_angle if facing_direction > 0 else (PI - _swing_angle)
+		var idle_ang := _sword_angle if facing_direction > 0 else (PI - _sword_angle)
+		var final_ang: float = lerp_angle(idle_ang, ang, _swing_blend)
+		return hand + Vector2(cos(final_ang), sin(final_ang)) * blade_len
+	else:
+		var ang := _sword_angle if facing_direction > 0 else (PI - _sword_angle)
+		return hand + Vector2(cos(ang), sin(ang)) * blade_len
 
 
 func _update_sword_slots(delta: float) -> void:
@@ -1026,65 +1038,69 @@ func _emit_elemental_blade_particles(delta: float) -> void:
 
 	match equipped_sword:
 		"sword_flame":
-			# 1. Rising dark smoke puffs drifting upwards
-			if randf() < (0.85 if is_slashing else 0.45):
-				var t_pos: float = randf_range(0.15, 1.0)
-				var p: Vector2 = hand + blade_dir * (blade_len * t_pos) + Vector2(randf_range(-4, 4), randf_range(-4, 4))
-				elemental_particles.append({
-					"p": p,
-					"v": Vector2(randf_range(-14, 14), randf_range(-38, -18)),
-					"g": -12.0, # gently rises like hot smoke
-					"c": ["~", "o", "°", "·", "≈"][randi() % 5],
-					"col": [Color(0.25, 0.22, 0.26, 0.75), Color(0.38, 0.25, 0.22, 0.75), Color(0.15, 0.15, 0.18, 0.8)][randi() % 3],
-					"a": 0.8,
-					"life": randf_range(0.35, 0.65),
-					"max_life": 0.65,
-					"size": randi_range(7, 10),
-					"on_top": false,
-					"rot": 0.0,
-					"rot_spd": randf_range(-3.0, 3.0),
-				})
-
-			# 2. Glowing fire flame embers popping off blade
-			var ember_count: int = 3 if is_slashing else 1
-			for i in range(ember_count):
-				if randf() < 0.7:
-					var t_pos: float = randf_range(0.2, 1.0)
-					var p: Vector2 = hand + blade_dir * (blade_len * t_pos) + Vector2(randf_range(-3, 3), randf_range(-3, 3))
+			# 1. Rising dark smoke puffs drifting upwards (intensified)
+			var smoke_count: int = 3 if is_slashing else 1
+			for i in range(smoke_count):
+				if randf() < (0.95 if is_slashing else 0.65):
+					var t_pos: float = randf_range(0.1, 1.0)
+					var p: Vector2 = hand + blade_dir * (blade_len * t_pos) + Vector2(randf_range(-5, 5), randf_range(-5, 5))
 					elemental_particles.append({
 						"p": p,
-						"v": Vector2(randf_range(-25, 25), randf_range(-55, -20)),
-						"g": -24.0,
-						"c": ["*", "+", "·", "^", "1", "7"][randi() % 6],
-						"col": [Color("#ff3d00"), Color("#ff9100"), Color("#ffd600"), Color.WHITE][randi() % 4],
+						"v": Vector2(randf_range(-18, 18), randf_range(-45, -20)),
+						"g": -16.0, # rises swiftly like hot dark smoke
+						"c": ["~", "o", "°", "·", "≈", "░"][randi() % 6],
+						"col": [Color(0.25, 0.22, 0.26, 0.8), Color(0.38, 0.25, 0.22, 0.8), Color(0.15, 0.15, 0.18, 0.85)][randi() % 3],
+						"a": 0.85,
+						"life": randf_range(0.35, 0.68),
+						"max_life": 0.68,
+						"size": randi_range(7, 11),
+						"on_top": false,
+						"rot": 0.0,
+						"rot_spd": randf_range(-3.0, 3.0),
+					})
+
+			# 2. Glowing intense fire flame embers popping off blade (intensified)
+			var ember_count: int = 6 if is_slashing else 3
+			for i in range(ember_count):
+				if randf() < (0.9 if is_slashing else 0.75):
+					var t_pos: float = randf_range(0.15, 1.0)
+					var p: Vector2 = hand + blade_dir * (blade_len * t_pos) + Vector2(randf_range(-4, 4), randf_range(-4, 4))
+					elemental_particles.append({
+						"p": p,
+						"v": Vector2(randf_range(-35, 35), randf_range(-65, -25)),
+						"g": -28.0,
+						"c": ["*", "+", "·", "^", "1", "7", "x"][randi() % 7],
+						"col": [Color("#ff1744"), Color("#ff5722"), Color("#ff9100"), Color("#ffd600"), Color.WHITE][randi() % 5],
 						"a": 1.0,
-						"life": randf_range(0.25, 0.48),
-						"max_life": 0.48,
-						"size": randi_range(6, 8),
+						"life": randf_range(0.28, 0.52),
+						"max_life": 0.52,
+						"size": randi_range(6, 9),
 						"on_top": true,
 						"rot": 0.0,
-						"rot_spd": randf_range(-5.0, 5.0),
+						"rot_spd": randf_range(-6.0, 6.0),
 					})
 
 		"sword_frost":
-			# Freezing cold vapor mist & ice crystals
-			if randf() < (0.75 if is_slashing else 0.38):
-				var t_pos: float = randf_range(0.15, 1.0)
-				var p: Vector2 = hand + blade_dir * (blade_len * t_pos)
-				elemental_particles.append({
-					"p": p,
-					"v": Vector2(randf_range(-12, 12), randf_range(6, 28)), # cold vapor drops gently
-					"g": 18.0,
-					"c": ["·", ".", "◇", "*", "+", "x"][randi() % 6],
-					"col": [Color("#e0f7fa"), Color("#80deea"), Color("#26c6da"), Color.WHITE][randi() % 4],
-					"a": 0.9,
-					"life": randf_range(0.3, 0.55),
-					"max_life": 0.55,
-					"size": randi_range(6, 8),
-					"on_top": randf() > 0.4,
-					"rot": 0.0,
-					"rot_spd": randf_range(-4.0, 4.0),
-				})
+			# Freezing cold vapor mist & ice crystals (intensified)
+			var frost_count: int = 5 if is_slashing else 2
+			for i in range(frost_count):
+				if randf() < (0.9 if is_slashing else 0.7):
+					var t_pos: float = randf_range(0.1, 1.0)
+					var p: Vector2 = hand + blade_dir * (blade_len * t_pos) + Vector2(randf_range(-4, 4), randf_range(-4, 4))
+					elemental_particles.append({
+						"p": p,
+						"v": Vector2(randf_range(-18, 18), randf_range(8, 35)), # icy vapor falls gently
+						"g": 24.0,
+						"c": ["◇", "*", "+", "·", "x", "1", "0"][randi() % 7],
+						"col": [Color("#e0f7fa"), Color("#80deea"), Color("#00e5ff"), Color("#26c6da"), Color.WHITE][randi() % 5],
+						"a": 0.95,
+						"life": randf_range(0.35, 0.62),
+						"max_life": 0.62,
+						"size": randi_range(6, 9),
+						"on_top": randf() > 0.3,
+						"rot": 0.0,
+						"rot_spd": randf_range(-5.0, 5.0),
+					})
 
 		"sword_lightsaber":
 			# Electric plasma sparks & crackles along the blade
