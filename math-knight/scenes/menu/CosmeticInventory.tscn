@@ -1,0 +1,224 @@
+[gd_scene load_steps=8 format=3 uid="uid://cosmeticinvscene"]
+
+[ext_resource type="Script" path="res://scenes/menu/CosmeticInventory.gd" id="1_inv"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/rpg_menu_frame.png" id="3_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/knight_pedestal.png" id="4_pedestal"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight_comic/Idle/rotations/west.png" id="5_knight"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="6_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="7_silk"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiEntity.gd" id="8_ascii"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiPedestal.gd" id="9_pedestal"]
+
+[node name="CosmeticInventory" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_inv")
+
+[node name="MenuBackground" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 8
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+
+[node name="BackBtn" type="Button" parent="MarginContainer/MainLayout/Header"]
+custom_minimum_size = Vector2(75, 26)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_font_sizes/font_size = 9
+text = "‹ Zurück"
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("6_press")
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+text = "RÜSTKAMMER & KOSMETIK"
+horizontal_alignment = 1
+
+[node name="DiamondBadge" type="PanelContainer" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+
+[node name="DiamondLabel" type="Label" parent="MarginContainer/MainLayout/Header/DiamondBadge"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "💎 0"
+
+[node name="Body" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="PreviewFrame" type="NinePatchRect" parent="MarginContainer/MainLayout/Body"]
+custom_minimum_size = Vector2(215, 0)
+layout_mode = 2
+texture = ExtResource("3_frame")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="PreviewPanel" type="VBoxContainer" parent="MarginContainer/MainLayout/Body/PreviewFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = -8.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="KnightArea" type="Control" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel"]
+custom_minimum_size = Vector2(110, 104)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Pedestal" type="Control" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel/KnightArea"]
+custom_minimum_size = Vector2(80, 24)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -22.0
+offset_right = 40.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("9_pedestal")
+radius_x = 36.0
+radius_y = 10.0
+base_height = 8.0
+primary_color = Color(1, 0.09, 0.27, 1)
+
+[node name="AsciiKnight" type="Node2D" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel/KnightArea"]
+position = Vector2(55, 58)
+script = ExtResource("8_ascii")
+entity_type = "knight"
+facing_direction = -1.0
+
+[node name="ItemTitle" type="Label" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 9
+text = "Item Name"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ItemRarity" type="Label" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "[Gewöhnlich]"
+horizontal_alignment = 1
+
+[node name="ItemDesc" type="Label" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 8
+text = "Beschreibung"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ActionBtn" type="Button" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel"]
+custom_minimum_size = Vector2(160, 28)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_colors/font_color = Color(0.1, 0.05, 0.0, 1)
+theme_override_font_sizes/font_size = 9
+text = "Ausrüsten"
+
+[node name="RightPanel" type="VBoxContainer" parent="MarginContainer/MainLayout/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="TabBar" type="HBoxContainer" parent="MarginContainer/MainLayout/Body/RightPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SwordTab" type="Button" parent="MarginContainer/MainLayout/Body/RightPanel/TabBar"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_font_sizes/font_size = 8
+text = "🗡️ Schwerter"
+
+[node name="HelmTab" type="Button" parent="MarginContainer/MainLayout/Body/RightPanel/TabBar"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_font_sizes/font_size = 8
+text = "🛡️ Helme"
+
+[node name="HatTab" type="Button" parent="MarginContainer/MainLayout/Body/RightPanel/TabBar"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_font_sizes/font_size = 8
+text = "🧙 Hüte"
+
+[node name="AnimTab" type="Button" parent="MarginContainer/MainLayout/Body/RightPanel/TabBar"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_font_sizes/font_size = 8
+text = "🎆 Sieges-Anim"
+
+[node name="Scroll" type="ScrollContainer" parent="MarginContainer/MainLayout/Body/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemGrid" type="GridContainer" parent="MarginContainer/MainLayout/Body/RightPanel/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 3

@@ -1,0 +1,121 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/ChestReward.gd" id="1_chest"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="4_silk"]
+
+[node name="ChestReward" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_chest")
+
+[node name="MenuBackground" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="VBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_press")
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "📦 BEUTE-TRUHEN ÖFFNEN"
+horizontal_alignment = 1
+
+[node name="SubLabel" type="Label" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 8
+text = "Knacke die schwere Aufgabe um die Beute zu bergen! Nur 1 Versuch!"
+horizontal_alignment = 1
+
+[node name="ChestArea" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ChallengePanel" type="PanelContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/MainLayout/ChallengePanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="ChestTitle" type="Label" parent="MarginContainer/MainLayout/ChallengePanel/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_font_sizes/font_size = 10
+text = "TRUHE"
+horizontal_alignment = 1
+
+[node name="ProblemLabel" type="Label" parent="MarginContainer/MainLayout/ChallengePanel/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_press")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "25 + 38 = ?"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="MarginContainer/MainLayout/ChallengePanel/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "Zeit unbegrenzt — wähle bedacht:"
+horizontal_alignment = 1
+
+[node name="ChoiceRow" type="HBoxContainer" parent="MarginContainer/MainLayout/ChallengePanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ResultLabel" type="Label" parent="MarginContainer/MainLayout/ChallengePanel/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+
+[node name="Footer" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+alignment = 1
+
+[node name="ContinueBtn" type="Button" parent="MarginContainer/MainLayout/Footer"]
+custom_minimum_size = Vector2(220, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_colors/font_color = Color(1, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "Zum Hauptmenü ➔"

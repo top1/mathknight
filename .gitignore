@@ -1,0 +1,17 @@
+# Godot specific ignores
+.godot/
+**/android/
+**/.godot/
+
+# Android build outputs
+*.apk
+*.apk.idsig
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary / OS files
+.DS_Store
+Thumbs.db

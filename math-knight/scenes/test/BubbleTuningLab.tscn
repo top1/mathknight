@@ -1,0 +1,360 @@
+[gd_scene load_steps=3 format=3 uid="uid://dpbu8labtuningscn"]
+
+[ext_resource type="Script" path="res://scenes/test/BubbleTuningLab.gd" id="1_lab"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.08, 0.15, 0.95)
+border_width_left = 2
+border_color = Color(0.35, 0.3, 0.5, 0.8)
+
+[node name="BubbleTuningLab" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lab")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.05, 0.1, 1)
+
+[node name="LivePreviewArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 380.0
+grow_vertical = 2
+
+[node name="HeaderLabel" type="Label" parent="LivePreviewArea"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 370.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = "🧪 BUBBLE & ZAHLEN TESTLAB"
+
+[node name="SubLabel" type="Label" parent="LivePreviewArea"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 24.0
+offset_right = 370.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
+theme_override_font_sizes/font_size = 8
+text = "Interaktives Slicen/Tappen von 4, 9, 49, 94:"
+
+[node name="BubbleContainer" type="Control" parent="LivePreviewArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HeroBubblePos" type="Marker2D" parent="LivePreviewArea"]
+position = Vector2(190, 275)
+
+[node name="HeroLabel" type="Label" parent="LivePreviewArea"]
+layout_mode = 0
+offset_left = 110.0
+offset_top = 325.0
+offset_right = 270.0
+offset_bottom = 340.0
+theme_override_colors/font_color = Color(0.5, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 8
+text = "▲ Hero Bubble (Custom Input) ▲"
+horizontal_alignment = 1
+
+[node name="ControlPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -260.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ControlPanel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="ControlPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 10
+text = "⚙️ EINSTELLUNGEN"
+horizontal_alignment = 1
+
+[node name="FontSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/FontSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Schriftart (Font):"
+
+[node name="OptFont" type="OptionButton" parent="ControlPanel/ScrollContainer/VBox/FontSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+
+[node name="Size1Section" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="ControlPanel/ScrollContainer/VBox/Size1Section"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/Size1Section/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "1-Stellig Größe (z.B. 4, 9):"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/Size1Section"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "15 px"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/Size1Section"]
+layout_mode = 2
+min_value = 8.0
+max_value = 24.0
+value = 15.0
+
+[node name="Size2Section" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/Size2Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "2-Stellig Größe (z.B. 49, 94):"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/Size2Section"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "14 px"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/Size2Section"]
+layout_mode = 2
+min_value = 8.0
+max_value = 22.0
+value = 14.0
+
+[node name="Size3Section" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/Size3Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "3-Stellig Größe (z.B. 100):"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/Size3Section"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "11 px"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/Size3Section"]
+layout_mode = 2
+min_value = 7.0
+max_value = 18.0
+value = 11.0
+
+[node name="OutlineSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/OutlineSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Rand / Boldness (Outline):"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/OutlineSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "2 (8-fach Stark)"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/OutlineSection"]
+layout_mode = 2
+max_value = 3.0
+value = 2.0
+
+[node name="ShadowXSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/ShadowXSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Schatten Offset X:"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/ShadowXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "1.5 px"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/ShadowXSection"]
+layout_mode = 2
+max_value = 4.0
+step = 0.5
+value = 1.5
+
+[node name="ShadowYSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/ShadowYSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Schatten Offset Y:"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/ShadowYSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "1.5 px"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/ShadowYSection"]
+layout_mode = 2
+max_value = 4.0
+step = 0.5
+value = 1.5
+
+[node name="ExclusionSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/ExclusionSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Freiraum um Zahl (Exclusion):"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/ExclusionSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "1.15x"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/ExclusionSection"]
+layout_mode = 2
+min_value = 0.8
+max_value = 2.0
+step = 0.05
+value = 1.15
+
+[node name="RadiusSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/RadiusSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Blasen Radius:"
+
+[node name="ValLabel" type="Label" parent="ControlPanel/ScrollContainer/VBox/RadiusSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 8
+text = "26 px"
+
+[node name="HSlider" type="HSlider" parent="ControlPanel/ScrollContainer/VBox/RadiusSection"]
+layout_mode = 2
+min_value = 20.0
+max_value = 36.0
+value = 26.0
+
+[node name="ColorSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/ColorSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Zahlen-Farbe:"
+
+[node name="HBox" type="HBoxContainer" parent="ControlPanel/ScrollContainer/VBox/ColorSection"]
+layout_mode = 2
+
+[node name="BtnYellow" type="Button" parent="ControlPanel/ScrollContainer/VBox/ColorSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.4, 1)
+theme_override_font_sizes/font_size = 8
+text = "Gelb"
+
+[node name="BtnWhite" type="Button" parent="ControlPanel/ScrollContainer/VBox/ColorSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 8
+text = "Weiß"
+
+[node name="BtnAmber" type="Button" parent="ControlPanel/ScrollContainer/VBox/ColorSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 8
+text = "Gold"
+
+[node name="BtnCyan" type="Button" parent="ControlPanel/ScrollContainer/VBox/ColorSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 8
+text = "Cyan"
+
+[node name="CustomInputSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/CustomInputSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Hero Custom Zahl eingeben:"
+
+[node name="LineEdit" type="LineEdit" parent="ControlPanel/ScrollContainer/VBox/CustomInputSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "49"
+placeholder_text = "z.B. 4, 9, 49, 94..."
+
+[node name="ActionButtons" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="BtnRespawn" type="Button" parent="ControlPanel/ScrollContainer/VBox/ActionButtons"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "🔄 Blasen neu spawnen"
+
+[node name="BtnReset" type="Button" parent="ControlPanel/ScrollContainer/VBox/ActionButtons"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "↩️ Auf Standard zurücksetzen"
+
+[node name="BtnBack" type="Button" parent="ControlPanel/ScrollContainer/VBox/ActionButtons"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 9
+text = "⬅️ Zurück zum Menü"
+
+[node name="CodeSection" type="VBoxContainer" parent="ControlPanel/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ControlPanel/ScrollContainer/VBox/CodeSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Aktueller Code-Export:"
+
+[node name="CodeReadout" type="TextEdit" parent="ControlPanel/ScrollContainer/VBox/CodeSection"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+editable = false
+wrap_mode = 1

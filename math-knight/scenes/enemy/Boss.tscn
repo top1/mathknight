@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://d1x8bossenemy01"]
+
+[ext_resource type="Script" path="res://scenes/enemy/Boss.gd" id="1_boss"]
+[ext_resource type="Texture2D" path="res://assets/sprites/boss/boss_math_king.png" id="2_boss"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiEntity.gd" id="3_ascii"]
+
+[node name="Boss" type="Node2D"]
+script = ExtResource("1_boss")
+
+[node name="AsciiEntity" type="Node2D" parent="."]
+position = Vector2(0, -14)
+script = ExtResource("3_ascii")
+entity_type = "boss"
+facing_direction = 1.0
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture_filter = 1
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_boss")
+
+[node name="BossLabel" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -65.0
+offset_right = 40.0
+offset_bottom = -45.0
+theme_override_colors/font_color = Color(1, 0.84, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AttackTimer" type="Timer" parent="."]
+wait_time = 2.5
+autostart = false
+
+[connection signal="timeout" from="AttackTimer" to="." method="_on_attack_timer_timeout"]

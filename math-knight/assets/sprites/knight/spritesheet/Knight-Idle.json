@@ -1,0 +1,57 @@
+{
+  "character": {
+    "id": "92c09db0-4fb1-40cc-b1ae-753316a2c73c",
+    "name": "Idle",
+    "prompt": "brave knight in steel plate armor wielding a sword",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "directions": 4,
+    "view": "side"
+  },
+  "spritesheet": {
+    "path": "Knight-Idle.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 864,
+      "height": 288
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 4,
+        "directions": [
+          "south",
+          "west",
+          "east",
+          "north"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "sword_attack",
+        "animation_group_id": "fd8ac610-6cf0-4ab8-9a15-a5ceb5d56311",
+        "direction": "west"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "sword_attack",
+        "animation_group_id": "fd8ac610-6cf0-4ab8-9a15-a5ceb5d56311",
+        "direction": "east"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-08-30T21:12:11.219200+00:00"
+}

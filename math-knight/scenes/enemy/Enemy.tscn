@@ -1,0 +1,55 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemy/Enemy.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/orc/Idle/rotations/east.png" id="2_orc"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_font"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiEntity.gd" id="4_ascii"]
+
+[node name="Enemy" type="Node2D"]
+script = ExtResource("1_enemy")
+
+[node name="AsciiEntity" type="Node2D" parent="."]
+position = Vector2(0, -14)
+script = ExtResource("4_ascii")
+entity_type = "goblin"
+facing_direction = 1.0
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture_filter = 1
+position = Vector2(0, -14)
+texture = ExtResource("2_orc")
+
+[node name="ShieldLabel" type="Label" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -45.0
+offset_top = -60.0
+offset_right = 45.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_colors/font_color = Color(1, 0.94, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.04, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 11
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AttackTimer" type="Timer" parent="."]
+wait_time = 2.0
+
+[node name="HurtBox" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[connection signal="timeout" from="AttackTimer" to="." method="_on_attack_timer_timeout"]
+

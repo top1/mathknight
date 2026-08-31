@@ -1,0 +1,65 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scenes/main/Main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/utils/ShakeCamera.gd" id="2_cam"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/GameOverScreen.tscn" id="4_go"]
+[ext_resource type="PackedScene" path="res://scenes/ui/InputArea.tscn" id="5_input"]
+[ext_resource type="PackedScene" path="res://scenes/knight/Knight.tscn" id="6_knight"]
+[ext_resource type="Script" path="res://scenes/enemy/EnemyQueue.gd" id="7_eq"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+script = ExtResource("2_cam")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 216.0
+mouse_filter = 2
+color = Color(0.04, 0.03, 0.08, 1)
+
+[node name="BattleArea" type="Node2D" parent="."]
+
+[node name="Ground" type="ColorRect" parent="BattleArea"]
+offset_top = 190.0
+offset_right = 640.0
+offset_bottom = 216.0
+mouse_filter = 2
+color = Color(0.08, 0.06, 0.14, 1)
+
+[node name="Knight" parent="BattleArea" instance=ExtResource("6_knight")]
+position = Vector2(540, 176)
+
+[node name="EnemyQueue" type="Node2D" parent="BattleArea"]
+position = Vector2(0, 170)
+script = ExtResource("7_eq")
+
+[node name="SpawnTimer" type="Timer" parent="BattleArea/EnemyQueue"]
+wait_time = 3.0
+
+[node name="Enemies" type="Node2D" parent="BattleArea/EnemyQueue"]
+
+[node name="Divider" type="ColorRect" parent="."]
+offset_top = 216.0
+offset_right = 640.0
+offset_bottom = 218.0
+mouse_filter = 2
+color = Color(0.15, 0.12, 0.2, 1)
+
+[node name="InputAreaContainer" type="Control" parent="."]
+anchors_preset = 0
+offset_top = 218.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+
+[node name="InputArea" parent="InputAreaContainer" instance=ExtResource("5_input")]
+
+[node name="HUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="GameOverScreen" parent="." instance=ExtResource("4_go")]
+
+[connection signal="timeout" from="BattleArea/EnemyQueue/SpawnTimer" to="BattleArea/EnemyQueue" method="_on_spawn_timer_timeout"]

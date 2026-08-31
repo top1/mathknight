@@ -1,0 +1,147 @@
+{
+  "group_id": "7dc93cf5-f600-4dca-92fb-cca5d6525364",
+  "states": [
+    {
+      "character": {
+        "id": "11da89e5-a71b-43fe-8aa6-3235163576c7",
+        "name": "Idle",
+        "prompt": "A valiant heroic comic knight in gleaming polished silver plate armor with blue cloth accents, a closed knight helmet with golden visor slit, royal blue feather plume on the helmet, steel pauldrons and gauntlets, carrying a sharp medieval steel sword. Clean colorful comic fantasy style with bold pixel art outlines.",
+        "size": {
+          "width": 132,
+          "height": 132
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "side",
+        "created_at": "2026-08-31T07:15:06.498070+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "west": "Idle/rotations/west.png",
+          "east": "Idle/rotations/east.png",
+          "north": "Idle/rotations/north.png"
+        },
+        "animations": {
+          "sword_attack": {
+            "west": [
+              "Idle/animations/sword_attack/west/frame_000.png",
+              "Idle/animations/sword_attack/west/frame_001.png",
+              "Idle/animations/sword_attack/west/frame_002.png",
+              "Idle/animations/sword_attack/west/frame_003.png",
+              "Idle/animations/sword_attack/west/frame_004.png",
+              "Idle/animations/sword_attack/west/frame_005.png",
+              "Idle/animations/sword_attack/west/frame_006.png",
+              "Idle/animations/sword_attack/west/frame_007.png",
+              "Idle/animations/sword_attack/west/frame_008.png"
+            ]
+          },
+          "idle": {
+            "east": [
+              "Idle/animations/idle/east/frame_000.png",
+              "Idle/animations/idle/east/frame_001.png",
+              "Idle/animations/idle/east/frame_002.png",
+              "Idle/animations/idle/east/frame_003.png"
+            ],
+            "west": [
+              "Idle/animations/idle/west/frame_000.png",
+              "Idle/animations/idle/west/frame_001.png",
+              "Idle/animations/idle/west/frame_002.png",
+              "Idle/animations/idle/west/frame_003.png"
+            ],
+            "south": [
+              "Idle/animations/idle/south/frame_000.png",
+              "Idle/animations/idle/south/frame_001.png",
+              "Idle/animations/idle/south/frame_002.png",
+              "Idle/animations/idle/south/frame_003.png"
+            ],
+            "north": [
+              "Idle/animations/idle/north/frame_000.png",
+              "Idle/animations/idle/north/frame_001.png",
+              "Idle/animations/idle/north/frame_002.png",
+              "Idle/animations/idle/north/frame_003.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "e359392a-dec5-4936-9ada-b24bed67e77f",
+        "name": "Lightsaber",
+        "prompt": "A valiant heroic comic knight in gleaming polished silver plate armor with blue cloth accents, a closed knight helmet with golden visor slit, royal blue feather plume on the helmet, steel pauldrons and gauntlets, carrying a sharp medieval steel sword. Clean colorful comic fantasy style with bold pixel art outlines.",
+        "size": {
+          "width": 132,
+          "height": 132
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "side",
+        "created_at": "2026-08-31T07:20:19.579257+00:00"
+      },
+      "folder": "Lightsaber",
+      "frames": {
+        "rotations": {
+          "south": "Lightsaber/rotations/south.png",
+          "west": "Lightsaber/rotations/west.png",
+          "east": "Lightsaber/rotations/east.png",
+          "north": "Lightsaber/rotations/north.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "30dfc28f-b2f2-4580-aeef-46c921caf58a",
+        "name": "Frying Pan",
+        "prompt": "A valiant heroic comic knight in gleaming polished silver plate armor with blue cloth accents, a closed knight helmet with golden visor slit, royal blue feather plume on the helmet, steel pauldrons and gauntlets, carrying a sharp medieval steel sword. Clean colorful comic fantasy style with bold pixel art outlines.",
+        "size": {
+          "width": 132,
+          "height": 132
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "side",
+        "created_at": "2026-08-31T07:20:20.805733+00:00"
+      },
+      "folder": "Frying_Pan",
+      "frames": {
+        "rotations": {
+          "south": "Frying_Pan/rotations/south.png",
+          "west": "Frying_Pan/rotations/west.png",
+          "east": "Frying_Pan/rotations/east.png",
+          "north": "Frying_Pan/rotations/north.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "a4afd455-92ab-48f6-a2fa-53bc8631d9c6",
+        "name": "Flame Sword",
+        "prompt": "A valiant heroic comic knight in gleaming polished silver plate armor with blue cloth accents, a closed knight helmet with golden visor slit, royal blue feather plume on the helmet, steel pauldrons and gauntlets, carrying a sharp medieval steel sword. Clean colorful comic fantasy style with bold pixel art outlines.",
+        "size": {
+          "width": 132,
+          "height": 132
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "side",
+        "created_at": "2026-08-31T07:20:22.050945+00:00"
+      },
+      "folder": "Flame_Sword",
+      "frames": {
+        "rotations": {
+          "south": "Flame_Sword/rotations/south.png",
+          "west": "Flame_Sword/rotations/west.png",
+          "east": "Flame_Sword/rotations/east.png",
+          "north": "Flame_Sword/rotations/north.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-31T08:01:06.914034"
+}

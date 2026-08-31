@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cdg3k8m2n8q4z"]
+
+[ext_resource type="Script" path="res://scenes/effects/GoldCoinEffect.gd" id="1_glc3n"]
+
+[node name="GoldCoinEffect" type="Node2D"]
+script = ExtResource("1_glc3n")

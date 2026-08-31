@@ -1,0 +1,41 @@
+{
+  "character": {
+    "id": "a57242f4-011d-4a67-9b02-391727b65206",
+    "name": "Idle",
+    "prompt": "grumpy muscular green orc wielding a heavy spiked club",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "directions": 4,
+    "view": "side"
+  },
+  "spritesheet": {
+    "path": "Grumpy_Orc-Idle.png",
+    "cell_size": {
+      "width": 92,
+      "height": 92
+    },
+    "sheet_size": {
+      "width": 368,
+      "height": 92
+    },
+    "columns": 4,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 4,
+        "directions": [
+          "south",
+          "west",
+          "east",
+          "north"
+        ]
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-08-30T21:12:11.528291+00:00"
+}

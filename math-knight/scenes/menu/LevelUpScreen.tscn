@@ -1,0 +1,102 @@
+[gd_scene load_steps=6 format=3 uid="uid://levelupscreenscene"]
+
+[ext_resource type="Script" path="res://scenes/menu/LevelUpScreen.gd" id="1_lvl"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/rpg_menu_frame.png" id="3_frame"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="4_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="5_silk"]
+
+[node name="LevelUpScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lvl")
+
+[node name="MenuBackground" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_press")
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 9
+text = "⬆️ RITTER-AUFSTIEG & TALENTE"
+
+[node name="PointsBadge" type="PanelContainer" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+
+[node name="PointsLabel" type="Label" parent="MarginContainer/MainLayout/Header/PointsBadge"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_silk")
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 9
+text = "Punkte verfügbar: 0"
+
+[node name="FrameWrapper" type="NinePatchRect" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+texture = ExtResource("3_frame")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/MainLayout/FrameWrapper"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StatList" type="VBoxContainer" parent="MarginContainer/MainLayout/FrameWrapper/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+
+[node name="Footer" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+alignment = 1
+
+[node name="CloseBtn" type="Button" parent="MarginContainer/MainLayout/Footer"]
+custom_minimum_size = Vector2(180, 30)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_silk")
+theme_override_colors/font_color = Color(1, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "Fertig / Zurück ➔"

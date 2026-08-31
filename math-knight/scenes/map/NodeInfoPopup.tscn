@@ -1,0 +1,206 @@
+[gd_scene load_steps=6 format=3 uid="uid://nodepopup012"]
+
+[ext_resource type="Script" path="res://scenes/map/NodeInfoPopup.gd" id="1_nodepopup"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="3_silk_bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Regular.ttf" id="4_silk_reg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.09, 0.16, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.72, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_example"]
+bg_color = Color(0.16, 0.14, 0.24, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.35, 0.55, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="NodeInfoPopup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_nodepopup")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="Panel" type="Panel" parent="."]
+custom_minimum_size = Vector2(330, 240)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -165.0
+offset_top = -120.0
+offset_right = 165.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_silk_bold")
+theme_override_colors/font_color = Color(1, 0.88, 0.3, 1)
+theme_override_font_sizes/font_size = 13
+text = "⚔ KAMPF"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CombatInfo" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RechenartLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/CombatInfo"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_silk_bold")
+theme_override_colors/font_color = Color(0.45, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 9
+text = "Rechenart: Addition (+)"
+horizontal_alignment = 1
+
+[node name="ChallengeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/CombatInfo"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_silk_bold")
+theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
+theme_override_font_sizes/font_size = 9
+text = "Challenge: Rechen-Schlag (Ergebnis finden)"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="DifficultyLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/CombatInfo"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk_reg")
+theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 9
+text = "Stufe: Leicht ★☆☆ (Zahlenraum 1–10)"
+horizontal_alignment = 1
+
+[node name="ExamplePanel" type="PanelContainer" parent="Panel/MarginContainer/VBoxContainer/CombatInfo"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_example")
+
+[node name="Margin" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/CombatInfo/ExamplePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 3
+
+[node name="ExampleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/CombatInfo/ExamplePanel/Margin"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk_reg")
+theme_override_colors/font_color = Color(0.55, 1, 0.75, 1)
+theme_override_font_sizes/font_size = 9
+text = "Vorschau: 7 + 8 = ?"
+horizontal_alignment = 1
+
+[node name="StatsRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/CombatInfo"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="EnemyLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/CombatInfo/StatsRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk_reg")
+theme_override_colors/font_color = Color(1, 0.55, 0.55, 1)
+theme_override_font_sizes/font_size = 9
+text = "👾 3 Gegner"
+
+[node name="Divider" type="Label" parent="Panel/MarginContainer/VBoxContainer/CombatInfo/StatsRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.6, 1)
+theme_override_font_sizes/font_size = 9
+text = "|"
+
+[node name="RewardLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/CombatInfo/StatsRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk_reg")
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 9
+text = "🪙 15 Gold"
+
+[node name="NonCombatInfo" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="NonCombatDescLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/NonCombatInfo"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk_reg")
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "Raste am Lagerfeuer und regeneriere 40% deiner Lebenspunkte."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Spacer" type="Control" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk_reg")
+theme_override_font_sizes/font_size = 10
+text = "Zurück"
+
+[node name="ConfirmButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(130, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_silk_bold")
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 10
+text = "Los geht's!"

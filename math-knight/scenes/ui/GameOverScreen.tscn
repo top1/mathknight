@@ -1,0 +1,155 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/GameOverScreen.gd" id="1_go"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="3_font_silk"]
+
+[node name="GameOverScreen" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_go")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.03, 0.08, 0.85)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelFrame" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(400, 275)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelFrame"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="GameOverLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_colors/font_color = Color(0.95, 0.25, 0.25, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+text = "DEFEAT"
+horizontal_alignment = 1
+
+[node name="SubLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 9
+text = "Dein Ritter ist ehrenvoll gefallen"
+horizontal_alignment = 1
+
+[node name="HighscoreBadge" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.1, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
+text = "★ NEUER HIGHSCORE! ★"
+horizontal_alignment = 1
+
+[node name="ScoreBadge" type="PanelContainer" parent="CenterContainer/PanelFrame/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="ScoreLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer/ScoreBadge"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "Punkte: 0"
+horizontal_alignment = 1
+
+[node name="StatsPanel" type="PanelContainer" parent="CenterContainer/PanelFrame/VBoxContainer"]
+layout_mode = 2
+
+[node name="StatsGrid" type="GridContainer" parent="CenterContainer/PanelFrame/VBoxContainer/StatsPanel"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 4
+columns = 2
+
+[node name="StatSpeedLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer/StatsPanel/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 9
+text = "⏱ Schnellste: 0.0s"
+
+[node name="StatAvgLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer/StatsPanel/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 9
+text = "📊 Ø Zeit: 0.0s"
+
+[node name="StatAccuracyLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer/StatsPanel/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 9
+text = "🎯 Quote: 100%"
+
+[node name="StatComboLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer/StatsPanel/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 9
+text = "⚡ Max Combo: x0"
+
+[node name="StatStageLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer/StatsPanel/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 9
+text = "🏆 Stufe: 1 / 12"
+
+[node name="StatTimeLabel" type="Label" parent="CenterContainer/PanelFrame/VBoxContainer/StatsPanel/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 9
+text = "⏳ Zeit: 0s"
+
+[node name="ButtonContainer" type="HBoxContainer" parent="CenterContainer/PanelFrame/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="RetryButton" type="Button" parent="CenterContainer/PanelFrame/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(140, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.1, 0.08, 0.02, 1)
+theme_override_font_sizes/font_size = 10
+text = "Erneut Kämpfen"
+
+[node name="MenuButton" type="Button" parent="CenterContainer/PanelFrame/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(120, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_colors/font_color = Color(0.9, 0.85, 0.75, 1)
+theme_override_font_sizes/font_size = 10
+text = "Hauptmenü"
+
+[connection signal="pressed" from="CenterContainer/PanelFrame/VBoxContainer/ButtonContainer/RetryButton" to="." method="_on_retry_button_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelFrame/VBoxContainer/ButtonContainer/MenuButton" to="." method="_on_menu_button_pressed"]

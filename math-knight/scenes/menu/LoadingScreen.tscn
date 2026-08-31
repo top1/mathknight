@@ -1,0 +1,125 @@
+[gd_scene load_steps=8 format=3 uid="uid://e1raho1m6htd"]
+
+[ext_resource type="Script" path="res://scenes/menu/LoadingScreen.gd" id="1_load"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiLoadingSpinner.gd" id="3_spin"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiEntity.gd" id="4_knight"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/rpg_menu_frame.png" id="5_frame"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="6_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="7_silk"]
+
+[node name="LoadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_load")
+
+[node name="MenuBackground" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_bg")
+variant = "loading"
+
+[node name="CenterContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = -45.0
+offset_bottom = -45.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="KnightAnchor" type="Node2D" parent="CenterContainer"]
+
+[node name="AsciiKnight" type="Node2D" parent="CenterContainer/KnightAnchor"]
+script = ExtResource("4_knight")
+facing_direction = 1.0
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 24
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="TipPanel" type="NinePatchRect" parent="MarginContainer/MainLayout"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+texture = ExtResource("5_frame")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="TipLabel" type="Label" parent="MarginContainer/MainLayout/TipPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 6.0
+offset_right = -12.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_colors/font_color = Color(1, 0.95, 0.6, 1)
+theme_override_font_sizes/font_size = 9
+text = "TIPP: Lade mathematisches Reich..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainLayout"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="ProgressContainer" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="AsciiSpinner" type="Control" parent="MarginContainer/MainLayout/ProgressContainer"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("3_spin")
+radius = 11.0
+
+[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/MainLayout/ProgressContainer"]
+custom_minimum_size = Vector2(290, 14)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_fonts/font = ExtResource("7_silk")
+theme_override_font_sizes/font_size = 8
+max_value = 100.0
+step = 1.0
+show_percentage = false
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/MainLayout/ProgressContainer"]
+custom_minimum_size = Vector2(145, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("6_press")
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 8
+text = "Lade Dungeon... 0%"
+vertical_alignment = 1

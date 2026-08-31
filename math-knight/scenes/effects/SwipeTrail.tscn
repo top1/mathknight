@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/effects/SwipeTrail.gd" id="1_st"]
+
+[sub_resource type="Curve" id="Curve_trail"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_trail"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 1, 1, 0)
+
+[node name="SwipeTrail" type="Line2D"]
+width = 8.0
+width_curve = SubResource("Curve_trail")
+default_color = Color(0, 1, 1, 1)
+gradient = SubResource("Gradient_trail")
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+script = ExtResource("1_st")

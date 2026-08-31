@@ -1,0 +1,57 @@
+{
+  "group_id": "c7e17d04-360d-48bb-bd39-6af5b73229de",
+  "states": [
+    {
+      "character": {
+        "id": "92c09db0-4fb1-40cc-b1ae-753316a2c73c",
+        "name": "Idle",
+        "prompt": "brave knight in steel plate armor wielding a sword",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "side",
+        "created_at": "2026-08-30T21:09:29.531566+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "west": "Idle/rotations/west.png",
+          "east": "Idle/rotations/east.png",
+          "north": "Idle/rotations/north.png"
+        },
+        "animations": {
+          "sword_attack": {
+            "west": [
+              "Idle/animations/sword_attack/west/frame_000.png",
+              "Idle/animations/sword_attack/west/frame_001.png",
+              "Idle/animations/sword_attack/west/frame_002.png",
+              "Idle/animations/sword_attack/west/frame_003.png",
+              "Idle/animations/sword_attack/west/frame_004.png",
+              "Idle/animations/sword_attack/west/frame_005.png",
+              "Idle/animations/sword_attack/west/frame_006.png",
+              "Idle/animations/sword_attack/west/frame_007.png",
+              "Idle/animations/sword_attack/west/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/sword_attack/east/frame_000.png",
+              "Idle/animations/sword_attack/east/frame_001.png",
+              "Idle/animations/sword_attack/east/frame_002.png",
+              "Idle/animations/sword_attack/east/frame_003.png",
+              "Idle/animations/sword_attack/east/frame_004.png",
+              "Idle/animations/sword_attack/east/frame_005.png",
+              "Idle/animations/sword_attack/east/frame_006.png",
+              "Idle/animations/sword_attack/east/frame_007.png",
+              "Idle/animations/sword_attack/east/frame_008.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-30T21:12:10.519992"
+}

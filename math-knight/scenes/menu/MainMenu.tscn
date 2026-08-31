@@ -1,0 +1,342 @@
+[gd_scene load_steps=10 format=3 uid="uid://mainmenuscene"]
+
+[ext_resource type="Script" path="res://scenes/menu/MainMenu.gd" id="1_menu"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/rpg_menu_frame.png" id="3_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_mode_strike.png" id="4_icon_strike"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_mode_forge.png" id="5_icon_forge"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_mode_chain.png" id="6_icon_chain"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/button_gold_normal.png" id="7_btn_gold"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="8_font_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="9_font_silk"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="MenuBackground" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 8
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="HeaderBar" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+
+[node name="BackBtn" type="Button" parent="MarginContainer/MainLayout/HeaderBar"]
+custom_minimum_size = Vector2(75, 26)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("9_font_silk")
+theme_override_font_sizes/font_size = 9
+text = "‹ Zurück"
+
+[node name="HeaderBox" type="VBoxContainer" parent="MarginContainer/MainLayout/HeaderBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/HeaderBar/HeaderBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("8_font_press")
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 14
+text = "TRAININGS-ARENA"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="MarginContainer/MainLayout/HeaderBar/HeaderBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("9_font_silk")
+theme_override_colors/font_color = Color(0.78, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 8
+text = "WÄHLE MODUS, OPERATION & SCHWIERIGKEIT"
+horizontal_alignment = 1
+
+[node name="LabBtn" type="Button" parent="MarginContainer/MainLayout/HeaderBar"]
+custom_minimum_size = Vector2(80, 26)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("9_font_silk")
+theme_override_font_sizes/font_size = 9
+text = "🧪 Testlab"
+
+[node name="ModeSection" type="VBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ModeHeader" type="HBoxContainer" parent="MarginContainer/MainLayout/ModeSection"]
+layout_mode = 2
+alignment = 1
+
+[node name="ModeSectionLabel" type="Label" parent="MarginContainer/MainLayout/ModeSection/ModeHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.45, 1)
+theme_override_font_sizes/font_size = 9
+text = "--- 1. DISZIPLIN WÄHLEN ---"
+horizontal_alignment = 1
+
+[node name="ModeContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/ModeSection"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Mode1Btn" type="Button" parent="MarginContainer/MainLayout/ModeSection/ModeContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Content" type="VBoxContainer" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode1Btn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode1Btn/Content"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+texture = ExtResource("4_icon_strike")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode1Btn/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("9_font_silk")
+theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "Rechen-Schlag"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode1Btn/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 7
+text = "Term -> Ergebnis (7 + 5)"
+horizontal_alignment = 1
+
+[node name="Mode2Btn" type="Button" parent="MarginContainer/MainLayout/ModeSection/ModeContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Content" type="VBoxContainer" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode2Btn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode2Btn/Content"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+texture = ExtResource("5_icon_forge")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode2Btn/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("9_font_silk")
+theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "Zahlen-Schmiede"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode2Btn/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 7
+text = "Ergebnis -> Term (? = 12)"
+horizontal_alignment = 1
+
+[node name="Mode3Btn" type="Button" parent="MarginContainer/MainLayout/ModeSection/ModeContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Content" type="VBoxContainer" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode3Btn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode3Btn/Content"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+texture = ExtResource("6_icon_chain")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode3Btn/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("9_font_silk")
+theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "Meister-Kette"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="MarginContainer/MainLayout/ModeSection/ModeContainer/Mode3Btn/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 7
+text = "Kettenrechnung (3+4+5)"
+horizontal_alignment = 1
+
+[node name="ConfigGrid" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="OpSection" type="VBoxContainer" parent="MarginContainer/MainLayout/ConfigGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="OpHeader" type="Label" parent="MarginContainer/MainLayout/ConfigGrid/OpSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.6, 1)
+theme_override_font_sizes/font_size = 8
+text = "2. RECHENART"
+horizontal_alignment = 1
+
+[node name="OpContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/ConfigGrid/OpSection"]
+layout_mode = 2
+theme_override_constants/separation = 3
+alignment = 1
+
+[node name="OpAddBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/OpSection/OpContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "+ Plus"
+
+[node name="OpSubBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/OpSection/OpContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "- Minus"
+
+[node name="OpMulBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/OpSection/OpContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "x Mal"
+
+[node name="OpDivBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/OpSection/OpContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "/ Geteilt"
+
+[node name="OpMixBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/OpSection/OpContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "MIX"
+
+[node name="DiffSection" type="VBoxContainer" parent="MarginContainer/MainLayout/ConfigGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="DiffHeader" type="Label" parent="MarginContainer/MainLayout/ConfigGrid/DiffSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.6, 1)
+theme_override_font_sizes/font_size = 8
+text = "3. SCHWIERIGKEIT"
+horizontal_alignment = 1
+
+[node name="DiffContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/ConfigGrid/DiffSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="DiffEasyBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/DiffSection/DiffContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "Leicht [★]"
+
+[node name="DiffMedBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/DiffSection/DiffContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "Mittel [★★]"
+
+[node name="DiffHardBtn" type="Button" parent="MarginContainer/MainLayout/ConfigGrid/DiffSection/DiffContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+text = "Schwer [★★★]"
+
+[node name="InfoPanel" type="PanelContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+
+[node name="InfoLabel" type="Label" parent="MarginContainer/MainLayout/InfoPanel"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("9_font_silk")
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 8
+text = "Zahlenraum: 1 bis 9 | 4 Antwortmöglichkeiten"
+horizontal_alignment = 1
+
+[node name="ActionRow" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="StartBtn" type="Button" parent="MarginContainer/MainLayout/ActionRow"]
+custom_minimum_size = Vector2(280, 38)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_fonts/font = ExtResource("8_font_press")
+theme_override_colors/font_color = Color(0.12, 0.08, 0.02, 1)
+theme_override_font_sizes/font_size = 10
+text = "IN DIE ARENA ZIEHEN"

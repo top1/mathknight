@@ -1,0 +1,97 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/shop/ShopScreen.gd" id="1_shop"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="4_silk"]
+
+[node name="ShopScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_shop")
+
+[node name="MenuBackground" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_press")
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "🏪 HÄNDLER DER ZAHLEN"
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GoldBadge" type="PanelContainer" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+
+[node name="GoldContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/Header/GoldBadge"]
+layout_mode = 2
+
+[node name="GoldLabel" type="Label" parent="MarginContainer/MainLayout/Header/GoldBadge/GoldContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 11
+text = "🪙 0"
+
+[node name="MerchantPanel" type="PanelContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+
+[node name="DialogueLabel" type="Label" parent="MarginContainer/MainLayout/MerchantPanel"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_colors/font_color = Color(0.85, 0.8, 0.95, 1)
+theme_override_font_sizes/font_size = 9
+text = "»Willkommen in meinem Warenhaus! Wähle weise für die kommenden Schlachten.«"
+horizontal_alignment = 1
+
+[node name="CardContainer" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Footer" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+alignment = 1
+
+[node name="LeaveBtn" type="Button" parent="MarginContainer/MainLayout/Footer"]
+custom_minimum_size = Vector2(200, 36)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_silk")
+theme_override_colors/font_color = Color(1, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "Weiter zur Karte ➔"
