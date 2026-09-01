@@ -227,11 +227,11 @@ func _sync_ui_from_globals() -> void:
 
 func _reset_defaults() -> void:
 	NumberBubble.global_font_override = font_press_start
-	NumberBubble.global_font_size_1_digit = 15
-	NumberBubble.global_font_size_2_digit = 14
-	NumberBubble.global_font_size_3_digit = 11
-	NumberBubble.global_outline_thickness = 2
-	NumberBubble.global_shadow_offset = Vector2(1.5, 1.5)
+	NumberBubble.global_font_size_1_digit = 16
+	NumberBubble.global_font_size_2_digit = 16
+	NumberBubble.global_font_size_3_digit = 12
+	NumberBubble.global_outline_thickness = 1
+	NumberBubble.global_shadow_offset = Vector2(1.0, 1.0)
 	NumberBubble.global_exclusion_factor = 1.15
 	NumberBubble.global_text_color = Color("#fff176")
 	opt_font.select(0)

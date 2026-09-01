@@ -17,33 +17,33 @@ func generate_problem(config: MathConfig = null) -> MathProblem:
 	var cfg: MathConfig = config if config else current_config
 	var problem: MathProblem
 	
-	var chosen_op: MathConfig.Operation = cfg.operation
-	if chosen_op == MathConfig.Operation.MIXED:
-		var ops: Array[MathConfig.Operation] = [
-			MathConfig.Operation.ADDITION,
-			MathConfig.Operation.SUBTRACTION,
-			MathConfig.Operation.MULTIPLICATION,
-			MathConfig.Operation.DIVISION
-		]
-		chosen_op = ops.pick_random()
-
-	match chosen_op:
-		MathConfig.Operation.ADDITION:
-			problem = _generate_addition(cfg)
-		MathConfig.Operation.SUBTRACTION:
-			problem = _generate_subtraction(cfg)
-		MathConfig.Operation.MULTIPLICATION:
-			problem = _generate_multiplication(cfg)
-		MathConfig.Operation.DIVISION:
-			problem = _generate_division(cfg)
-		_:
-			problem = _generate_addition(cfg)
-
-	# Format display text based on game mode (default before set assignment)
 	if cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION:
-		problem.question_text = "=" + str(problem.correct_answer)
-	elif cfg.game_mode == MathConfig.GameMode.RESULT_TO_EQUATION:
-		problem.question_text = "?" + problem.operator_symbol + "?=" + str(problem.correct_answer)
+		problem = _generate_multi_op(cfg)
+	else:
+		var chosen_op: MathConfig.Operation = cfg.operation
+		if chosen_op == MathConfig.Operation.MIXED:
+			var ops: Array[MathConfig.Operation] = [
+				MathConfig.Operation.ADDITION,
+				MathConfig.Operation.SUBTRACTION,
+				MathConfig.Operation.MULTIPLICATION,
+				MathConfig.Operation.DIVISION
+			]
+			chosen_op = ops.pick_random()
+
+		match chosen_op:
+			MathConfig.Operation.ADDITION:
+				problem = _generate_addition(cfg)
+			MathConfig.Operation.SUBTRACTION:
+				problem = _generate_subtraction(cfg)
+			MathConfig.Operation.MULTIPLICATION:
+				problem = _generate_multiplication(cfg)
+			MathConfig.Operation.DIVISION:
+				problem = _generate_division(cfg)
+			_:
+				problem = _generate_addition(cfg)
+
+		if cfg.game_mode == MathConfig.GameMode.RESULT_TO_EQUATION:
+			problem.question_text = "?" + problem.operator_symbol + "?=" + str(problem.correct_answer)
 
 	problem.choices = _generate_smart_distractors(problem.correct_answer, problem.operand_a, problem.operand_b, cfg.num_choices)
 	problem.choices.shuffle()
@@ -89,35 +89,30 @@ func generate_set(set_size: int = 5, total_bubbles: int = 8, config: MathConfig 
 
 		problems.append(best_problem)
 
-	# 2. Zahlenschmiede logic: configure pre-given vs completely open problems (3 out of 5 pre-filled)
+	# 2. Game Mode specific set configuration
 	if cfg.game_mode == MathConfig.GameMode.RESULT_TO_EQUATION:
 		_configure_zahlenschmiede_set(problems, cfg)
+	elif cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION:
+		_configure_meisterkette_set(problems, cfg)
 
 	var max_val: int = max(cfg.max_result, cfg.max_operand)
 	if max_val < 1:
 		max_val = 20
 
 	# 3. Build Bubble Pools
-	var is_equation_mode: bool = (cfg.game_mode == MathConfig.GameMode.RESULT_TO_EQUATION or cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION)
-	if is_equation_mode:
+	if cfg.game_mode == MathConfig.GameMode.RESULT_TO_EQUATION:
 		for p in problems:
-			if cfg.game_mode == MathConfig.GameMode.RESULT_TO_EQUATION:
-				if p.is_completely_open():
-					if not pool_left.has(p.operand_a):
-						pool_left.append(p.operand_a)
-					if not pool_right.has(p.operand_b):
-						pool_right.append(p.operand_b)
-				elif p.given_operand_index == 0:
-					if not pool_right.has(p.operand_b):
-						pool_right.append(p.operand_b)
-				elif p.given_operand_index == 1:
-					if not pool_left.has(p.operand_a):
-						pool_left.append(p.operand_a)
-			else:
+			if p.is_completely_open():
 				if not pool_left.has(p.operand_a):
 					pool_left.append(p.operand_a)
 				if not pool_right.has(p.operand_b):
 					pool_right.append(p.operand_b)
+			elif p.given_operand_index == 0:
+				if not pool_right.has(p.operand_b):
+					pool_right.append(p.operand_b)
+			elif p.given_operand_index == 1:
+				if not pool_left.has(p.operand_a):
+					pool_left.append(p.operand_a)
 
 		# Ensure Left and Right pools have all required operands plus distractors
 		var target_side_count: int = max(4, max(pool_left.size(), pool_right.size()) + 1)
@@ -146,12 +141,17 @@ func generate_set(set_size: int = 5, total_bubbles: int = 8, config: MathConfig 
 		for val in pool_right:
 			pool.append(val)
 	else:
-		# Mode 1: Rechen-Schlag (Target results)
-		# Ensure EVERY problem's correct answer is in the pool
+		# Mode 1 (Rechen-Schlag) & Mode 3 (Meister-Kette)
+		# Ensure EVERY problem's required answers/operands are in the pool
 		for p in problems:
-			pool.append(p.correct_answer)
+			if p.is_three_operand and p.given_operand_index == -2: # Type B 3-part chain
+				if not pool.has(p.operand_a): pool.append(p.operand_a)
+				if not pool.has(p.operand_b): pool.append(p.operand_b)
+				if not pool.has(p.operand_c): pool.append(p.operand_c)
+			else:
+				if not pool.has(p.correct_answer): pool.append(p.correct_answer)
 
-		var target_pool_size: int = max(effective_set_size + 3, 7)
+		var target_pool_size: int = max(effective_set_size + 4, 8)
 		var dist_attempts: int = 0
 		while pool.size() < target_pool_size and dist_attempts < 50:
 			dist_attempts += 1
@@ -168,6 +168,22 @@ func generate_set(set_size: int = 5, total_bubbles: int = 8, config: MathConfig 
 		"bubble_pool_left": pool_left,
 		"bubble_pool_right": pool_right
 	}
+
+
+func _configure_meisterkette_set(problems: Array[MathProblem], cfg: MathConfig) -> void:
+	var total: int = problems.size()
+	var is_bubble_input = (cfg.input_type == MathConfig.InputType.BUBBLES or cfg.input_type == MathConfig.InputType.BUBBLES_MOVING or cfg.input_type == MathConfig.InputType.BUBBLES_LIVING)
+
+	for i in range(total):
+		var p: MathProblem = problems[i]
+		if is_bubble_input and i % 2 == 1:
+			# Type B: 3-operand chain building (? + ? + ? = 18)
+			p.given_operand_index = -2 # special marker for 3-part chain
+			p.question_text = "?%s?%s?=%d" % [p.operator_symbol, p.operator_symbol_2, p.correct_answer]
+		else:
+			# Type A: Enemy shows long equation, player calculates & enters result
+			p.given_operand_index = -1
+			p.question_text = "%d%s%d%s%d" % [p.operand_a, p.operator_symbol, p.operand_b, p.operator_symbol_2, p.operand_c]
 
 
 func _configure_zahlenschmiede_set(problems: Array[MathProblem], _cfg: MathConfig) -> void:
@@ -194,6 +210,89 @@ func _configure_zahlenschmiede_set(problems: Array[MathProblem], _cfg: MathConfi
 				p.question_text = str(p.operand_a) + p.operator_symbol + "?=" + str(p.correct_answer)
 			else:
 				p.question_text = "?" + p.operator_symbol + str(p.operand_b) + "=" + str(p.correct_answer)
+
+
+func _generate_multi_op(cfg: MathConfig) -> MathProblem:
+	var problem: MathProblem = MathProblem.new()
+	problem.is_three_operand = true
+
+	var chosen_op = cfg.operation
+	if chosen_op == MathConfig.Operation.MIXED:
+		var ops = [MathConfig.Operation.ADDITION, MathConfig.Operation.SUBTRACTION, MathConfig.Operation.MULTIPLICATION, MathConfig.Operation.DIVISION]
+		chosen_op = ops.pick_random()
+
+	match chosen_op:
+		MathConfig.Operation.ADDITION:
+			problem.operator_symbol = "+"
+			problem.operator_symbol_2 = "+"
+			var max_num = 6 if cfg.difficulty == MathConfig.Difficulty.EASY else (12 if cfg.difficulty == MathConfig.Difficulty.MEDIUM else 20)
+			problem.operand_a = randi_range(cfg.min_operand, max_num)
+			problem.operand_b = randi_range(cfg.min_operand, max_num)
+			problem.operand_c = randi_range(cfg.min_operand, max_num)
+			problem.correct_answer = problem.operand_a + problem.operand_b + problem.operand_c
+
+		MathConfig.Operation.SUBTRACTION:
+			if randf() < 0.5:
+				problem.operator_symbol = "-"
+				problem.operator_symbol_2 = "-"
+				var b = randi_range(2, 6 if cfg.difficulty == MathConfig.Difficulty.EASY else 12)
+				var c = randi_range(1, 5 if cfg.difficulty == MathConfig.Difficulty.EASY else 10)
+				var rem = randi_range(2, 10 if cfg.difficulty == MathConfig.Difficulty.EASY else 20)
+				problem.operand_a = b + c + rem
+				problem.operand_b = b
+				problem.operand_c = c
+				problem.correct_answer = rem
+			else:
+				problem.operator_symbol = "+"
+				problem.operator_symbol_2 = "-"
+				var a = randi_range(3, 8 if cfg.difficulty == MathConfig.Difficulty.EASY else 15)
+				var b = randi_range(3, 8 if cfg.difficulty == MathConfig.Difficulty.EASY else 15)
+				var c = randi_range(2, min(a + b - 1, 6 if cfg.difficulty == MathConfig.Difficulty.EASY else 12))
+				problem.operand_a = a
+				problem.operand_b = b
+				problem.operand_c = c
+				problem.correct_answer = a + b - c
+
+		MathConfig.Operation.MULTIPLICATION:
+			problem.operator_symbol = "×"
+			problem.operator_symbol_2 = "+" if randf() < 0.6 else "-"
+			var a = randi_range(2, 4 if cfg.difficulty == MathConfig.Difficulty.EASY else (6 if cfg.difficulty == MathConfig.Difficulty.MEDIUM else 9))
+			var b = randi_range(2, 4 if cfg.difficulty == MathConfig.Difficulty.EASY else (6 if cfg.difficulty == MathConfig.Difficulty.MEDIUM else 9))
+			var prod = a * b
+			if problem.operator_symbol_2 == "+":
+				var c = randi_range(1, 6 if cfg.difficulty == MathConfig.Difficulty.EASY else 15)
+				problem.operand_a = a
+				problem.operand_b = b
+				problem.operand_c = c
+				problem.correct_answer = prod + c
+			else:
+				var c = randi_range(1, min(prod - 1, 6 if cfg.difficulty == MathConfig.Difficulty.EASY else 12))
+				problem.operand_a = a
+				problem.operand_b = b
+				problem.operand_c = c
+				problem.correct_answer = prod - c
+
+		MathConfig.Operation.DIVISION:
+			problem.operator_symbol = "÷"
+			problem.operator_symbol_2 = "+"
+			var divisor = randi_range(2, 5 if cfg.difficulty == MathConfig.Difficulty.EASY else 8)
+			var quotient = randi_range(2, 5 if cfg.difficulty == MathConfig.Difficulty.EASY else 8)
+			var c = randi_range(1, 6 if cfg.difficulty == MathConfig.Difficulty.EASY else 12)
+			problem.operand_a = divisor * quotient
+			problem.operand_b = divisor
+			problem.operand_c = c
+			problem.correct_answer = quotient + c
+
+		_:
+			problem.operator_symbol = "+"
+			problem.operator_symbol_2 = "+"
+			problem.operand_a = randi_range(1, 5)
+			problem.operand_b = randi_range(1, 5)
+			problem.operand_c = randi_range(1, 5)
+			problem.correct_answer = problem.operand_a + problem.operand_b + problem.operand_c
+
+	problem.question_text = "%d%s%d%s%d" % [problem.operand_a, problem.operator_symbol, problem.operand_b, problem.operator_symbol_2, problem.operand_c]
+	return problem
 
 
 func _generate_addition(cfg: MathConfig) -> MathProblem:

@@ -1,0 +1,212 @@
+[gd_scene load_steps=8 format=3 uid="uid://stageselect001"]
+
+[ext_resource type="Script" path="res://scenes/stage/StageSelectScreen.gd" id="1_stage_select"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="3_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+bg_color = Color(0.05, 0.04, 0.1, 0.95)
+border_width_bottom = 2
+border_color = Color(0.25, 0.75, 1, 0.7)
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
+bg_color = Color(0.1, 0.08, 0.18, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.35, 0.55, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.16, 0.12, 0.26, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 2
+border_color = Color(0.65, 0.55, 0.85, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 10.0
+content_margin_right = 10.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font = ExtResource("3_font")
+font_size = 14
+font_color = Color(1, 0.9, 0.35, 1)
+shadow_size = 3
+shadow_color = Color(0, 0, 0, 0.85)
+
+[node name="StageSelectScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_stage_select")
+
+[node name="MenuBackground" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_bg")
+variant = "map"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TopBar" type="PanelContainer" parent="MarginContainer/MainLayout"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="HBox" type="HBoxContainer" parent="MarginContainer/MainLayout/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StageBadge" type="PanelContainer" parent="MarginContainer/MainLayout/TopBar/HBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+
+[node name="StageLabel" type="Label" parent="MarginContainer/MainLayout/TopBar/HBox/StageBadge"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "⚔️ STUFE 1 / 10"
+vertical_alignment = 1
+
+[node name="HPBadge" type="PanelContainer" parent="MarginContainer/MainLayout/TopBar/HBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+
+[node name="HPContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/TopBar/HBox/HPBadge"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Icon" type="Label" parent="MarginContainer/MainLayout/TopBar/HBox/HPBadge/HPContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 10
+text = "❤️"
+
+[node name="HPLabel" type="Label" parent="MarginContainer/MainLayout/TopBar/HBox/HPBadge/HPContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 9
+text = "10 / 10"
+
+[node name="GoldBadge" type="PanelContainer" parent="MarginContainer/MainLayout/TopBar/HBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+
+[node name="GoldContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/TopBar/HBox/GoldBadge"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Icon" type="Label" parent="MarginContainer/MainLayout/TopBar/HBox/GoldBadge/GoldContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 10
+text = "🪙"
+
+[node name="GoldLabel" type="Label" parent="MarginContainer/MainLayout/TopBar/HBox/GoldBadge/GoldContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 9
+text = "0"
+
+[node name="DiamondBadge" type="PanelContainer" parent="MarginContainer/MainLayout/TopBar/HBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+
+[node name="DiamondContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/TopBar/HBox/DiamondBadge"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Icon" type="Label" parent="MarginContainer/MainLayout/TopBar/HBox/DiamondBadge/DiamondContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "💎"
+
+[node name="DiamondLabel" type="Label" parent="MarginContainer/MainLayout/TopBar/HBox/DiamondBadge/DiamondContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+text = "0"
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainLayout/TopBar/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RestHubBtn" type="Button" parent="MarginContainer/MainLayout/TopBar/HBox"]
+custom_minimum_size = Vector2(110, 24)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "🏪 HÄNDLER / TRUHEN"
+
+[node name="Header" type="VBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+text = "WÄHLE DEIN PORTAL"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.9, 1)
+theme_override_font_sizes/font_size = 8
+text = "Wähle Rechenart, Tempo und Belohnung für die nächste Prüfung"
+horizontal_alignment = 1
+
+[node name="CardsArea" type="Control" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CardsContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/CardsArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1

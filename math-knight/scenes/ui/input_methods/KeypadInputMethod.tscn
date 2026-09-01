@@ -1,0 +1,153 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/input_methods/KeypadInputMethod.gd" id="1_pad"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="3_font_silk"]
+
+[node name="KeypadInputMethod" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pad")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.08, 0.06, 0.14, 0.95)
+
+[node name="HeaderBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 4.0
+offset_right = -12.0
+offset_bottom = 28.0
+grow_horizontal = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PromptLabel" type="Label" parent="HeaderBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+text = "🔢 TASTENFELD EINGABE:"
+vertical_alignment = 1
+
+[node name="BufferLabel" type="Label" parent="HeaderBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+text = "[ ? ]"
+vertical_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -36.0
+offset_right = 160.0
+offset_bottom = 54.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+columns = 6
+
+[node name="Btn1" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "1"
+
+[node name="Btn2" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "2"
+
+[node name="Btn3" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "3"
+
+[node name="Btn4" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "4"
+
+[node name="Btn5" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "5"
+
+[node name="Btn6" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "6"
+
+[node name="Btn7" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "7"
+
+[node name="Btn8" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "8"
+
+[node name="Btn9" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "9"
+
+[node name="Btn0" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 10
+text = "0"
+
+[node name="BtnClear" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 9
+text = "↺ C"
+
+[node name="BtnOK" type="Button" parent="GridContainer"]
+custom_minimum_size = Vector2(48, 38)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 8
+text = "⚔️ OK"

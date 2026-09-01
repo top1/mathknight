@@ -316,6 +316,122 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 9
 text = "Schwer [★★★]"
 
+[node name="InputSection" type="VBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="InputHeader" type="Label" parent="MarginContainer/MainLayout/InputSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.6, 1)
+theme_override_font_sizes/font_size = 8
+text = "4. EINGABE-METHODE"
+horizontal_alignment = 1
+
+[node name="InputContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/InputSection"]
+layout_mode = 2
+theme_override_constants/separation = 3
+alignment = 1
+
+[node name="InputBubblesBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🫧 Statisch"
+
+[node name="InputMovingBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🌊 Moving"
+
+[node name="InputLivingBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🌱 Living"
+
+[node name="InputDrawBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "✍️ Malen"
+
+[node name="InputTapBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "👆 Tap"
+
+[node name="InputStretchBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🏹 Ziehen"
+
+[node name="InputTimingBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "⏱️ Timing"
+
+[node name="InputWheelBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🎡 Rad"
+
+[node name="InputPadBtn" type="Button" parent="MarginContainer/MainLayout/InputSection/InputContainer"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🔢 Tasten"
+
+[node name="InputDiffSection" type="VBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="InputDiffHeader" type="Label" parent="MarginContainer/MainLayout/InputDiffSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.6, 1)
+theme_override_font_sizes/font_size = 8
+text = "5. EINGABE-TEMPO / HERAUSFORDERUNG"
+horizontal_alignment = 1
+
+[node name="InputDiffContainer" type="HBoxContainer" parent="MarginContainer/MainLayout/InputDiffSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="InputDiffEasyBtn" type="Button" parent="MarginContainer/MainLayout/InputDiffSection/InputDiffContainer"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🟢 Entspannt"
+
+[node name="InputDiffMedBtn" type="Button" parent="MarginContainer/MainLayout/InputDiffSection/InputDiffContainer"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🟡 Flott (Lücken)"
+
+[node name="InputDiffHardBtn" type="Button" parent="MarginContainer/MainLayout/InputDiffSection/InputDiffContainer"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 8
+text = "🔴 Extrem (Glitches)"
+
 [node name="InfoPanel" type="PanelContainer" parent="MarginContainer/MainLayout"]
 layout_mode = 2
 

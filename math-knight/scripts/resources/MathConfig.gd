@@ -4,10 +4,24 @@ extends Resource
 enum GameMode { TASK_TO_RESULT, RESULT_TO_EQUATION, MULTI_OP_EQUATION }
 enum Operation { ADDITION, SUBTRACTION, MULTIPLICATION, DIVISION, MIXED }
 enum Difficulty { EASY, MEDIUM, HARD }
+enum InputDifficulty { EASY, MEDIUM, HARD }
+enum InputType {
+	BUBBLES,
+	BUBBLES_MOVING,
+	BUBBLES_LIVING,
+	HANDWRITING,
+	QUICK_TAP,
+	HOLD_STRETCH,
+	TIMING_BAR,
+	NUMBER_WHEEL,
+	KEYPAD
+}
 
 @export var game_mode: GameMode = GameMode.TASK_TO_RESULT
 @export var operation: Operation = Operation.ADDITION
 @export var difficulty: Difficulty = Difficulty.EASY
+@export var input_difficulty: InputDifficulty = InputDifficulty.EASY
+@export var input_type: InputType = InputType.BUBBLES
 
 @export var min_operand: int = 1
 @export var max_operand: int = 9
@@ -18,11 +32,13 @@ enum Difficulty { EASY, MEDIUM, HARD }
 @export var allow_negative_results: bool = false
 @export var distractor_strategy: String = "smart"
 
-static func create_config(p_mode: GameMode, p_op: Operation, p_diff: Difficulty) -> MathConfig:
+static func create_config(p_mode: GameMode, p_op: Operation, p_diff: Difficulty, p_input: InputType = InputType.BUBBLES, p_input_diff: InputDifficulty = InputDifficulty.EASY) -> MathConfig:
 	var cfg: MathConfig = MathConfig.new()
 	cfg.game_mode = p_mode
 	cfg.operation = p_op
 	cfg.difficulty = p_diff
+	cfg.input_type = p_input
+	cfg.input_difficulty = p_input_diff
 	cfg.num_choices = 4
 	cfg.set_size = 5
 	cfg.bubble_pool_size = 12 if p_mode == GameMode.MULTI_OP_EQUATION else 10

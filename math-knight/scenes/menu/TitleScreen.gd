@@ -632,4 +632,9 @@ func _on_new_game_pressed() -> void:
 
 
 func _on_training_pressed() -> void:
+	if has_node("/root/RunManager"):
+		var rm = get_node("/root/RunManager")
+		if rm.is_run_active:
+			rm.end_run(false)
+		rm.is_run_active = false
 	get_tree().change_scene_to_file("res://scenes/menu/MainMenu.tscn")

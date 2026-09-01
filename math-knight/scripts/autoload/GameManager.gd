@@ -5,7 +5,7 @@ extends Node
 
 enum GameState { READY, PLAYING, PAUSED, GAME_OVER, VICTORY, TITLE_SCREEN, MAP, SHOP, CHEST_OPENING }
 
-const TOTAL_STAGES: int = 12
+const TOTAL_STAGES: int = 11
 const SAVE_PATH: String = "user://mathknight_data.cfg"
 
 const STAGE_CONFIGS: Array[Dictionary] = [
@@ -57,6 +57,7 @@ var _current_set_number: int = 0
 # Boss mode tracking
 var is_boss_fight: bool = false
 var boss_node_data: Dictionary = {}
+var is_in_countdown: bool = false
 
 
 func _ready() -> void:
@@ -68,6 +69,7 @@ func _ready() -> void:
 	EventBus.knight_died.connect(_on_knight_died)
 	EventBus.set_started.connect(_on_set_started)
 	EventBus.set_cleared.connect(_on_set_cleared)
+	EventBus.countdown_tick.connect(_on_countdown_tick)
 
 
 func get_stage_config(stage_num: int) -> Dictionary:
@@ -77,6 +79,7 @@ func get_stage_config(stage_num: int) -> Dictionary:
 
 func start_game() -> void:
 	state = GameState.PLAYING
+	is_in_countdown = true
 	score = 0
 	combo = 0
 	wave = 1
@@ -128,6 +131,7 @@ func resume_game() -> void:
 func end_game() -> void:
 	if state == GameState.GAME_OVER or state == GameState.VICTORY:
 		return
+	is_in_countdown = false
 	state = GameState.GAME_OVER
 	is_victory = false
 	_finalize_run_stats()
@@ -217,6 +221,14 @@ func _on_stroke_ended() -> void:
 func _on_set_started(set_number: int, _bubble_pool: Array[int]) -> void:
 	_current_set_number = set_number
 	_current_set_errors = 0
+	is_in_countdown = true
+
+
+func _on_countdown_tick(count_text: String) -> void:
+	if count_text.begins_with("⚔️") or count_text.contains("LOS"):
+		is_in_countdown = false
+	else:
+		is_in_countdown = true
 
 
 func _on_set_cleared(set_number: int) -> void:
@@ -228,7 +240,7 @@ func _on_set_cleared(set_number: int) -> void:
 
 
 func _on_answer_selected(value: int, method: String, bubble: Area2D, slice_dir: Vector2) -> void:
-	if state != GameState.PLAYING:
+	if state != GameState.PLAYING or is_in_countdown:
 		return
 	if current_problem == null:
 		return

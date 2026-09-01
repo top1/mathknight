@@ -1,0 +1,119 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/input_methods/NumberWheelInputMethod.gd" id="1_wheel"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="3_font_silk"]
+
+[node name="NumberWheelInputMethod" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wheel")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.08, 0.06, 0.14, 0.95)
+
+[node name="HeaderBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 4.0
+offset_right = -12.0
+offset_bottom = 28.0
+grow_horizontal = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PromptLabel" type="Label" parent="HeaderBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+text = "🎡 DREHE DAS RAD & SCHLAGE ZU:"
+vertical_alignment = 1
+
+[node name="BufferLabel" type="Label" parent="HeaderBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+text = "[ ? ]"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="HeaderBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="SubmitBtn" type="Button" parent="HeaderBar"]
+custom_minimum_size = Vector2(100, 24)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 9
+text = "⚔️ SCHLAG!"
+
+[node name="WheelArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = 8.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="WheelCanvas" type="Control" parent="WheelArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PointerArrow" type="Label" parent="WheelArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -74.0
+offset_right = 12.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+text = "▼"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WheelDisc" type="Control" parent="WheelArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

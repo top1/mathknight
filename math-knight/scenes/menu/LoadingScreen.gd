@@ -10,7 +10,7 @@ extends Control
 @onready var ascii_spinner: AsciiLoadingSpinner = $MarginContainer/MainLayout/ProgressContainer/AsciiSpinner
 @onready var ascii_knight: AsciiEntity = $CenterContainer/KnightAnchor/AsciiKnight
 
-var target_scene_path: String = "res://scenes/map/RunMap.tscn"
+var target_scene_path: String = "res://scenes/stage/StageSelectScreen.tscn"
 var _progress: float = 0.0
 var _is_loaded: bool = false
 

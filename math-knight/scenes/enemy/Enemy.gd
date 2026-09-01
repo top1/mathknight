@@ -123,9 +123,11 @@ func _update_label_display() -> void:
 func _adjust_label_size() -> void:
 	if not shield_label:
 		return
-	if problem_text.length() > 8:
-		shield_label.add_theme_font_size_override("font_size", 11)
-	elif problem_text.length() > 6:
+	if problem_text.length() > 10:
+		shield_label.add_theme_font_size_override("font_size", 9)
+	elif problem_text.length() > 7:
+		shield_label.add_theme_font_size_override("font_size", 10)
+	elif problem_text.length() > 5:
 		shield_label.add_theme_font_size_override("font_size", 12)
 	else:
 		shield_label.add_theme_font_size_override("font_size", 14)

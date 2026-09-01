@@ -1,0 +1,129 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/input_methods/QuickTapInputMethod.gd" id="1_tap"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="3_font_silk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_bg"]
+bg_color = Color(0.12, 0.1, 0.2, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_fill"]
+bg_color = Color(1, 0.85, 0.2, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="QuickTapInputMethod" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tap")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.08, 0.06, 0.14, 0.95)
+
+[node name="HeaderBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 4.0
+offset_right = -12.0
+offset_bottom = 28.0
+grow_horizontal = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PromptLabel" type="Label" parent="HeaderBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+text = "👆 TIPPE SCHNELL (PAUSE = SCHLAG!):"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="HeaderBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Plus5Btn" type="Button" parent="HeaderBar"]
+custom_minimum_size = Vector2(50, 22)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 8
+text = "+5"
+
+[node name="ResetBtn" type="Button" parent="HeaderBar"]
+custom_minimum_size = Vector2(65, 22)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 8
+text = "↺ Reset"
+
+[node name="SubmitBtn" type="Button" parent="HeaderBar"]
+custom_minimum_size = Vector2(75, 22)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 8
+text = "⚔️ Schlag"
+
+[node name="CenterArea" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -25.0
+offset_right = 80.0
+offset_bottom = 45.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="CountDisplay" type="PanelContainer" parent="CenterArea"]
+custom_minimum_size = Vector2(120, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+
+[node name="CountLabel" type="Label" parent="CenterArea/CountDisplay"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CommitProgressBar" type="ProgressBar" parent="CenterArea"]
+custom_minimum_size = Vector2(140, 6)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+max_value = 0.75
+value = 0.0
+show_percentage = false
+
+[node name="CommitTimer" type="Timer" parent="."]
+one_shot = true

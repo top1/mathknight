@@ -167,16 +167,17 @@ func _on_retry_button_pressed() -> void:
 		if rm.is_run_active:
 			rm.end_run(false)
 			rm.start_new_run()
-			get_tree().change_scene_to_file("res://scenes/map/RunMap.tscn")
+			get_tree().change_scene_to_file("res://scenes/stage/StageSelectScreen.tscn")
 			return
 
 	get_tree().reload_current_scene()
 
 
 func _on_menu_button_pressed() -> void:
-	if has_node("/root/RunManager"):
+	if has_node("/root/RunManager") and get_node("/root/RunManager").is_run_active:
 		var rm = get_node("/root/RunManager")
-		if rm.is_run_active:
-			rm.end_run(false)
-	get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")
+		rm.end_run(false)
+		get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/menu/MainMenu.tscn")
 

@@ -61,40 +61,39 @@ func start_new_set() -> void:
 		if rm.is_run_active and not rm.get_current_node().is_empty():
 			var node_data: Dictionary = rm.get_current_node()
 			var is_boss_node: bool = (node_data.get("type", "") == "boss")
-			is_elite_node = (node_data.get("type", "") == "elite")
-			
+			is_elite_node = (node_data.get("type", "") == "elite" or node_data.get("archetype", "") == "elite")
+			var stage_idx: int = rm.current_stage_index
+
 			if is_boss_node:
 				total_waves = 1
 				is_elite_wave = true
-				active_set_size = node_data.get("enemy_count", 5)
-				if active_set_size <= 0:
-					active_set_size = 5
+				active_set_size = node_data.get("enemy_count", 6)
 			else:
-				# 3-5 waves per level based on tier and node type
 				total_waves = 4 if is_elite_node else 3
-				if node_data.get("tier", 0) >= 2:
-					total_waves = 5 if is_elite_node else 4
+				if stage_idx >= 7:
+					total_waves = 4
 
-				# Elite wave triggers on final wave (or wave 2+ in elite nodes)
 				if is_elite_node and current_set_number >= 2:
 					is_elite_wave = true
 				elif current_set_number == total_waves:
 					is_elite_wave = true
 
 				active_set_size = node_data.get("enemy_count", 4)
-				if active_set_size <= 0:
-					active_set_size = 4
 
 			active_pool_size = max(active_set_size + 4, 12)
 
-			# Use node's difficulty for speed/damage
-			match node_data.get("math_difficulty", 0):
-				0:  # EASY
-					stage_cfg = {"enemies": active_set_size, "pool": active_pool_size, "speed": 38.0, "damage": 1.0, "interval": 2.1}
-				1:  # MEDIUM
-					stage_cfg = {"enemies": active_set_size, "pool": active_pool_size, "speed": 48.0, "damage": 1.2, "interval": 1.8}
-				2:  # HARD
-					stage_cfg = {"enemies": active_set_size, "pool": active_pool_size, "speed": 58.0, "damage": 1.5, "interval": 1.5}
+			# Speed & damage scale with input_difficulty and stage index
+			var base_speed: float = 38.0 + (stage_idx * 2.5)
+			var base_dmg: float = 1.0 + (stage_idx * 0.1)
+			var base_interval: float = maxf(1.1, 2.2 - (stage_idx * 0.08))
+
+			match node_data.get("input_difficulty", 0):
+				0: # EASY
+					stage_cfg = {"enemies": active_set_size, "pool": active_pool_size, "speed": base_speed * 0.9, "damage": base_dmg, "interval": base_interval}
+				1: # MEDIUM
+					stage_cfg = {"enemies": active_set_size, "pool": active_pool_size, "speed": base_speed * 1.15, "damage": base_dmg * 1.15, "interval": base_interval * 0.9}
+				2: # HARD / EXTREME
+					stage_cfg = {"enemies": active_set_size, "pool": active_pool_size, "speed": base_speed * 1.35, "damage": base_dmg * 1.3, "interval": base_interval * 0.8}
 	else:
 		active_set_size = stage_cfg.enemies
 		active_pool_size = stage_cfg.pool

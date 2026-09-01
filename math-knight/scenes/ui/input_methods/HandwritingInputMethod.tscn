@@ -1,0 +1,192 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/input_methods/HandwritingInputMethod.gd" id="1_hw"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_press"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="3_font_silk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_timer_bg"]
+bg_color = Color(0.12, 0.1, 0.2, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_timer_fill"]
+bg_color = Color(0.2, 0.85, 1, 0.85)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="HandwritingInputMethod" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hw")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.08, 0.06, 0.14, 0.95)
+
+[node name="GridGuide" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -130.0
+offset_top = -42.0
+offset_right = 130.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.15, 0.12, 0.25, 0.4)
+
+[node name="CenterDivider" type="ColorRect" parent="GridGuide"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -0.5
+offset_right = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.3, 0.25, 0.45, 0.25)
+
+[node name="GuideLine" type="ColorRect" parent="GridGuide"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.3, 0.25, 0.45, 0.3)
+
+[node name="DrawSurface" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HeaderBox" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 4.0
+offset_right = -12.0
+offset_bottom = 28.0
+grow_horizontal = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PromptLabel" type="Label" parent="HeaderBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+text = "✍️ ZEICHNE DIE ZAHL:"
+vertical_alignment = 1
+
+[node name="BufferLabel" type="Label" parent="HeaderBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+text = "[ ? ]"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="HeaderBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BackspaceBtn" type="Button" parent="HeaderBox"]
+custom_minimum_size = Vector2(30, 22)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 9
+text = "⌫"
+
+[node name="ClearBtn" type="Button" parent="HeaderBox"]
+custom_minimum_size = Vector2(65, 22)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 8
+text = "↺ Löschen"
+
+[node name="SubmitBtn" type="Button" parent="HeaderBox"]
+custom_minimum_size = Vector2(70, 22)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font_silk")
+theme_override_font_sizes/font_size = 8
+text = "⚔️ Schlag"
+
+[node name="TimerBar" type="ProgressBar" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -130.0
+offset_top = -14.0
+offset_right = 130.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_timer_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_timer_fill")
+max_value = 1.0
+value = 0.0
+show_percentage = false
+
+[node name="FeedbackPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -30.0
+offset_top = -25.0
+offset_right = 30.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(30, 25)
+mouse_filter = 2
+
+[node name="FeedbackLabel" type="Label" parent="FeedbackPanel"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font_press")
+theme_override_font_sizes/font_size = 24
+text = "7"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DebounceTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="draw" from="DrawSurface" to="." method="_on_draw_surface_draw"]

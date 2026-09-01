@@ -106,6 +106,9 @@ func _input(event: InputEvent) -> void:
 
 
 func _perform_slice_cast(from: Vector2, to: Vector2) -> void:
+	if has_node("/root/GameManager") and get_node("/root/GameManager").is_in_countdown:
+		return
+
 	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
 	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(from, to, collision_mask, _sliced_rids)
 	query.collide_with_areas = true
@@ -128,6 +131,9 @@ func _perform_slice_cast(from: Vector2, to: Vector2) -> void:
 
 
 func _check_tap(pos: Vector2) -> void:
+	if has_node("/root/GameManager") and get_node("/root/GameManager").is_in_countdown:
+		return
+
 	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
 	var query: PhysicsPointQueryParameters2D = PhysicsPointQueryParameters2D.new()
 	query.position = pos

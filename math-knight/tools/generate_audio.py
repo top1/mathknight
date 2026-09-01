@@ -3,7 +3,7 @@ Google AI Audio & Music Generation Helper Script for MathKnight
 Supports generating background music (Lyria) and audio/speech (Gemini) using the Google GenAI SDK.
 
 Usage:
-  python tools/generate_audio.py --type music --prompt "Medieval tavern lute upbeat loop" --out assets/audio/tavern.mp3
+  python tools/generate_audio.py --type music --prompt "TRON Legacy synthwave loop 124 BPM" --out assets/audio/bgm_battle.mp3
   python tools/generate_audio.py --type speech --prompt "Critical Strike!" --voice Puck --out assets/audio/critical.wav
 """
 
@@ -12,69 +12,75 @@ import base64
 import os
 import sys
 
-def generate_music(prompt: str, output_path: str, model: str = "lyria-3-clip-preview"):
+def get_client(api_key: str = None):
     from google import genai
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("ERROR: GEMINI_API_KEY environment variable is not set.", file=sys.stderr)
-        print("Set it using: $env:GEMINI_API_KEY='your_key' (PowerShell) or export GEMINI_API_KEY='your_key'", file=sys.stderr)
-        sys.exit(1)
+    key = api_key or os.environ.get("GEMINI_API_KEY")
+    if not key:
+        raise ValueError("GEMINI_API_KEY environment variable or --api-key argument is required.")
+    return genai.Client(api_key=key)
 
+def generate_music(prompt: str, output_path: str, model: str = "lyria-3-clip-preview"):
+    client = get_client()
     print(f"Generating music using model: {model}...")
     print(f"Prompt: {prompt}")
     
-    client = genai.Client(api_key=api_key)
-    interaction = client.interactions.create(
-        model=model,
-        input=prompt
-    )
+    try:
+        interaction = client.interactions.create(
+            model=model,
+            input=prompt
+        )
 
-    if interaction.output_audio and interaction.output_audio.data:
-        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-        with open(output_path, "wb") as f:
-            f.write(base64.b64decode(interaction.output_audio.data))
-        print(f"Successfully saved music to: {output_path}")
-    else:
-        print("No audio data returned in response.", file=sys.stderr)
+        if hasattr(interaction, "output_audio") and interaction.output_audio and interaction.output_audio.data:
+            os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+            with open(output_path, "wb") as f:
+                f.write(base64.b64decode(interaction.output_audio.data))
+            print(f"Successfully saved music to: {output_path}")
+            return True
+        else:
+            print("No audio data returned in response.", file=sys.stderr)
+            return False
+    except Exception as e:
+        print(f"Error during music generation: {e}", file=sys.stderr)
+        return False
 
-def generate_speech(prompt: str, output_path: str, voice: str = "Puck", model: str = "gemini-2.5-flash"):
-    from google import genai
+def generate_speech(prompt: str, output_path: str, voice: str = "Puck", model: str = "gemini-2.5-flash-preview-tts"):
     from google.genai import types
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("ERROR: GEMINI_API_KEY environment variable is not set.", file=sys.stderr)
-        sys.exit(1)
-
     print(f"Generating speech/voice using model: {model} (Voice: {voice})...")
-    client = genai.Client(api_key=api_key)
+    client = get_client()
 
-    response = client.models.generate_content(
-        model=model,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_modalities=["AUDIO"],
-            speech_config=types.SpeechConfig(
-                voice_config=types.VoiceConfig(
-                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice)
+    try:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["AUDIO"],
+                speech_config=types.SpeechConfig(
+                    voice_config=types.VoiceConfig(
+                        prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice)
+                    )
                 )
             )
         )
-    )
 
-    saved = False
-    for candidate in response.candidates:
-        for part in candidate.content.parts:
-            if part.inline_data and part.inline_data.data:
-                os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-                with open(output_path, "wb") as f:
-                    f.write(part.inline_data.data)
-                print(f"Successfully saved speech to: {output_path}")
-                saved = True
-                break
+        saved = False
+        for candidate in response.candidates:
+            for part in candidate.content.parts:
+                if part.inline_data and part.inline_data.data:
+                    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+                    with open(output_path, "wb") as f:
+                        f.write(part.inline_data.data)
+                    print(f"Successfully saved speech to: {output_path}")
+                    saved = True
+                    break
 
-    if not saved:
-        print("No audio inline data returned in response.", file=sys.stderr)
+        if not saved:
+            print("No audio inline data returned in response.", file=sys.stderr)
+            return False
+        return True
+    except Exception as e:
+        print(f"Error during speech generation: {e}", file=sys.stderr)
+        return False
 
 def main():
     parser = argparse.ArgumentParser(description="Generate music and audio using Google AI")
@@ -90,7 +96,7 @@ def main():
         model = args.model or "lyria-3-clip-preview"
         generate_music(args.prompt, args.out, model)
     elif args.type == "speech":
-        model = args.model or "gemini-2.5-flash"
+        model = args.model or "gemini-2.5-flash-preview-tts"
         generate_speech(args.prompt, args.out, args.voice, model)
 
 if __name__ == "__main__":

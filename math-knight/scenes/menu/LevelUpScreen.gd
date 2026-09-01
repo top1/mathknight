@@ -206,6 +206,6 @@ func _on_close_pressed() -> void:
 	if has_node("/root/AudioManager"):
 		get_node("/root/AudioManager").play_sfx("click")
 	if has_node("/root/RunManager") and get_node("/root/RunManager").is_run_active:
-		get_tree().change_scene_to_file("res://scenes/map/RunMap.tscn")
+		get_tree().change_scene_to_file("res://scenes/stage/StageSelectScreen.tscn")
 	else:
 		get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")

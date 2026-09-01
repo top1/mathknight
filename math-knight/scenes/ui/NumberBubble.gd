@@ -13,6 +13,7 @@ class_name NumberBubble
 ## ═══════════════════════════════════════════════════════════════════════════
 
 signal selected(value: int, method: String, bubble: Area2D, slice_dir: Vector2)
+signal naturally_expired(bubble: Area2D)
 
 # ---------------------------------------------------------------------------
 #  CONSTANTS
@@ -27,11 +28,11 @@ const MC: Array[String] = [
 # ---------------------------------------------------------------------------
 # Shared / Tunable Bubble Visual Configuration (adjustable live in BubbleTuningLab)
 static var global_font_override: Font = null
-static var global_font_size_1_digit: int = 15
-static var global_font_size_2_digit: int = 14
-static var global_font_size_3_digit: int = 11
-static var global_outline_thickness: int = 2 # 0 = none, 1 = 4-way, 2 = 8-way thick
-static var global_shadow_offset: Vector2 = Vector2(1.5, 1.5)
+static var global_font_size_1_digit: int = 16
+static var global_font_size_2_digit: int = 16
+static var global_font_size_3_digit: int = 12
+static var global_outline_thickness: int = 1 # 0 = none, 1 = 4-way, 2 = 8-way thick
+static var global_shadow_offset: Vector2 = Vector2(1.0, 1.0)
 static var global_exclusion_factor: float = 1.15
 static var global_text_color: Color = Color("#fff176") # Bright electric yellow
 static var global_shadow_color: Color = Color(0.02, 0.02, 0.06, 0.98)
@@ -47,6 +48,15 @@ var float_freq_x: float = 0.7
 var float_freq_y: float = 1.0
 var phase_offset_x: float = 0.0
 var phase_offset_y: float = 0.0
+
+# Motion & Living Ecosystem
+var motion_mode: String = "static" # "static", "moving", "living"
+var velocity: Vector2 = Vector2.ZERO
+var bounds_min: Vector2 = Vector2(36.0, 24.0)
+var bounds_max: Vector2 = Vector2(604.0, 118.0)
+var lifespan: float = 0.0
+var max_lifespan: float = 0.0
+var is_expiring: bool = false
 
 var _time: float = 0.0
 var is_alive: bool = true
@@ -204,6 +214,34 @@ func _update_sphere_slots(delta: float) -> void:
 		s.ph += delta * float(s.spd)
 		s.a = 0.35 + sin(float(s.ph)) * 0.22
 
+func setup_motion(p_mode: String, p_min: Vector2, p_max: Vector2, p_lifespan: float = 0.0, speed_multiplier: float = 1.0) -> void:
+	motion_mode = p_mode
+	bounds_min = p_min
+	bounds_max = p_max
+	max_lifespan = p_lifespan
+	lifespan = p_lifespan
+	is_expiring = false
+
+	if motion_mode == "moving" or motion_mode == "living":
+		var angle: float = randf() * TAU
+		var speed: float = randf_range(28.0, 56.0) * speed_multiplier
+		velocity = Vector2(cos(angle), sin(angle)) * speed
+
+
+func _expire_naturally() -> void:
+	if not is_alive:
+		return
+	is_alive = false
+	naturally_expired.emit(self)
+	var tween: Tween = create_tween()
+	if tween:
+		tween.tween_property(self, "scale", Vector2(0.1, 0.1), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(self, "modulate:a", 0.0, 0.25)
+		tween.tween_callback(queue_free)
+	else:
+		queue_free()
+
+
 # ---------------------------------------------------------------------------
 #  PROCESS & FLOATING
 # ---------------------------------------------------------------------------
@@ -215,6 +253,32 @@ func _process(delta: float) -> void:
 
 	if not is_alive:
 		return
+
+	# 1. Linear Drift & Bounce for Moving and Living modes
+	if motion_mode == "moving" or motion_mode == "living":
+		base_position += velocity * delta
+		if base_position.x < bounds_min.x:
+			base_position.x = bounds_min.x
+			velocity.x = abs(velocity.x)
+		elif base_position.x > bounds_max.x:
+			base_position.x = bounds_max.x
+			velocity.x = -abs(velocity.x)
+
+		if base_position.y < bounds_min.y:
+			base_position.y = bounds_min.y
+			velocity.y = abs(velocity.y)
+		elif base_position.y > bounds_max.y:
+			base_position.y = bounds_max.y
+			velocity.y = -abs(velocity.y)
+
+	# 2. Living ecosystem lifecycle countdown
+	if motion_mode == "living" and max_lifespan > 0.0 and not _is_splatting:
+		lifespan -= delta
+		if lifespan <= 1.5 and not is_expiring:
+			is_expiring = true
+		if lifespan <= 0.0:
+			_expire_naturally()
+			return
 
 	_time += delta * float_speed
 	var off_x: float = sin(_time * float_freq_x + phase_offset_x) * float_amplitude_x

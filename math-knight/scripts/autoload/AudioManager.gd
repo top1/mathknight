@@ -1,6 +1,7 @@
 extends Node
 ## AudioManager singleton for MathKnight.
 ## Manages SFX pool, BGM crossfading, procedural audio synthesis, adaptive track selection, and event connections.
+## Features a high-octane, super-harmonic TRON / Cyberpunk synthesizer engine.
 
 # Audio file paths
 const AUDIO_DIR: String = "res://assets/audio/"
@@ -523,8 +524,6 @@ func _create_wav_stream(samples: PackedFloat32Array, loop: bool = false) -> Audi
 
 
 func _save_wav_file(path: String, wav_stream: AudioStreamWAV) -> void:
-	if FileAccess.file_exists(path):
-		return # File already exists, avoid rewriting on every boot
 	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if not file:
 		return
@@ -558,7 +557,7 @@ func _save_wav_file(path: String, wav_stream: AudioStreamWAV) -> void:
 	file.close()
 
 
-# --- SFX Synthesizers ---
+# --- Sound Effect Synthesizers (Cyber / Laser / Neon Styling) ---
 
 func _synth_bubble_pop() -> AudioStreamWAV:
 	var duration: float = 0.12
@@ -569,11 +568,12 @@ func _synth_bubble_pop() -> AudioStreamWAV:
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var progress: float = t / duration
-		var freq: float = lerpf(950.0, 240.0, progress * progress)
+		var freq: float = lerpf(1250.0, 180.0, progress * progress)
 		phase += freq * (TAU / SAMPLE_RATE)
-		var env: float = exp(-t * 32.0)
-		var pop_click: float = (randf_range(-1.0, 1.0) * 0.35) if (i < 40) else 0.0
-		samples[i] = (sin(phase) + pop_click) * env * 0.9
+		var env: float = exp(-t * 36.0)
+		var laser_chirp: float = sin(phase) + 0.3 * sin(phase * 2.0)
+		var click: float = (randf_range(-1.0, 1.0) * 0.4) if (i < 30) else 0.0
+		samples[i] = (laser_chirp + click) * env * 0.88
 	return _create_wav_stream(samples, false)
 
 
@@ -587,14 +587,14 @@ func _synth_sword_slash() -> AudioStreamWAV:
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var progress: float = t / duration
-		var freq: float = lerpf(580.0, 140.0, progress)
+		var freq: float = lerpf(720.0, 120.0, progress)
 		phase += freq * (TAU / SAMPLE_RATE)
-		var body: float = sin(phase) * 0.45
+		var plasma_tone: float = (fmod(phase, 1.0) * 2.0 - 1.0) * 0.45
 		var white_noise: float = randf_range(-1.0, 1.0)
-		var filter_coeff: float = lerpf(0.55, 0.15, progress)
+		var filter_coeff: float = lerpf(0.65, 0.12, progress)
 		noise_filter = noise_filter + filter_coeff * (white_noise - noise_filter)
-		var env: float = (t / 0.025) if t < 0.025 else (1.0 - ((t - 0.025) / (duration - 0.025)))
-		samples[i] = (body + noise_filter * 0.7) * env * 0.85
+		var env: float = (t / 0.02) if t < 0.02 else exp(-(t - 0.02) * 14.0)
+		samples[i] = (plasma_tone + noise_filter * 0.8) * env * 0.85
 	return _create_wav_stream(samples, false)
 
 
@@ -603,8 +603,9 @@ func _synth_correct() -> AudioStreamWAV:
 	var num_samples: int = int(duration * SAMPLE_RATE)
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
-	var freqs: Array[float] = [783.99, 987.77, 1318.51] # G5, B5, E6
-	var offsets: Array[float] = [0.0, 0.07, 0.14]
+	# Sparkling major 9th cyber chime (C6, E6, G6, B6)
+	var freqs: Array[float] = [1046.50, 1318.51, 1567.98, 1975.53]
+	var offsets: Array[float] = [0.0, 0.06, 0.12, 0.18]
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var total_sample: float = 0.0
@@ -612,9 +613,9 @@ func _synth_correct() -> AudioStreamWAV:
 			var note_t: float = t - offsets[n]
 			if note_t >= 0.0:
 				var f: float = freqs[n]
-				var env: float = exp(-note_t * 9.5)
-				var bell: float = sin(note_t * f * TAU) + 0.35 * sin(note_t * f * 2.76 * TAU) + 0.15 * sin(note_t * f * 4.2 * TAU)
-				total_sample += bell * env * 0.35
+				var env: float = exp(-note_t * 8.5)
+				var bell: float = sin(note_t * f * TAU) + 0.35 * sin(note_t * f * 2.76 * TAU) + 0.18 * sin(note_t * f * 4.2 * TAU)
+				total_sample += bell * env * 0.28
 		samples[i] = total_sample
 	return _create_wav_stream(samples, false)
 
@@ -628,14 +629,14 @@ func _synth_wrong() -> AudioStreamWAV:
 	var phase2: float = 0.0
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
-		var f1: float = lerpf(135.0, 90.0, t / duration)
-		var f2: float = lerpf(142.0, 94.0, t / duration)
+		var f1: float = lerpf(140.0, 80.0, t / duration)
+		var f2: float = lerpf(148.0, 84.0, t / duration)
 		phase1 += f1 * (TAU / SAMPLE_RATE)
 		phase2 += f2 * (TAU / SAMPLE_RATE)
-		var wave1: float = 1.0 if (sin(phase1) > 0.0) else -1.0
-		var wave2: float = 1.0 if (sin(phase2) > 0.0) else -1.0
-		var env: float = 1.0 if t < 0.2 else (1.0 - (t - 0.2) / 0.12)
-		samples[i] = (wave1 * 0.35 + wave2 * 0.35) * env
+		var saw1: float = fmod(phase1, 1.0) * 2.0 - 1.0
+		var saw2: float = fmod(phase2, 1.0) * 2.0 - 1.0
+		var env: float = 1.0 if t < 0.18 else exp(-(t - 0.18) * 18.0)
+		samples[i] = (saw1 * 0.35 + saw2 * 0.35) * env
 	return _create_wav_stream(samples, false)
 
 
@@ -647,12 +648,12 @@ func _synth_coin() -> AudioStreamWAV:
 	var phase: float = 0.0
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
-		var f: float = 987.77 if t < 0.06 else 1318.51
+		var f: float = 1174.66 if t < 0.05 else 1760.0 # D6 -> A6
 		phase += f * (TAU / SAMPLE_RATE)
-		var note_t: float = t if t < 0.06 else (t - 0.06)
-		var env: float = exp(-note_t * 11.0)
-		var chime: float = sin(phase) + 0.2 * sin(phase * 2.0)
-		samples[i] = chime * env * 0.55
+		var note_t: float = t if t < 0.05 else (t - 0.05)
+		var env: float = exp(-note_t * 12.0)
+		var neon_coin: float = sin(phase) + 0.3 * sin(phase * 2.0) + 0.15 * sin(phase * 3.0)
+		samples[i] = neon_coin * env * 0.55
 	return _create_wav_stream(samples, false)
 
 
@@ -661,8 +662,8 @@ func _synth_diamond() -> AudioStreamWAV:
 	var num_samples: int = int(duration * SAMPLE_RATE)
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
-	var freqs: Array[float] = [1174.66, 1479.98, 1760.00, 2349.32]
-	var offsets: Array[float] = [0.0, 0.08, 0.16, 0.24]
+	var freqs: Array[float] = [1318.51, 1567.98, 1975.53, 2637.02] # E6 -> G6 -> B6 -> E7
+	var offsets: Array[float] = [0.0, 0.07, 0.14, 0.21]
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var total_sample: float = 0.0
@@ -670,10 +671,10 @@ func _synth_diamond() -> AudioStreamWAV:
 			var note_t: float = t - offsets[n]
 			if note_t >= 0.0:
 				var f: float = freqs[n]
-				var vibrato: float = sin(note_t * 12.0) * 4.0
-				var env: float = exp(-note_t * 7.0)
-				var bell: float = sin(note_t * (f + vibrato) * TAU) + 0.3 * sin(note_t * f * 2.0 * TAU)
-				total_sample += bell * env * 0.28
+				var vibrato: float = sin(note_t * 14.0) * 5.0
+				var env: float = exp(-note_t * 6.5)
+				var bell: float = sin(note_t * (f + vibrato) * TAU) + 0.35 * sin(note_t * f * 2.0 * TAU) + 0.15 * sin(note_t * f * 3.0 * TAU)
+				total_sample += bell * env * 0.26
 		samples[i] = total_sample
 	return _create_wav_stream(samples, false)
 
@@ -686,10 +687,10 @@ func _synth_click() -> AudioStreamWAV:
 	var phase: float = 0.0
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
-		var f: float = lerpf(1800.0, 600.0, t / duration)
+		var f: float = lerpf(2400.0, 800.0, t / duration)
 		phase += f * (TAU / SAMPLE_RATE)
-		var env: float = exp(-t * 90.0)
-		samples[i] = sin(phase) * env * 0.8
+		var env: float = exp(-t * 110.0)
+		samples[i] = (sin(phase) + (randf_range(-1.0, 1.0) * 0.2)) * env * 0.85
 	return _create_wav_stream(samples, false)
 
 
@@ -708,14 +709,16 @@ func _synth_levelup() -> AudioStreamWAV:
 			var note_t: float = t - float(note_idx) * step_dur
 			var f: float = notes[note_idx]
 			var env: float = exp(-note_t * 5.0)
-			var brass: float = sin(t * f * TAU) + 0.4 * sin(t * f * 2.0 * TAU) + 0.2 * sin(t * f * 3.0 * TAU)
-			total_sample = brass * env * 0.45
+			var saw_a: float = fmod(note_t * f * 0.995, 1.0) * 2.0 - 1.0
+			var saw_b: float = fmod(note_t * f * 1.005, 1.0) * 2.0 - 1.0
+			total_sample = (saw_a + saw_b) * 0.5 * env * 0.42
 		else:
 			var chord_t: float = t - step_dur * 4.0
-			var env: float = exp(-chord_t * 2.5)
+			var env: float = exp(-chord_t * 2.2)
 			for f in notes:
-				var brass: float = sin(chord_t * f * TAU) + 0.3 * sin(chord_t * f * 2.0 * TAU)
-				total_sample += brass * env * 0.16
+				var saw: float = fmod(chord_t * f, 1.0) * 2.0 - 1.0
+				var sin_layer: float = sin(chord_t * f * TAU)
+				total_sample += (saw * 0.4 + sin_layer * 0.6) * env * 0.14
 		samples[i] = total_sample
 	return _create_wav_stream(samples, false)
 
@@ -725,19 +728,18 @@ func _synth_chest_open() -> AudioStreamWAV:
 	var num_samples: int = int(duration * SAMPLE_RATE)
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
-	var phase_creak: float = 0.0
+	var phase_chirp: float = 0.0
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var total_sample: float = 0.0
-		if t < 0.25:
-			var f: float = lerpf(220.0, 480.0, t / 0.25)
-			var mod: float = sin(t * 70.0 * TAU) * 60.0
-			phase_creak += (f + mod) * (TAU / SAMPLE_RATE)
-			total_sample = sin(phase_creak) * exp(-t * 8.0) * 0.5
+		if t < 0.22:
+			var f: float = lerpf(300.0, 950.0, t / 0.22)
+			phase_chirp += f * (TAU / SAMPLE_RATE)
+			total_sample = sin(phase_chirp) * exp(-t * 7.0) * 0.45
 		else:
-			var chime_t: float = t - 0.25
-			var chime_f: float = 1318.51
-			var env: float = exp(-chime_t * 6.0)
+			var chime_t: float = t - 0.22
+			var chime_f: float = 1567.98
+			var env: float = exp(-chime_t * 5.5)
 			total_sample = (sin(chime_t * chime_f * TAU) + 0.4 * sin(chime_t * chime_f * 2.0 * TAU)) * env * 0.45
 		samples[i] = total_sample
 	return _create_wav_stream(samples, false)
@@ -751,19 +753,22 @@ func _synth_chest_break() -> AudioStreamWAV:
 	var phase_thud: float = 0.0
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
-		var f_thud: float = lerpf(120.0, 40.0, t / duration)
+		var f_thud: float = lerpf(160.0, 35.0, t / duration)
 		phase_thud += f_thud * (TAU / SAMPLE_RATE)
-		var thud: float = sin(phase_thud) * exp(-t * 12.0) * 0.6
-		var crackle: float = (randf_range(-1.0, 1.0) * exp(-t * 18.0) * 0.5) if (t < 0.18) else 0.0
-		samples[i] = thud + crackle
+		var thud: float = sin(phase_thud) * exp(-t * 14.0) * 0.65
+		var glitch: float = (randf_range(-1.0, 1.0) * exp(-t * 20.0) * 0.45) if (t < 0.15) else 0.0
+		samples[i] = thud + glitch
 	return _create_wav_stream(samples, false)
 
 
-# --- BGM Synthesizers (Full 32-Beat Multi-Phrase Loop Compositions) ---
+# ==============================================================================
+# --- TRON & SYNTHWAVE BGM SYNTHESIS ENGINE (DRIVING, SUPER-HARMONIC, ADDICTIVE) ---
+# ==============================================================================
 
-# 1. BGM Title: Epic Royal Theme (32 beats - 95 BPM, ~20.2s loop)
+# 1. BGM Title: "The Grid Ascendant" (32 beats - 124 BPM, ~15.48s loop)
+# Epic Daft Punk / TRON: Legacy synthwave anthem with rolling 16th cyber-bass, pumping supersaw chords, and soaring lead.
 func _synth_bgm_title() -> AudioStreamWAV:
-	var bpm: float = 95.0
+	var bpm: float = 124.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -771,26 +776,26 @@ func _synth_bgm_title() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: D -> G -> A -> D -> Bm -> G -> Em -> A
+	# 8 bars: Dm9 -> Bbmaj7 -> Fmaj7 -> Cadd9 -> Dm9 -> Gm7 -> Bbmaj9 -> A7sus4
 	var chords: Array = [
-		[146.83, 220.0, 293.66, 369.99], # D
-		[196.00, 246.94, 293.66, 392.00], # G
-		[220.00, 277.18, 329.63, 440.00], # A
-		[146.83, 220.0, 293.66, 587.33], # D
-		[123.47, 185.00, 246.94, 293.66], # Bm
-		[196.00, 246.94, 293.66, 392.00], # G
-		[164.81, 196.00, 246.94, 329.63], # Em
-		[220.00, 277.18, 329.63, 440.00]  # A
+		[146.83, 220.00, 261.63, 329.63, 349.23], # Dm9
+		[116.54, 233.08, 293.66, 349.23, 440.00], # Bbmaj7
+		[174.61, 261.63, 329.63, 349.23, 392.00], # Fmaj7
+		[130.81, 196.00, 261.63, 293.66, 329.63], # Cadd9
+		[146.83, 220.00, 261.63, 329.63, 349.23], # Dm9
+		[98.00,  196.00, 233.08, 293.66, 349.23], # Gm7
+		[116.54, 233.08, 293.66, 349.23, 440.00], # Bbmaj9
+		[110.00, 220.00, 293.66, 329.63, 440.00]  # A7sus4
 	]
 	var lead_melody: Array[float] = [
-		293.66, 369.99, 440.00, 587.33,
-		392.00, 493.88, 587.33, 493.88,
-		440.00, 554.37, 659.25, 554.37,
-		587.33, 739.99, 880.00, 587.33,
-		493.88, 587.33, 739.99, 587.33,
-		392.00, 493.88, 587.33, 739.99,
-		659.25, 587.33, 493.88, 440.00,
-		554.37, 659.25, 739.99, 587.33
+		587.33, 659.25, 698.46, 880.00,
+		698.46, 587.33, 523.25, 587.33,
+		659.25, 783.99, 880.00, 1046.50,
+		880.00, 783.99, 659.25, 587.33,
+		587.33, 698.46, 880.00, 1046.50,
+		880.00, 698.46, 783.99, 880.00,
+		698.46, 880.00, 1046.50, 1174.66,
+		1046.50, 880.00, 783.99, 587.33
 	]
 
 	for i in range(num_samples):
@@ -800,39 +805,71 @@ func _synth_bgm_title() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Harp Arpeggio (16th notes)
-		var sixteenth_idx: int = int(current_beat * 4.0) % 4
-		var harp_freq: float = chord[sixteenth_idx]
-		var harp_t: float = fmod(t, beat_dur * 0.25)
-		var harp_env: float = exp(-harp_t * 8.5)
-		var harp: float = (sin(harp_t * harp_freq * TAU) + 0.3 * sin(harp_t * harp_freq * 2.0 * TAU)) * harp_env
-		total_sample += harp * 0.30
-
-		# Majestic Brass Lead
-		var beat_idx: int = mini(int(current_beat), 31)
-		var lead_freq: float = lead_melody[beat_idx]
-		var lead_t: float = fmod(t, beat_dur)
-		var vibrato: float = sin(lead_t * 5.0 * TAU) * 2.5
-		var lead_env: float = sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI)
-		var brass: float = (sin(lead_t * (lead_freq + vibrato) * TAU) + 0.45 * sin(lead_t * lead_freq * 2.0 * TAU) + 0.25 * sin(lead_t * lead_freq * 3.0 * TAU)) * lead_env
-		total_sample += brass * 0.32
-
-		# Timpani / March Snare
 		var beat_frac: float = fmod(current_beat, 1.0)
-		var beat_num: int = int(current_beat) % 4
-		if beat_num == 0 and beat_frac < 0.25:
-			var drum_t: float = beat_frac * beat_dur
-			var timp_f: float = lerpf(120.0, 50.0, drum_t / 0.2)
-			total_sample += sin(drum_t * timp_f * TAU) * exp(-drum_t * 12.0) * 0.45
+		var sidechain: float = clampf(1.0 - 0.65 * exp(-beat_frac * 10.0), 0.2, 1.0)
 
-		samples[i] = total_sample * 0.85
+		# 1. Pumping Lush Supersaw Pad (4-Voice Chords)
+		var pad_sample: float = 0.0
+		for voice_idx in range(chord.size()):
+			var f: float = chord[voice_idx]
+			var saw_a: float = fmod(t * f * 0.995, 1.0) * 2.0 - 1.0
+			var saw_b: float = fmod(t * f * 1.005, 1.0) * 2.0 - 1.0
+			pad_sample += (saw_a + saw_b) * 0.5
+		total_sample += pad_sample * (0.28 / float(chord.size())) * sidechain
+
+		# 2. Rolling 16th Cyber-Bass (Alternating Octaves)
+		var sixteenth_idx: int = int(current_beat * 4.0) % 4
+		var bass_root: float = chord[0]
+		var bass_f: float = (bass_root * 2.0) if (sixteenth_idx == 2 or sixteenth_idx == 3) else bass_root
+		var bass_t: float = fmod(t, beat_dur * 0.25)
+		var bass_saw: float = fmod(bass_t * bass_f, 1.0) * 2.0 - 1.0
+		var bass_sub: float = sin(bass_t * bass_root * TAU)
+		var bass_env: float = exp(-bass_t * 14.0)
+		total_sample += (bass_saw * 0.35 + bass_sub * 0.45) * bass_env * 0.42
+
+		# 3. Cascading 16th Neon Arpeggiator
+		var arp_f: float = chord[sixteenth_idx % chord.size()] * 2.0
+		var arp_t: float = fmod(t, beat_dur * 0.25)
+		var arp_wave: float = sin(arp_t * arp_f * TAU) + 0.3 * sin(arp_t * arp_f * 2.0 * TAU)
+		total_sample += arp_wave * exp(-arp_t * 16.0) * 0.20
+
+		# 4. Soaring TRON Lead Synth
+		var beat_idx: int = mini(int(current_beat), 31)
+		var lead_f: float = lead_melody[beat_idx]
+		var lead_t: float = fmod(t, beat_dur)
+		var vibrato: float = sin(lead_t * 6.0 * TAU) * 3.5
+		var lead_env: float = sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI)
+		var lead_saw: float = fmod(lead_t * (lead_f + vibrato), 1.0) * 2.0 - 1.0
+		var lead_sin: float = sin(lead_t * (lead_f + vibrato) * TAU)
+		total_sample += (lead_saw * 0.3 + lead_sin * 0.7) * lead_env * 0.30
+
+		# 5. Driving TRON Drum Machine (Punchy Sub Kick, Neon Snare on 2 & 4, 16th Hats)
+		if beat_frac < 0.22:
+			var kt: float = beat_frac * beat_dur
+			var kf: float = lerpf(165.0, 42.0, clampf(kt / 0.07, 0.0, 1.0))
+			total_sample += sin(kt * kf * TAU) * exp(-kt * 18.0) * 0.52
+
+		var beat_num: int = int(current_beat) % 4
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.22:
+			var st: float = beat_frac * beat_dur
+			var snare: float = (randf_range(-1.0, 1.0) * 0.5 + sin(st * 220.0 * TAU) * 0.35) * exp(-st * 26.0)
+			total_sample += snare * 0.38
+
+		var sixteenth_f: float = fmod(current_beat * 4.0, 1.0)
+		if sixteenth_f < 0.08:
+			var ht: float = sixteenth_f * (beat_dur * 0.25)
+			var hat_accent: float = 0.28 if (sixteenth_idx == 2) else 0.16
+			total_sample += randf_range(-1.0, 1.0) * exp(-ht * 85.0) * hat_accent
+
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 2. BGM Menu: Tavern Lute & Flute (32 beats - 105 BPM, ~18.3s loop)
+# 2. BGM Menu: "Neon Outpost / End of Line Lounge" (32 beats - 114 BPM, ~16.84s loop)
+# Smooth, addictive French-Touch / Cyber-Lounge with warm electric chords and groovy rolling bass.
 func _synth_bgm_menu() -> AudioStreamWAV:
-	var bpm: float = 105.0
+	var bpm: float = 114.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -840,68 +877,93 @@ func _synth_bgm_menu() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Am -> F -> C -> G -> Dm -> Am -> F -> E7
-	var chord_triads: Array = [
-		[220.0, 261.63, 329.63, 440.0],  # Am
-		[174.61, 220.0, 261.63, 349.23], # F
-		[261.63, 329.63, 392.0, 523.25],  # C
-		[196.0, 246.94, 293.66, 392.0],  # G
-		[146.83, 174.61, 220.0, 293.66], # Dm
-		[220.0, 261.63, 329.63, 440.0],  # Am
-		[174.61, 220.0, 261.63, 349.23], # F
-		[164.81, 207.65, 246.94, 329.63] # E7
+	# 8 bars: Am9 -> Fmaj9 -> Dm7 -> Em7 -> Am9 -> Fmaj7 -> Gsus4 -> E7#9
+	var chords: Array = [
+		[110.00, 220.00, 261.63, 329.63, 493.88], # Am9
+		[87.31,  174.61, 261.63, 329.63, 392.00], # Fmaj9
+		[146.83, 220.00, 261.63, 349.23, 440.00], # Dm7
+		[82.41,  164.81, 246.94, 329.63, 392.00], # Em7
+		[110.00, 220.00, 261.63, 329.63, 493.88], # Am9
+		[87.31,  174.61, 220.00, 261.63, 329.63], # Fmaj7
+		[98.00,  196.00, 261.63, 293.66, 392.00], # Gsus4
+		[82.41,  164.81, 207.65, 311.13, 392.00]  # E7#9
 	]
-	var flute_melody: Array[float] = [
-		440.0, 523.25, 659.25, 523.25,
-		440.0, 349.23, 392.0, 440.0,
-		523.25, 659.25, 783.99, 659.25,
-		587.33, 493.88, 523.25, 440.0,
-		587.33, 698.46, 880.00, 698.46,
-		659.25, 523.25, 440.00, 523.25,
-		698.46, 659.25, 523.25, 440.00,
-		493.88, 523.25, 587.33, 440.00
+	var lead_melody: Array[float] = [
+		440.00, 493.88, 523.25, 659.25,
+		587.33, 523.25, 493.88, 440.00,
+		587.33, 659.25, 698.46, 880.00,
+		783.99, 659.25, 523.25, 493.88,
+		523.25, 659.25, 880.00, 987.77,
+		880.00, 698.46, 659.25, 587.33,
+		659.25, 783.99, 880.00, 1046.50,
+		987.77, 880.00, 659.25, 440.00
 	]
 
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var current_beat: float = t / beat_dur
 		var bar_idx: int = mini(int(current_beat / 4.0), 7)
-		var chord: Array = chord_triads[bar_idx]
+		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Lute Arpeggio
-		var sub_beat: int = int(current_beat * 2.0) % 8
-		var lute_freq: float = chord[sub_beat % 4]
-		var lute_t: float = fmod(t, beat_dur * 0.5)
-		var lute_env: float = exp(-lute_t * 6.5)
-		var lute: float = (sin(lute_t * lute_freq * TAU) + 0.35 * sin(lute_t * lute_freq * 2.0 * TAU) + 0.15 * sin(lute_t * lute_freq * 3.0 * TAU)) * lute_env
-		total_sample += lute * 0.32
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.55 * exp(-beat_frac * 8.0), 0.3, 1.0)
 
-		# Flute Melody
+		# 1. Warm Rhodes/Synth Chord Pad
+		var pad_sample: float = 0.0
+		for voice_idx in range(chord.size()):
+			var f: float = chord[voice_idx]
+			var voice: float = sin(t * f * TAU) + 0.3 * sin(t * f * 2.0 * TAU) + 0.15 * sin(t * f * 3.0 * TAU)
+			pad_sample += voice
+		total_sample += pad_sample * (0.28 / float(chord.size())) * sidechain
+
+		# 2. Funky Bouncing Cyber-Bass
+		var bass_t: float = fmod(t, beat_dur * 0.5)
+		var bass_subbeat: int = int(current_beat * 2.0) % 8
+		var bass_note: float = chord[0] * (2.0 if (bass_subbeat == 3 or bass_subbeat == 6) else 1.0)
+		var bass: float = (sin(bass_t * bass_note * TAU) + 0.4 * (fmod(bass_t * bass_note, 1.0) * 2.0 - 1.0)) * exp(-bass_t * 9.0)
+		total_sample += bass * 0.38
+
+		# 3. Sparkling Crystal Arpeggio (8th-note Plucks)
+		var arp_idx: int = int(current_beat * 2.0) % 4
+		var arp_f: float = chord[arp_idx] * 2.0
+		var arp_t: float = fmod(t, beat_dur * 0.5)
+		var arp: float = (sin(arp_t * arp_f * TAU) + 0.3 * sin(arp_t * arp_f * 2.7 * TAU)) * exp(-arp_t * 11.0)
+		total_sample += arp * 0.22
+
+		# 4. Smooth Neon Flute/Lead
 		var beat_idx: int = mini(int(current_beat), 31)
-		var flute_freq: float = flute_melody[beat_idx]
-		var flute_t: float = fmod(t, beat_dur)
-		var vibrato: float = sin(flute_t * 5.5 * TAU) * 3.0
-		var flute_env: float = sin(clampf(flute_t / beat_dur, 0.0, 1.0) * PI)
-		var flute: float = (sin(flute_t * (flute_freq + vibrato) * TAU) + 0.2 * sin(flute_t * flute_freq * 2.0 * TAU)) * flute_env
-		total_sample += flute * 0.28
+		var lead_f: float = lead_melody[beat_idx]
+		var lead_t: float = fmod(t, beat_dur)
+		var vibrato: float = sin(lead_t * 5.5 * TAU) * 3.0
+		var lead_env: float = sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI)
+		var flute: float = (sin(lead_t * (lead_f + vibrato) * TAU) + 0.25 * sin(lead_t * lead_f * 2.0 * TAU)) * lead_env
+		total_sample += flute * 0.26
 
-		# Tambourine
-		var beat_fraction: float = fmod(current_beat, 1.0)
+		# 5. Chill Lounge Drums
+		if beat_frac < 0.20:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(140.0, 40.0, kt / 0.09) * TAU) * exp(-kt * 16.0) * 0.44
+
 		var beat_num: int = int(current_beat) % 4
-		if (beat_num == 1 or beat_num == 3) and beat_fraction < 0.15:
-			var drum_t: float = beat_fraction * beat_dur
-			var tamb: float = (randf_range(-1.0, 1.0) * 0.4 + sin(drum_t * 300.0 * TAU) * 0.3) * exp(-drum_t * 25.0)
-			total_sample += tamb * 0.2
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.18:
+			var st: float = beat_frac * beat_dur
+			total_sample += (randf_range(-1.0, 1.0) * 0.4 + sin(st * 240.0 * TAU) * 0.3) * exp(-st * 24.0) * 0.32
 
-		samples[i] = total_sample * 0.85
+		var sixteenth_f: float = fmod(current_beat * 4.0, 1.0)
+		if sixteenth_f < 0.06:
+			var ht: float = sixteenth_f * (beat_dur * 0.25)
+			total_sample += randf_range(-1.0, 1.0) * exp(-ht * 90.0) * 0.14
+
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 3. BGM Shop: Whimsical Merchant & Mystic Items (32 beats - 110 BPM, ~17.5s loop)
+# 3. BGM Shop: "Cyber Matrix Bazaar" (32 beats - 118 BPM, ~16.27s loop)
+# Funky, upbeat electro-disco Tron track with slap synth bass, staccato disco chords, and sparkling FM plucks.
 func _synth_bgm_shop() -> AudioStreamWAV:
-	var bpm: float = 110.0
+	var bpm: float = 118.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -909,26 +971,26 @@ func _synth_bgm_shop() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Cmaj7 -> Fmaj7 -> Em7 -> G -> Am7 -> Dm7 -> G7 -> Cmaj7
+	# 8 bars: Cmaj9 -> Em7 -> Fmaj7 -> G7sus4 -> Am7 -> Dm7 -> G7 -> Cmaj7
 	var chords: Array = [
-		[261.63, 329.63, 392.00, 493.88], # Cmaj7
-		[174.61, 220.00, 261.63, 329.63], # Fmaj7
-		[164.81, 196.00, 246.94, 293.66], # Em7
-		[196.00, 246.94, 293.66, 392.00], # G
-		[220.00, 261.63, 329.63, 392.00], # Am7
-		[146.83, 174.61, 220.00, 261.63], # Dm7
-		[196.00, 246.94, 293.66, 349.23], # G7
-		[261.63, 329.63, 392.00, 523.25]  # C
+		[130.81, 196.00, 246.94, 293.66, 329.63], # Cmaj9
+		[82.41,  164.81, 246.94, 293.66, 329.63], # Em7
+		[87.31,  174.61, 220.00, 261.63, 329.63], # Fmaj7
+		[98.00,  196.00, 261.63, 293.66, 349.23], # G7sus4
+		[110.00, 220.00, 261.63, 329.63, 392.00], # Am7
+		[146.83, 220.00, 261.63, 349.23, 440.00], # Dm7
+		[98.00,  196.00, 246.94, 293.66, 349.23], # G7
+		[130.81, 196.00, 246.94, 261.63, 329.63]  # Cmaj7
 	]
 	var shop_melody: Array[float] = [
 		523.25, 493.88, 392.00, 329.63,
-		349.23, 440.00, 523.25, 659.25,
+		392.00, 440.00, 523.25, 659.25,
 		493.88, 392.00, 329.63, 293.66,
 		392.00, 440.00, 493.88, 523.25,
 		440.00, 523.25, 659.25, 587.33,
 		523.25, 440.00, 349.23, 392.00,
-		440.00, 493.88, 587.33, 493.88,
-		523.25, 659.25, 783.99, 523.25
+		440.00, 493.88, 587.33, 659.25,
+		587.33, 523.25, 440.00, 523.25
 	]
 
 	for i in range(num_samples):
@@ -938,100 +1000,58 @@ func _synth_bgm_shop() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Pizzicato Harp / Pluck
-		var sub_beat: int = int(current_beat * 2.0) % 4
-		var harp_f: float = chord[sub_beat]
-		var harp_t: float = fmod(t, beat_dur * 0.5)
-		var harp: float = (sin(harp_t * harp_f * TAU) + 0.4 * sin(harp_t * harp_f * 2.0 * TAU)) * exp(-harp_t * 11.0)
-		total_sample += harp * 0.32
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.60 * exp(-beat_frac * 9.0), 0.25, 1.0)
 
-		# Whimsical Bell Lead
-		var beat_idx: int = mini(int(current_beat), 31)
-		var bell_f: float = shop_melody[beat_idx]
-		var bell_t: float = fmod(t, beat_dur)
-		var bell: float = (sin(bell_t * bell_f * TAU) + 0.3 * sin(bell_t * bell_f * 3.0 * TAU)) * exp(-bell_t * 4.5)
-		total_sample += bell * 0.28
+		# 1. Staccato Disco/Synth Chords (Off-beat stabs on .5)
+		var subbeat_f: float = fmod(current_beat, 0.5)
+		if int(current_beat * 2.0) % 2 == 1 and subbeat_f < 0.22:
+			var stab_t: float = subbeat_f * (beat_dur * 0.5)
+			var chord_stab: float = 0.0
+			for voice_idx in range(1, chord.size()):
+				var f: float = chord[voice_idx]
+				chord_stab += (fmod(stab_t * f, 1.0) * 2.0 - 1.0) * 0.35 + sin(stab_t * f * TAU) * 0.65
+			total_sample += chord_stab * (0.28 / float(chord.size() - 1)) * exp(-stab_t * 12.0)
 
-		# Soft Shaker
-		var sixteenth_f: float = fmod(current_beat * 4.0, 1.0)
-		if sixteenth_f < 0.1:
-			var shaker_t: float = sixteenth_f * (beat_dur * 0.25)
-			total_sample += randf_range(-1.0, 1.0) * exp(-shaker_t * 80.0) * 0.12
-
-		samples[i] = total_sample * 0.85
-
-	return _create_wav_stream(samples, true)
-
-
-# 4. BGM Map: Adventurous Tactical Path (32 beats - 110 BPM, ~17.5s loop)
-func _synth_bgm_map() -> AudioStreamWAV:
-	var bpm: float = 110.0
-	var beat_dur: float = 60.0 / bpm
-	var total_beats: int = 32
-	var duration: float = float(total_beats) * beat_dur
-	var num_samples: int = int(duration * SAMPLE_RATE)
-	var samples: PackedFloat32Array = PackedFloat32Array()
-	samples.resize(num_samples)
-
-	# 8 bars: Em -> G -> D -> C -> Am -> Em -> C -> B7
-	var chords: Array = [
-		[164.81, 196.00, 246.94, 329.63], # Em
-		[196.00, 246.94, 293.66, 392.00], # G
-		[146.83, 220.00, 293.66, 369.99], # D
-		[130.81, 164.81, 196.00, 261.63], # C
-		[220.00, 261.63, 329.63, 440.00], # Am
-		[164.81, 196.00, 246.94, 329.63], # Em
-		[130.81, 164.81, 196.00, 261.63], # C
-		[123.47, 155.56, 185.00, 246.94]  # B7
-	]
-	var map_melody: Array[float] = [
-		329.63, 392.00, 493.88, 392.00,
-		392.00, 493.88, 587.33, 493.88,
-		369.99, 440.00, 587.33, 440.00,
-		261.63, 329.63, 392.00, 329.63,
-		440.00, 523.25, 659.25, 523.25,
-		493.88, 392.00, 329.63, 246.94,
-		261.63, 329.63, 392.00, 493.88,
-		466.16, 369.99, 246.94, 329.63
-	]
-
-	for i in range(num_samples):
-		var t: float = float(i) / float(SAMPLE_RATE)
-		var current_beat: float = t / beat_dur
-		var bar_idx: int = mini(int(current_beat / 4.0), 7)
-		var chord: Array = chords[bar_idx]
-		var total_sample: float = 0.0
-
-		# Rhythmic Cello/Bass Staccato
+		# 2. Slap-Synth Cyber Bass
 		var bass_t: float = fmod(t, beat_dur * 0.5)
 		var bass_f: float = chord[0]
-		var bass: float = (sin(bass_t * bass_f * TAU) + 0.35 * sin(bass_t * bass_f * 2.0 * TAU)) * exp(-bass_t * 7.5)
-		total_sample += bass * 0.35
+		var slap: float = (sin(bass_t * bass_f * TAU) + 0.5 * (fmod(bass_t * bass_f * 2.0, 1.0) * 2.0 - 1.0)) * exp(-bass_t * 11.0)
+		total_sample += slap * 0.36
 
-		# Explorer Flute Motif
+		# 3. Shimmering FM Crystal Plucks (16th notes)
+		var sixteenth: int = int(current_beat * 4.0) % 4
+		var pluck_f: float = chord[sixteenth % chord.size()] * 2.0
+		var pluck_t: float = fmod(t, beat_dur * 0.25)
+		var fm_bell: float = sin(pluck_t * pluck_f * TAU + sin(pluck_t * pluck_f * 2.0 * TAU) * 1.5) * exp(-pluck_t * 14.0)
+		total_sample += fm_bell * 0.22 * sidechain
+
+		# 4. Catchy Vocaloid/Synth Lead
 		var beat_idx: int = mini(int(current_beat), 31)
-		var flute_f: float = map_melody[beat_idx]
-		var flute_t: float = fmod(t, beat_dur)
-		var vibrato: float = sin(flute_t * 5.0 * TAU) * 2.0
-		var flute_env: float = sin(clampf(flute_t / beat_dur, 0.0, 1.0) * PI)
-		var flute: float = (sin(flute_t * (flute_f + vibrato) * TAU) + 0.2 * sin(flute_t * flute_f * 2.0 * TAU)) * flute_env
-		total_sample += flute * 0.28
+		var lead_f: float = shop_melody[beat_idx]
+		var lead_t: float = fmod(t, beat_dur)
+		var lead_wave: float = sin(lead_t * lead_f * TAU) + 0.3 * (1.0 if fmod(lead_t * lead_f, 1.0) < 0.5 else -1.0)
+		total_sample += lead_wave * exp(-lead_t * 4.0) * 0.26
 
-		# Marching drum pulse on 1 and 3
+		# 5. Upbeat Drums
+		if beat_frac < 0.20:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(160.0, 45.0, kt / 0.08) * TAU) * exp(-kt * 18.0) * 0.48
+
 		var beat_num: int = int(current_beat) % 4
-		var beat_f: float = fmod(current_beat, 1.0)
-		if (beat_num == 0 or beat_num == 2) and beat_f < 0.18:
-			var drum_t: float = beat_f * beat_dur
-			total_sample += sin(drum_t * 130.0 * TAU) * exp(-drum_t * 18.0) * 0.35
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.20:
+			var st: float = beat_frac * beat_dur
+			total_sample += (randf_range(-1.0, 1.0) * 0.6 + sin(st * 230.0 * TAU) * 0.35) * exp(-st * 25.0) * 0.36
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 5. BGM Addition: Sonnenritter-Marsch (32 beats - 130 BPM, ~14.8s loop)
-func _synth_bgm_addition() -> AudioStreamWAV:
-	var bpm: float = 130.0
+# 4. BGM Map: "Sector Grid / Tactical Navigation" (32 beats - 122 BPM, ~15.74s loop)
+# Atmospheric, driving synthwave with pulsing bass, clockwork laser ticks, and tension-building arpeggios.
+func _synth_bgm_map() -> AudioStreamWAV:
+	var bpm: float = 122.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -1039,9 +1059,104 @@ func _synth_bgm_addition() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: C -> G -> Am -> F -> C -> G -> F -> C
-	var bass_notes: Array[float] = [130.81, 98.00, 110.00, 87.31, 130.81, 98.00, 87.31, 130.81]
-	var lead_notes: Array[float] = [
+	# 8 bars: Em9 -> Cmaj7 -> G/B -> Dadd9 -> Em9 -> Am7 -> Cmaj7 -> Bm7
+	var chords: Array = [
+		[82.41,  164.81, 246.94, 293.66, 329.63], # Em9
+		[130.81, 196.00, 246.94, 261.63, 329.63], # Cmaj7
+		[123.47, 196.00, 246.94, 293.66, 392.00], # G/B
+		[146.83, 220.00, 261.63, 293.66, 369.99], # Dadd9
+		[82.41,  164.81, 246.94, 293.66, 329.63], # Em9
+		[110.00, 220.00, 261.63, 329.63, 440.00], # Am7
+		[130.81, 196.00, 246.94, 261.63, 329.63], # Cmaj7
+		[123.47, 185.00, 246.94, 293.66, 369.99]  # Bm7
+	]
+	var map_melody: Array[float] = [
+		329.63, 392.00, 493.88, 587.33,
+		523.25, 493.88, 392.00, 329.63,
+		392.00, 493.88, 587.33, 739.99,
+		587.33, 493.88, 440.00, 369.99,
+		493.88, 587.33, 659.25, 880.00,
+		698.46, 659.25, 523.25, 440.00,
+		523.25, 659.25, 783.99, 987.77,
+		739.99, 587.33, 493.88, 329.63
+	]
+
+	for i in range(num_samples):
+		var t: float = float(i) / float(SAMPLE_RATE)
+		var current_beat: float = t / beat_dur
+		var bar_idx: int = mini(int(current_beat / 4.0), 7)
+		var chord: Array = chords[bar_idx]
+		var total_sample: float = 0.0
+
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.50 * exp(-beat_frac * 8.0), 0.35, 1.0)
+
+		# 1. Pulsing 8th-note Cyber Bass
+		var bass_t: float = fmod(t, beat_dur * 0.5)
+		var bass_f: float = chord[0]
+		var bass_saw: float = fmod(bass_t * bass_f, 1.0) * 2.0 - 1.0
+		var bass_sub: float = sin(bass_t * bass_f * TAU)
+		total_sample += (bass_saw * 0.3 + bass_sub * 0.6) * exp(-bass_t * 8.0) * 0.40
+
+		# 2. Tension Arpeggios (16th notes)
+		var sixteenth: int = int(current_beat * 4.0) % 4
+		var arp_f: float = chord[sixteenth % chord.size()] * 2.0
+		var arp_t: float = fmod(t, beat_dur * 0.25)
+		var arp: float = sin(arp_t * arp_f * TAU) * exp(-arp_t * 14.0)
+		total_sample += arp * 0.22 * sidechain
+
+		# 3. Ethereal Neon Lead
+		var beat_idx: int = mini(int(current_beat), 31)
+		var lead_f: float = map_melody[beat_idx]
+		var lead_t: float = fmod(t, beat_dur)
+		var vibrato: float = sin(lead_t * 5.0 * TAU) * 2.5
+		var lead_env: float = sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI)
+		var lead: float = (sin(lead_t * (lead_f + vibrato) * TAU) + 0.3 * sin(lead_t * lead_f * 2.0 * TAU)) * lead_env
+		total_sample += lead * 0.28
+
+		# 4. Tactical Percussion (Sub kick on 1 & 3, clockwork laser ticks)
+		var beat_num: int = int(current_beat) % 4
+		if (beat_num == 0 or beat_num == 2) and beat_frac < 0.20:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(150.0, 42.0, kt / 0.08) * TAU) * exp(-kt * 18.0) * 0.44
+
+		if beat_num == 3 and beat_frac < 0.18:
+			var st: float = beat_frac * beat_dur
+			total_sample += randf_range(-1.0, 1.0) * exp(-st * 30.0) * 0.24
+
+		var sixteenth_f: float = fmod(current_beat * 4.0, 1.0)
+		if sixteenth_f < 0.05:
+			var tt: float = sixteenth_f * (beat_dur * 0.25)
+			total_sample += sin(tt * 2800.0 * TAU) * exp(-tt * 120.0) * 0.18
+
+		samples[i] = total_sample * 0.82
+
+	return _create_wav_stream(samples, true)
+
+
+# 5. BGM Addition: "Radiant Lightcycle / Solar Grid" (32 beats - 134 BPM, ~14.33s loop)
+# Euphoric, uplifting driving synthwave with 4-on-the-floor kick, rolling octave bass, and singing supersaw leads.
+func _synth_bgm_addition() -> AudioStreamWAV:
+	var bpm: float = 134.0
+	var beat_dur: float = 60.0 / bpm
+	var total_beats: int = 32
+	var duration: float = float(total_beats) * beat_dur
+	var num_samples: int = int(duration * SAMPLE_RATE)
+	var samples: PackedFloat32Array = PackedFloat32Array()
+	samples.resize(num_samples)
+
+	# 8 bars: Cadd9 -> G/B -> Am7 -> Fmaj7 -> C/E -> Gsus4 -> Fmaj7 -> C
+	var chords: Array = [
+		[130.81, 196.00, 261.63, 293.66, 329.63], # Cadd9
+		[123.47, 196.00, 246.94, 293.66, 392.00], # G/B
+		[110.00, 220.00, 261.63, 329.63, 440.00], # Am7
+		[87.31,  174.61, 220.00, 261.63, 329.63], # Fmaj7
+		[82.41,  164.81, 261.63, 329.63, 392.00], # C/E
+		[98.00,  196.00, 261.63, 293.66, 392.00], # Gsus4
+		[87.31,  174.61, 220.00, 261.63, 329.63], # Fmaj7
+		[130.81, 196.00, 261.63, 329.63, 523.25]  # C
+	]
+	var lead_melody: Array[float] = [
 		523.25, 659.25, 783.99, 1046.50,
 		783.99, 659.25, 587.33, 493.88,
 		440.00, 523.25, 659.25, 880.00,
@@ -1056,40 +1171,68 @@ func _synth_bgm_addition() -> AudioStreamWAV:
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var current_beat: float = t / beat_dur
 		var bar_idx: int = mini(int(current_beat / 4.0), 7)
+		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# 16th-note Chiptune Bass
-		var bass_t: float = fmod(t, beat_dur * 0.25)
-		var bass_f: float = bass_notes[bar_idx]
-		var bass_wave: float = 1.0 if (sin(bass_t * bass_f * TAU) > 0.0) else -1.0
-		total_sample += bass_wave * exp(-bass_t * 14.0) * 0.25
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.65 * exp(-beat_frac * 10.0), 0.2, 1.0)
 
-		# Bright Sun Knight Brass Lead
+		# 1. Pumping Supersaw Chords
+		var pad_sample: float = 0.0
+		for voice_idx in range(1, chord.size()):
+			var f: float = chord[voice_idx]
+			var saw_a: float = fmod(t * f * 0.996, 1.0) * 2.0 - 1.0
+			var saw_b: float = fmod(t * f * 1.004, 1.0) * 2.0 - 1.0
+			pad_sample += (saw_a + saw_b) * 0.5
+		total_sample += pad_sample * (0.28 / float(chord.size() - 1)) * sidechain
+
+		# 2. Galloping 16th Bassline
+		var sixteenth: int = int(current_beat * 4.0) % 4
+		var bass_f: float = (chord[0] * 2.0) if (sixteenth == 1 or sixteenth == 2) else chord[0]
+		var bass_t: float = fmod(t, beat_dur * 0.25)
+		var bass: float = (fmod(bass_t * bass_f, 1.0) * 2.0 - 1.0) * 0.4 + sin(bass_t * chord[0] * TAU) * 0.6
+		total_sample += bass * exp(-bass_t * 14.0) * 0.40
+
+		# 3. 16th Cascading Lightcycle Arp
+		var arp_f: float = chord[sixteenth % chord.size()] * 2.0
+		var arp_t: float = fmod(t, beat_dur * 0.25)
+		var arp: float = sin(arp_t * arp_f * TAU) + 0.35 * sin(arp_t * arp_f * 2.0 * TAU)
+		total_sample += arp * exp(-arp_t * 16.0) * 0.22
+
+		# 4. Triumphant Supersaw Lead
 		var beat_idx: int = mini(int(current_beat), 31)
-		var lead_f: float = lead_notes[beat_idx]
+		var lead_f: float = lead_melody[beat_idx]
 		var lead_t: float = fmod(t, beat_dur)
 		var lead_env: float = sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI)
-		var brass: float = (sin(lead_t * lead_f * TAU) + 0.4 * sin(lead_t * lead_f * 2.0 * TAU) + 0.2 * sin(lead_t * lead_f * 3.0 * TAU)) * lead_env
-		total_sample += brass * 0.32
+		var lead_saw: float = fmod(lead_t * lead_f, 1.0) * 2.0 - 1.0
+		var lead_sin: float = sin(lead_t * lead_f * TAU)
+		total_sample += (lead_saw * 0.35 + lead_sin * 0.65) * lead_env * 0.32
 
-		# Upbeat Drums
-		var beat_f: float = fmod(current_beat, 1.0)
-		var beat_int: int = int(current_beat) % 4
-		if (beat_int == 0 or beat_int == 2) and beat_f < 0.2:
-			var kick_t: float = beat_f * beat_dur
-			total_sample += sin(kick_t * lerpf(140.0, 45.0, kick_t / 0.15) * TAU) * exp(-kick_t * 22.0) * 0.45
-		if (beat_int == 1 or beat_int == 3) and beat_f < 0.2:
-			var snare_t: float = beat_f * beat_dur
-			total_sample += (randf_range(-1.0, 1.0) * 0.6 + sin(snare_t * 220.0 * TAU) * 0.4) * exp(-snare_t * 20.0) * 0.4
+		# 5. Driving 4-on-the-Floor Drums
+		if beat_frac < 0.22:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(165.0, 42.0, kt / 0.07) * TAU) * exp(-kt * 18.0) * 0.52
 
-		samples[i] = total_sample * 0.85
+		var beat_num: int = int(current_beat) % 4
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.22:
+			var st: float = beat_frac * beat_dur
+			total_sample += (randf_range(-1.0, 1.0) * 0.6 + sin(st * 220.0 * TAU) * 0.35) * exp(-st * 26.0) * 0.38
+
+		var sixteenth_f: float = fmod(current_beat * 4.0, 1.0)
+		if sixteenth_f < 0.08:
+			var ht: float = sixteenth_f * (beat_dur * 0.25)
+			var hat_accent: float = 0.28 if (sixteenth == 2) else 0.16
+			total_sample += randf_range(-1.0, 1.0) * exp(-ht * 85.0) * hat_accent
+
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 6. BGM Subtraction: Schatten-Klinge (32 beats - 125 BPM, ~15.4s loop)
+# 6. BGM Subtraction: "Shadow Protocol / Cyber Blade" (32 beats - 130 BPM, ~14.77s loop)
+# Dark aggressive cyberpunk electro battle music in D minor with biting saw bass and razor-sharp stabs.
 func _synth_bgm_subtraction() -> AudioStreamWAV:
-	var bpm: float = 125.0
+	var bpm: float = 130.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -1097,8 +1240,17 @@ func _synth_bgm_subtraction() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Dm -> Bb -> Gm -> A -> Dm -> F -> C -> A
-	var bass_roots: Array[float] = [146.83, 116.54, 98.00, 110.00, 146.83, 174.61, 130.81, 110.00]
+	# 8 bars: Dm -> Bb -> Gm7 -> A7 -> Dm -> F -> C -> A7sus4
+	var chords: Array = [
+		[146.83, 220.00, 293.66, 349.23], # Dm
+		[116.54, 233.08, 293.66, 349.23], # Bb
+		[98.00,  196.00, 233.08, 293.66], # Gm7
+		[110.00, 220.00, 277.18, 329.63], # A7
+		[146.83, 220.00, 293.66, 349.23], # Dm
+		[174.61, 261.63, 349.23, 440.00], # F
+		[130.81, 196.00, 261.63, 329.63], # C
+		[110.00, 220.00, 293.66, 329.63]  # A7sus4
+	]
 	var lead_melody: Array[float] = [
 		587.33, 523.25, 440.00, 493.88,
 		466.16, 523.25, 587.33, 698.46,
@@ -1114,33 +1266,60 @@ func _synth_bgm_subtraction() -> AudioStreamWAV:
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var current_beat: float = t / beat_dur
 		var bar_idx: int = mini(int(current_beat / 4.0), 7)
+		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Synth Bass Pulse
-		var bass_t: float = fmod(t, beat_dur * 0.5)
-		var bass_f: float = bass_roots[bar_idx]
-		var bass: float = (sin(bass_t * bass_f * TAU) + 0.5 * sin(bass_t * bass_f * 2.0 * TAU)) * exp(-bass_t * 7.0)
-		total_sample += bass * 0.38
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.65 * exp(-beat_frac * 10.0), 0.2, 1.0)
 
-		# Shadow Blade Saw Lead
+		# 1. Dark Detuned Saw Bass
+		var bass_t: float = fmod(t, beat_dur * 0.5)
+		var bass_f: float = chord[0]
+		var saw_a: float = fmod(bass_t * bass_f * 0.993, 1.0) * 2.0 - 1.0
+		var saw_b: float = fmod(bass_t * bass_f * 1.007, 1.0) * 2.0 - 1.0
+		var bass_sub: float = sin(bass_t * bass_f * TAU)
+		total_sample += ((saw_a + saw_b) * 0.35 + bass_sub * 0.5) * exp(-bass_t * 8.0) * 0.42
+
+		# 2. Razor Sharp Stabs on off-beats
+		var subbeat: int = int(current_beat * 2.0) % 2
+		if subbeat == 1 and fmod(current_beat, 0.5) < 0.18:
+			var stab_t: float = fmod(current_beat, 0.5) * (beat_dur * 0.5)
+			var chord_sample: float = 0.0
+			for voice_idx in range(chord.size()):
+				var f: float = chord[voice_idx]
+				chord_sample += (fmod(stab_t * f, 1.0) * 2.0 - 1.0)
+			total_sample += chord_sample * (0.30 / float(chord.size())) * exp(-stab_t * 14.0)
+
+		# 3. Cyber Blade Saw Lead
 		var beat_idx: int = mini(int(current_beat), 31)
 		var lead_f: float = lead_melody[beat_idx]
 		var lead_t: float = fmod(t, beat_dur)
-		var saw: float = fmod(lead_t * lead_f, 1.0) * 2.0 - 1.0
-		total_sample += saw * sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI) * 0.25
+		var saw_lead: float = fmod(lead_t * lead_f, 1.0) * 2.0 - 1.0
+		var sin_lead: float = sin(lead_t * lead_f * TAU)
+		total_sample += (saw_lead * 0.45 + sin_lead * 0.55) * sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI) * 0.32
 
-		# Crisp Hi-hat & Snare
-		var beat_f: float = fmod(current_beat, 1.0)
-		if (int(current_beat) % 2 == 1) and beat_f < 0.18:
-			var snare_t: float = beat_f * beat_dur
-			total_sample += randf_range(-1.0, 1.0) * exp(-snare_t * 24.0) * 0.35
+		# 4. Punchy Industrial Drums
+		if beat_frac < 0.22:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(170.0, 40.0, kt / 0.07) * TAU) * exp(-kt * 19.0) * 0.52
 
-		samples[i] = total_sample * 0.85
+		var beat_num: int = int(current_beat) % 4
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.22:
+			var st: float = beat_frac * beat_dur
+			total_sample += (randf_range(-1.0, 1.0) * 0.65 + sin(st * 240.0 * TAU) * 0.3) * exp(-st * 27.0) * 0.40
+
+		var sixteenth_f: float = fmod(current_beat * 4.0, 1.0)
+		if sixteenth_f < 0.07:
+			var ht: float = sixteenth_f * (beat_dur * 0.25)
+			total_sample += randf_range(-1.0, 1.0) * exp(-ht * 90.0) * 0.20
+
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 7. BGM Multiplication: Wirbelsturm-Duell (32 beats - 142 BPM, ~13.5s loop)
+# 7. BGM Multiplication: "Hyperdrive Accelerator" (32 beats - 142 BPM, ~13.52s loop)
+# Fast kinetic Outrun synth-rush in E minor with galloping 16th bassline and soaring dual leads.
 func _synth_bgm_multiplication() -> AudioStreamWAV:
 	var bpm: float = 142.0
 	var beat_dur: float = 60.0 / bpm
@@ -1150,16 +1329,16 @@ func _synth_bgm_multiplication() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Em -> C -> G -> D -> Em -> Am -> D -> B7
+	# 8 bars: Em -> Cmaj7 -> G -> D -> Em -> Am7 -> D -> B7
 	var chords: Array = [
-		[164.81, 196.00, 246.94, 329.63], # Em
-		[130.81, 164.81, 196.00, 261.63], # C
-		[196.00, 246.94, 293.66, 392.00], # G
-		[146.83, 220.00, 293.66, 369.99], # D
-		[164.81, 196.00, 246.94, 329.63], # Em
-		[220.00, 261.63, 329.63, 440.00], # Am
-		[146.83, 220.00, 293.66, 369.99], # D
-		[123.47, 155.56, 185.00, 246.94]  # B7
+		[82.41,  164.81, 196.00, 246.94, 329.63], # Em
+		[130.81, 164.81, 196.00, 246.94, 261.63], # Cmaj7
+		[98.00,  196.00, 246.94, 293.66, 392.00], # G
+		[146.83, 220.00, 293.66, 369.99, 440.00], # D
+		[82.41,  164.81, 196.00, 246.94, 329.63], # Em
+		[110.00, 220.00, 261.63, 329.63, 440.00], # Am7
+		[146.83, 220.00, 293.66, 369.99, 440.00], # D
+		[123.47, 155.56, 185.00, 246.94, 369.99]  # B7
 	]
 	var lead_melody: Array[float] = [
 		659.25, 783.99, 987.77, 1318.51,
@@ -1179,35 +1358,52 @@ func _synth_bgm_multiplication() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Fast Galloping Bass Arpeggio (16th notes)
-		var sixteenth: int = int(current_beat * 4.0) % 4
-		var arp_f: float = chord[sixteenth]
-		var arp_t: float = fmod(t, beat_dur * 0.25)
-		var arp: float = sin(arp_t * arp_f * TAU) * exp(-arp_t * 14.0)
-		total_sample += arp * 0.35
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.65 * exp(-beat_frac * 11.0), 0.2, 1.0)
 
-		# Soaring Whirlwind Lead
+		# 1. 16th-note Galloping Outrun Bass
+		var sixteenth: int = int(current_beat * 4.0) % 4
+		var bass_f: float = (chord[0] * 2.0) if (sixteenth == 1 or sixteenth == 2) else chord[0]
+		var bass_t: float = fmod(t, beat_dur * 0.25)
+		var bass: float = (fmod(bass_t * bass_f, 1.0) * 2.0 - 1.0) * 0.4 + sin(bass_t * chord[0] * TAU) * 0.6
+		total_sample += bass * exp(-bass_t * 15.0) * 0.42
+
+		# 2. Pumping Pad Chords
+		var pad_sample: float = 0.0
+		for voice_idx in range(1, chord.size()):
+			var f: float = chord[voice_idx]
+			pad_sample += (fmod(t * f, 1.0) * 2.0 - 1.0)
+		total_sample += pad_sample * (0.24 / float(chord.size() - 1)) * sidechain
+
+		# 3. Soaring Hyperdrive Dual Lead
 		var beat_idx: int = mini(int(current_beat), 31)
 		var lead_f: float = lead_melody[beat_idx]
 		var lead_t: float = fmod(t, beat_dur)
-		var lead_saw: float = fmod(lead_t * lead_f, 1.0) * 2.0 - 1.0
-		var lead_sin: float = sin(lead_t * lead_f * TAU)
-		total_sample += (lead_saw * 0.4 + lead_sin * 0.6) * exp(-lead_t * 3.5) * 0.32
+		var saw_lead_1: float = fmod(lead_t * lead_f, 1.0) * 2.0 - 1.0
+		var saw_lead_2: float = fmod(lead_t * (lead_f * 1.5), 1.0) * 2.0 - 1.0 # 5th harmony
+		var sin_lead: float = sin(lead_t * lead_f * TAU)
+		total_sample += (saw_lead_1 * 0.4 + saw_lead_2 * 0.2 + sin_lead * 0.4) * exp(-lead_t * 3.5) * 0.32
 
-		# Double Kick Driving Drums
-		var beat_f: float = fmod(current_beat, 0.5)
-		if beat_f < 0.15:
-			var kick_t: float = beat_f * (beat_dur * 0.5)
-			total_sample += sin(kick_t * 120.0 * TAU) * exp(-kick_t * 22.0) * 0.42
+		# 4. Double-Kick Driving Drums
+		var double_kick_f: float = fmod(current_beat, 0.5)
+		if double_kick_f < 0.18:
+			var kt: float = double_kick_f * (beat_dur * 0.5)
+			total_sample += sin(kt * lerpf(165.0, 42.0, kt / 0.07) * TAU) * exp(-kt * 20.0) * 0.48
 
-		samples[i] = total_sample * 0.85
+		var beat_num: int = int(current_beat) % 4
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.20:
+			var st: float = beat_frac * beat_dur
+			total_sample += (randf_range(-1.0, 1.0) * 0.65 + sin(st * 230.0 * TAU) * 0.35) * exp(-st * 26.0) * 0.38
+
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 8. BGM Division: Kristall-Präzision (32 beats - 120 BPM, ~16.0s loop)
+# 8. BGM Division: "Quantum Logic / Laser Matrix" (32 beats - 128 BPM, ~15.0s loop)
+# Hypnotic precision synthwave with crystal FM chimes, intricate polyrhythmic arps, and clean sub-bass.
 func _synth_bgm_division() -> AudioStreamWAV:
-	var bpm: float = 120.0
+	var bpm: float = 128.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -1215,16 +1411,16 @@ func _synth_bgm_division() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Bm -> G -> D -> A -> Em -> Bm -> G -> F#7
+	# 8 bars: Bm9 -> Gmaj7 -> Dmaj7 -> F#m7 -> Em9 -> Bm7 -> Gmaj7 -> F#7
 	var chords: Array = [
-		[246.94, 293.66, 369.99, 493.88], # Bm
-		[196.00, 246.94, 293.66, 392.00], # G
-		[146.83, 220.00, 293.66, 369.99], # D
-		[220.00, 277.18, 329.63, 440.00], # A
-		[164.81, 196.00, 246.94, 329.63], # Em
-		[246.94, 293.66, 369.99, 493.88], # Bm
-		[196.00, 246.94, 293.66, 392.00], # G
-		[185.00, 233.08, 277.18, 369.99]  # F#7
+		[123.47, 185.00, 246.94, 293.66, 369.99], # Bm9
+		[98.00,  196.00, 246.94, 293.66, 392.00], # Gmaj7
+		[146.83, 220.00, 293.66, 369.99, 440.00], # Dmaj7
+		[92.50,  185.00, 220.00, 277.18, 369.99], # F#m7
+		[82.41,  164.81, 246.94, 293.66, 329.63], # Em9
+		[123.47, 185.00, 246.94, 293.66, 369.99], # Bm7
+		[98.00,  196.00, 246.94, 293.66, 392.00], # Gmaj7
+		[92.50,  185.00, 233.08, 277.18, 369.99]  # F#7
 	]
 
 	for i in range(num_samples):
@@ -1234,30 +1430,47 @@ func _synth_bgm_division() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Crystal Bell Polyrhythm
-		var note_idx: int = int(current_beat * 3.0) % 4
-		var bell_f: float = chord[note_idx] * 2.0
-		var bell_t: float = fmod(t, beat_dur / 3.0)
-		var bell: float = (sin(bell_t * bell_f * TAU) + 0.3 * sin(bell_t * bell_f * 2.7 * TAU)) * exp(-bell_t * 8.0)
-		total_sample += bell * 0.35
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.55 * exp(-beat_frac * 9.0), 0.25, 1.0)
 
-		# Clockwork Tick Percussion
-		var tick_f: float = fmod(current_beat * 2.0, 1.0)
-		if tick_f < 0.08:
-			var tick_t: float = tick_f * (beat_dur * 0.5)
-			total_sample += sin(tick_t * 1800.0 * TAU) * exp(-tick_t * 70.0) * 0.2
+		# 1. FM Crystal Glass Chimes (Polyrhythm: 3 notes per 2 beats)
+		var poly_idx: int = int(current_beat * 1.5) % chord.size()
+		var chime_f: float = chord[poly_idx] * 2.0
+		var chime_t: float = fmod(t, beat_dur / 1.5)
+		var fm_mod: float = sin(chime_t * chime_f * 2.76 * TAU) * 2.0
+		var crystal: float = sin(chime_t * (chime_f + fm_mod) * TAU) * exp(-chime_t * 6.5)
+		total_sample += crystal * 0.30 * sidechain
 
-		# Deep Precision Sub-Bass
+		# 2. Precision Laser Arpeggio (16th notes)
+		var sixteenth: int = int(current_beat * 4.0) % 4
+		var arp_f: float = chord[sixteenth % chord.size()] * 2.0
+		var arp_t: float = fmod(t, beat_dur * 0.25)
+		var arp: float = sin(arp_t * arp_f * TAU) * exp(-arp_t * 18.0)
+		total_sample += arp * 0.22
+
+		# 3. Deep Clean Resonant Sub-Bass
 		var bass_t: float = fmod(t, beat_dur)
-		var bass_f: float = chord[0] * 0.5
-		total_sample += sin(bass_t * bass_f * TAU) * exp(-bass_t * 5.0) * 0.35
+		var bass_f: float = chord[0]
+		var sub_bass: float = sin(bass_t * bass_f * TAU) * exp(-bass_t * 4.5)
+		total_sample += sub_bass * 0.42
 
-		samples[i] = total_sample * 0.85
+		# 4. Precision Cyber Percussion
+		if beat_frac < 0.20:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(160.0, 40.0, kt / 0.08) * TAU) * exp(-kt * 18.0) * 0.45
+
+		var beat_num: int = int(current_beat) % 4
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.18:
+			var st: float = beat_frac * beat_dur
+			total_sample += randf_range(-1.0, 1.0) * exp(-st * 28.0) * 0.30
+
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 9. BGM Mixed: Ritter-Symphonie (32 beats - 136 BPM, ~14.1s loop)
+# 9. BGM Mixed / Battle: "Tron Symphonic Duel" (32 beats - 136 BPM, ~14.12s loop)
+# Master multi-layered cyber anthem combining sweeping harmonic progressions, rolling bass, and soaring leads.
 func _synth_bgm_mixed() -> AudioStreamWAV:
 	var bpm: float = 136.0
 	var beat_dur: float = 60.0 / bpm
@@ -1267,16 +1480,16 @@ func _synth_bgm_mixed() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Am -> F -> Dm -> E7 -> Am -> C -> G -> E7
+	# 8 bars: Am9 -> Fmaj7 -> Dm7 -> G -> Cmaj7 -> Fmaj7 -> Bm7b5 -> E7
 	var chords: Array = [
-		[220.0, 261.63, 329.63, 440.0],
-		[174.61, 220.0, 261.63, 349.23],
-		[146.83, 174.61, 220.0, 293.66],
-		[164.81, 207.65, 246.94, 329.63],
-		[220.0, 261.63, 329.63, 440.0],
-		[261.63, 329.63, 392.0, 523.25],
-		[196.0, 246.94, 293.66, 392.0],
-		[164.81, 207.65, 246.94, 329.63]
+		[110.00, 220.00, 261.63, 329.63, 493.88], # Am9
+		[87.31,  174.61, 220.00, 261.63, 329.63], # Fmaj7
+		[146.83, 220.00, 261.63, 349.23, 440.00], # Dm7
+		[98.00,  196.00, 246.94, 293.66, 392.00], # G
+		[130.81, 196.00, 246.94, 261.63, 329.63], # Cmaj7
+		[87.31,  174.61, 220.00, 261.63, 349.23], # Fmaj7
+		[123.47, 174.61, 220.00, 293.66, 369.99], # Bm7b5
+		[82.41,  164.81, 207.65, 246.94, 329.63]  # E7
 	]
 	var lead_melody: Array[float] = [
 		440.0, 523.25, 659.25, 880.0,
@@ -1296,38 +1509,68 @@ func _synth_bgm_mixed() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# 16th-note Chiptune Arpeggios
-		var sixteenth: int = int(current_beat * 4.0) % 4
-		var arp_f: float = chord[sixteenth]
-		var arp_t: float = fmod(t, beat_dur * 0.25)
-		var arp: float = (1.0 if sin(arp_t * arp_f * TAU) > 0.0 else -1.0) * exp(-arp_t * 14.0)
-		total_sample += arp * 0.25
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.65 * exp(-beat_frac * 10.0), 0.2, 1.0)
 
-		# Heroic Symphonic Lead
+		# 1. Pumping Supersaw Chords
+		var pad_sample: float = 0.0
+		for voice_idx in range(1, chord.size()):
+			var f: float = chord[voice_idx]
+			var saw_a: float = fmod(t * f * 0.995, 1.0) * 2.0 - 1.0
+			var saw_b: float = fmod(t * f * 1.005, 1.0) * 2.0 - 1.0
+			pad_sample += (saw_a + saw_b) * 0.5
+		total_sample += pad_sample * (0.28 / float(chord.size() - 1)) * sidechain
+
+		# 2. Rolling 16th Bassline
+		var sixteenth: int = int(current_beat * 4.0) % 4
+		var bass_f: float = (chord[0] * 2.0) if (sixteenth == 2 or sixteenth == 3) else chord[0]
+		var bass_t: float = fmod(t, beat_dur * 0.25)
+		var bass: float = (fmod(bass_t * bass_f, 1.0) * 2.0 - 1.0) * 0.35 + sin(bass_t * chord[0] * TAU) * 0.65
+		total_sample += bass * exp(-bass_t * 14.0) * 0.40
+
+		# 3. 16th Cascading Arpeggiator
+		var arp_f: float = chord[sixteenth % chord.size()] * 2.0
+		var arp_t: float = fmod(t, beat_dur * 0.25)
+		var arp: float = sin(arp_t * arp_f * TAU) + 0.3 * sin(arp_t * arp_f * 2.0 * TAU)
+		total_sample += arp * exp(-arp_t * 16.0) * 0.22
+
+		# 4. Heroic Symphonic Lead
 		var beat_idx: int = mini(int(current_beat), 31)
 		var lead_f: float = lead_melody[beat_idx]
 		var lead_t: float = fmod(t, beat_dur)
-		var brass: float = (sin(lead_t * lead_f * TAU) + 0.4 * sin(lead_t * lead_f * 2.0 * TAU)) * exp(-lead_t * 3.5)
-		total_sample += brass * 0.32
+		var lead_saw: float = fmod(lead_t * lead_f, 1.0) * 2.0 - 1.0
+		var lead_sin: float = sin(lead_t * lead_f * TAU)
+		total_sample += (lead_saw * 0.35 + lead_sin * 0.65) * sin(clampf(lead_t / beat_dur, 0.0, 1.0) * PI) * 0.32
 
-		# Heavy Kick & Snare
-		var beat_f: float = fmod(current_beat, 1.0)
-		var beat_int: int = int(current_beat) % 4
-		if (beat_int == 0 or beat_int == 2) and beat_f < 0.2:
-			var kick_t: float = beat_f * beat_dur
-			total_sample += sin(kick_t * lerpf(150.0, 40.0, kick_t / 0.15) * TAU) * exp(-kick_t * 22.0) * 0.45
-		if (beat_int == 1 or beat_int == 3) and beat_f < 0.2:
-			var snare_t: float = beat_f * beat_dur
-			total_sample += (randf_range(-1.0, 1.0) * 0.7 + sin(snare_t * 220.0 * TAU) * 0.3) * exp(-snare_t * 20.0) * 0.4
+		# 5. Punchy 4-on-the-Floor TRON Beat
+		if beat_frac < 0.22:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(165.0, 42.0, kt / 0.07) * TAU) * exp(-kt * 18.0) * 0.52
 
-		samples[i] = total_sample * 0.85
+		var beat_num: int = int(current_beat) % 4
+		if (beat_num == 1 or beat_num == 3) and beat_frac < 0.22:
+			var st: float = beat_frac * beat_dur
+			total_sample += (randf_range(-1.0, 1.0) * 0.6 + sin(st * 220.0 * TAU) * 0.35) * exp(-st * 26.0) * 0.38
+
+		var sixteenth_f: float = fmod(current_beat * 4.0, 1.0)
+		if sixteenth_f < 0.08:
+			var ht: float = sixteenth_f * (beat_dur * 0.25)
+			var hat_accent: float = 0.28 if (sixteenth == 2) else 0.16
+			total_sample += randf_range(-1.0, 1.0) * exp(-ht * 85.0) * hat_accent
+
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 10. BGM Forge: Zahlen-Schmiede (32 beats - 126 BPM, ~15.2s loop)
+func _synth_bgm_battle() -> AudioStreamWAV:
+	return _synth_bgm_mixed()
+
+
+# 10. BGM Forge: "Neon Cyber-Foundry" (32 beats - 128 BPM, ~15.0s loop)
+# Industrial electro with resonant metallic anvil clangs, grinding saw bass, and heavy steam kicks.
 func _synth_bgm_forge() -> AudioStreamWAV:
-	var bpm: float = 126.0
+	var bpm: float = 128.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -1335,16 +1578,16 @@ func _synth_bgm_forge() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Em -> D -> C -> B7 -> Em -> G -> A -> B7
+	# 8 bars: Em -> D/F# -> G -> A -> C -> B7 -> Em -> B7
 	var chords: Array = [
-		[164.81, 196.00, 246.94],
-		[146.83, 185.00, 220.00],
-		[130.81, 164.81, 196.00],
-		[123.47, 155.56, 185.00],
-		[164.81, 196.00, 246.94],
-		[196.00, 246.94, 293.66],
-		[220.00, 277.18, 329.63],
-		[123.47, 155.56, 185.00]
+		[82.41,  164.81, 196.00, 246.94],
+		[92.50,  146.83, 185.00, 220.00],
+		[98.00,  196.00, 246.94, 293.66],
+		[110.00, 220.00, 277.18, 329.63],
+		[130.81, 164.81, 196.00, 261.63],
+		[123.47, 155.56, 185.00, 246.94],
+		[82.41,  164.81, 196.00, 246.94],
+		[123.47, 155.56, 185.00, 246.94]
 	]
 
 	for i in range(num_samples):
@@ -1354,31 +1597,33 @@ func _synth_bgm_forge() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Metallic Anvil Strike on beats 2 & 4
 		var beat_int: int = int(current_beat) % 4
-		var beat_f: float = fmod(current_beat, 1.0)
-		if (beat_int == 1 or beat_int == 3) and beat_f < 0.22:
-			var anvil_t: float = beat_f * beat_dur
-			var anvil_clang: float = (sin(anvil_t * 1200.0 * TAU) + 0.5 * sin(anvil_t * 2760.0 * TAU) + 0.3 * sin(anvil_t * 3920.0 * TAU)) * exp(-anvil_t * 15.0)
-			total_sample += anvil_clang * 0.4
+		var beat_frac: float = fmod(current_beat, 1.0)
 
-		# Industrial Saw Bass
+		# 1. Metallic Anvil Synth Clang on beats 2 & 4
+		if (beat_int == 1 or beat_int == 3) and beat_frac < 0.24:
+			var at: float = beat_frac * beat_dur
+			var clang: float = (sin(at * 1250.0 * TAU) + 0.5 * sin(at * 2840.0 * TAU) + 0.3 * sin(at * 3920.0 * TAU)) * exp(-at * 16.0)
+			total_sample += clang * 0.44
+
+		# 2. Grinding Saw Bass
 		var bass_t: float = fmod(t, beat_dur * 0.5)
 		var bass_f: float = chord[0]
 		var saw: float = fmod(bass_t * bass_f, 1.0) * 2.0 - 1.0
-		total_sample += saw * exp(-bass_t * 9.0) * 0.3
+		total_sample += saw * exp(-bass_t * 9.0) * 0.36
 
-		# Heavy Steam Kick on 1 & 3
-		if (beat_int == 0 or beat_int == 2) and beat_f < 0.25:
-			var kick_t: float = beat_f * beat_dur
-			total_sample += sin(kick_t * lerpf(120.0, 35.0, kick_t / 0.2) * TAU) * exp(-kick_t * 16.0) * 0.5
+		# 3. Heavy Steam Kick on 1 & 3
+		if (beat_int == 0 or beat_int == 2) and beat_frac < 0.24:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(160.0, 36.0, kt / 0.12) * TAU) * exp(-kt * 16.0) * 0.54
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 11. BGM Chain: Meister-Kette (32 beats - 140 BPM, ~13.7s loop)
+# 11. BGM Chain: "Infinite Combo Stream" (32 beats - 140 BPM, ~13.71s loop)
+# Relentless Outrun / Eurobeat cyber track with pumping bass, euphoric chord stabs, and cascading 16th arp fireworks.
 func _synth_bgm_chain() -> AudioStreamWAV:
 	var bpm: float = 140.0
 	var beat_dur: float = 60.0 / bpm
@@ -1388,16 +1633,16 @@ func _synth_bgm_chain() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: F -> G -> Am -> C -> F -> G -> Em -> Am
+	# 8 bars: Fmaj7 -> G -> Am7 -> C -> Fmaj7 -> G -> Em7 -> Am
 	var chords: Array = [
-		[174.61, 220.0, 261.63, 349.23],
-		[196.0, 246.94, 293.66, 392.0],
-		[220.0, 261.63, 329.63, 440.0],
-		[261.63, 329.63, 392.0, 523.25],
-		[174.61, 220.0, 261.63, 349.23],
-		[196.0, 246.94, 293.66, 392.0],
-		[164.81, 196.0, 246.94, 329.63],
-		[220.0, 261.63, 329.63, 440.0]
+		[87.31,  174.61, 220.00, 261.63, 349.23],
+		[98.00,  196.00, 246.94, 293.66, 392.00],
+		[110.00, 220.00, 261.63, 329.63, 440.00],
+		[130.81, 196.00, 261.63, 329.63, 523.25],
+		[87.31,  174.61, 220.00, 261.63, 349.23],
+		[98.00,  196.00, 246.94, 293.66, 392.00],
+		[82.41,  164.81, 196.00, 246.94, 329.63],
+		[110.00, 220.00, 261.63, 329.63, 440.00]
 	]
 
 	for i in range(num_samples):
@@ -1407,32 +1652,35 @@ func _synth_bgm_chain() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Fast 16th Arpeggiator Sweep
+		var beat_frac: float = fmod(current_beat, 1.0)
+		var sidechain: float = clampf(1.0 - 0.65 * exp(-beat_frac * 10.0), 0.2, 1.0)
+
+		# 1. Cascading 16th Arpeggiator Sweep
 		var sixteenth: int = int(current_beat * 4.0) % 4
-		var arp_f: float = chord[sixteenth] * 2.0
+		var arp_f: float = chord[sixteenth % chord.size()] * 2.0
 		var arp_t: float = fmod(t, beat_dur * 0.25)
-		var arp: float = sin(arp_t * arp_f * TAU) * exp(-arp_t * 16.0)
-		total_sample += arp * 0.32
+		var arp: float = (fmod(arp_t * arp_f, 1.0) * 2.0 - 1.0) * 0.4 + sin(arp_t * arp_f * TAU) * 0.6
+		total_sample += arp * exp(-arp_t * 16.0) * 0.30
 
-		# Four-on-the-Floor Kick Drum
-		var beat_f: float = fmod(current_beat, 1.0)
-		if beat_f < 0.18:
-			var kick_t: float = beat_f * beat_dur
-			total_sample += sin(kick_t * lerpf(160.0, 45.0, kick_t / 0.15) * TAU) * exp(-kick_t * 22.0) * 0.48
+		# 2. Four-on-the-Floor Kick Drum
+		if beat_frac < 0.20:
+			var kt: float = beat_frac * beat_dur
+			total_sample += sin(kt * lerpf(165.0, 45.0, kt / 0.07) * TAU) * exp(-kt * 20.0) * 0.52
 
-		# High-energy synth chord stab
+		# 3. Euphoric Chord Stabs
 		var stab_t: float = fmod(t, beat_dur)
-		var stab: float = (sin(stab_t * chord[1] * TAU) + sin(stab_t * chord[2] * TAU)) * exp(-stab_t * 6.0)
-		total_sample += stab * 0.22
+		var stab: float = (sin(stab_t * chord[1] * TAU) + sin(stab_t * chord[2] * TAU) + sin(stab_t * chord[3] * TAU)) * exp(-stab_t * 7.0)
+		total_sample += stab * 0.26 * sidechain
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 12. BGM Elite: Elite-Herausforderung (32 beats - 145 BPM, ~13.2s loop)
+# 12. BGM Elite: "Derezzer Protocol" (32 beats - 144 BPM, ~13.33s loop)
+# Fast, dark electro encounter in G minor with razor-sharp saw stabs and intense rhythm.
 func _synth_bgm_elite() -> AudioStreamWAV:
-	var bpm: float = 145.0
+	var bpm: float = 144.0
 	var beat_dur: float = 60.0 / bpm
 	var total_beats: int = 32
 	var duration: float = float(total_beats) * beat_dur
@@ -1440,16 +1688,16 @@ func _synth_bgm_elite() -> AudioStreamWAV:
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	# 8 bars: Gm -> Eb -> F -> D -> Gm -> Cm -> D -> G
+	# 8 bars: Gm -> Eb -> F -> D7 -> Gm -> Cm -> D7 -> G5
 	var chords: Array = [
-		[196.00, 233.08, 293.66],
-		[155.56, 196.00, 233.08],
-		[174.61, 220.00, 261.63],
-		[146.83, 185.00, 220.00],
-		[196.00, 233.08, 293.66],
-		[130.81, 155.56, 196.00],
-		[146.83, 185.00, 220.00],
-		[196.00, 246.94, 293.66]
+		[98.00,  196.00, 233.08, 293.66],
+		[77.78,  155.56, 196.00, 233.08],
+		[87.31,  174.61, 220.00, 261.63],
+		[73.42,  146.83, 185.00, 220.00],
+		[98.00,  196.00, 233.08, 293.66],
+		[65.41,  130.81, 155.56, 196.00],
+		[73.42,  146.83, 185.00, 220.00],
+		[98.00,  196.00, 293.66, 392.00]
 	]
 
 	for i in range(num_samples):
@@ -1459,29 +1707,25 @@ func _synth_bgm_elite() -> AudioStreamWAV:
 		var chord: Array = chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Fast Saw Stabs
+		# 1. Fast Saw Stabs
 		var stab_t: float = fmod(t, beat_dur * 0.5)
-		var saw_f: float = chord[0] * 2.0
+		var saw_f: float = chord[1]
 		var saw: float = fmod(stab_t * saw_f, 1.0) * 2.0 - 1.0
-		total_sample += saw * exp(-stab_t * 12.0) * 0.35
+		total_sample += saw * exp(-stab_t * 12.0) * 0.38
 
-		# Heavy Fast Percussion
+		# 2. Driving Fast Kick
 		var beat_f: float = fmod(current_beat, 0.5)
-		if beat_f < 0.15:
-			var kick_t: float = beat_f * (beat_dur * 0.5)
-			total_sample += sin(kick_t * 130.0 * TAU) * exp(-kick_t * 22.0) * 0.45
+		if beat_f < 0.16:
+			var kt: float = beat_f * (beat_dur * 0.5)
+			total_sample += sin(kt * lerpf(165.0, 42.0, kt / 0.07) * TAU) * exp(-kt * 22.0) * 0.48
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 13. BGM Battle (Default / Legacy - 136 BPM)
-func _synth_bgm_battle() -> AudioStreamWAV:
-	return _synth_bgm_mixed()
-
-
-# 14. BGM Boss: Drachen-Zorn (32 beats - 150 BPM, ~12.8s loop)
+# 13. BGM Boss: "Master Control / Dragon Core" (32 beats - 150 BPM, ~12.80s loop)
+# Colossal, climactic boss fight with thunderous sub-kicks, ominous cyber brass horns, and frantic 3-octave arpeggios.
 func _synth_bgm_boss() -> AudioStreamWAV:
 	var bpm: float = 150.0
 	var beat_dur: float = 60.0 / bpm
@@ -1493,14 +1737,14 @@ func _synth_bgm_boss() -> AudioStreamWAV:
 
 	# 8 bars: Em -> C -> D -> B7 -> Em -> Am -> B7 -> Em
 	var boss_chords: Array = [
-		[164.81, 196.0, 246.94], # Em
-		[130.81, 164.81, 196.0], # C
-		[146.83, 185.0, 220.0],  # D
-		[123.47, 155.56, 185.0], # B7
-		[164.81, 196.0, 246.94], # Em
-		[220.00, 261.63, 329.63],# Am
-		[123.47, 155.56, 185.0], # B7
-		[164.81, 196.0, 246.94]  # Em
+		[82.41,  164.81, 196.00, 246.94], # Em
+		[65.41,  130.81, 164.81, 196.00], # C
+		[73.42,  146.83, 185.00, 220.00], # D
+		[61.74,  123.47, 155.56, 185.00], # B7
+		[82.41,  164.81, 196.00, 246.94], # Em
+		[110.00, 220.00, 261.63, 329.63], # Am
+		[61.74,  123.47, 155.56, 185.00], # B7
+		[82.41,  164.81, 196.00, 246.94]  # Em
 	]
 
 	for i in range(num_samples):
@@ -1510,47 +1754,47 @@ func _synth_bgm_boss() -> AudioStreamWAV:
 		var chord: Array = boss_chords[bar_idx]
 		var total_sample: float = 0.0
 
-		# Staccato Brass Stabs
+		# 1. Brassy Cyber Horn Stabs
 		var stab_t: float = fmod(t, beat_dur * 0.5)
-		var stab_env: float = exp(-stab_t * 12.0)
+		var stab_env: float = exp(-stab_t * 10.0)
 		for f in chord:
-			var brass: float = sin(stab_t * f * 2.0 * TAU) + 0.5 * sin(stab_t * f * 4.0 * TAU)
+			var brass: float = sin(stab_t * f * 2.0 * TAU) + 0.5 * sin(stab_t * f * 4.0 * TAU) + 0.3 * (fmod(stab_t * f * 2.0, 1.0) * 2.0 - 1.0)
 			total_sample += brass * stab_env * 0.12
 
-		# Fast Arp
-		var sixteenth_idx: int = int(current_beat * 4.0) % 4
-		var arp_f: float = chord[sixteenth_idx % chord.size()] * 2.0
+		# 2. Frantic 16th Arpeggiator Sweeps
+		var sixteenth: int = int(current_beat * 4.0) % 4
+		var arp_f: float = chord[sixteenth % chord.size()] * 2.0
 		var arp_t: float = fmod(t, beat_dur * 0.25)
-		var arp_wave: float = sin(arp_t * arp_f * TAU)
-		total_sample += arp_wave * exp(-arp_t * 16.0) * 0.2
+		var arp: float = sin(arp_t * arp_f * TAU) * exp(-arp_t * 16.0)
+		total_sample += arp * 0.24
 
-		# Heavy War Drum / Taiko Pattern
-		var beat_fraction: float = fmod(current_beat, 1.0)
-		if beat_fraction < 0.22:
-			var drum_t: float = beat_fraction * beat_dur
-			var drum_f: float = lerpf(110.0, 35.0, drum_t / 0.18)
-			var sub_kick: float = sin(drum_t * drum_f * TAU) * exp(-drum_t * 16.0)
-			total_sample += sub_kick * 0.55
+		# 3. Colossal Sub-Kick Impact
+		var beat_frac: float = fmod(current_beat, 1.0)
+		if beat_frac < 0.24:
+			var kt: float = beat_frac * beat_dur
+			var sub_kick: float = sin(kt * lerpf(175.0, 35.0, kt / 0.12) * TAU) * exp(-kt * 16.0)
+			total_sample += sub_kick * 0.58
 
-		if (bar_idx == 3 or bar_idx == 7) and int(current_beat) % 2 == 1 and beat_fraction < 0.15:
-			var tom_t: float = beat_fraction * beat_dur
-			total_sample += sin(tom_t * 180.0 * TAU) * exp(-tom_t * 20.0) * 0.35
+		if (bar_idx == 3 or bar_idx == 7) and int(current_beat) % 2 == 1 and beat_frac < 0.18:
+			var tom_t: float = beat_frac * beat_dur
+			total_sample += sin(tom_t * 190.0 * TAU) * exp(-tom_t * 22.0) * 0.38
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, true)
 
 
-# 15. Victory Fanfare (Celebratory brass fanfare with chimes)
+# 14. Victory Fanfare: "Grid Liberated" (3.6s)
+# Ascending neon supersaw fanfare with shimmering crystal chimes and triumphant finish.
 func _synth_jingle_victory() -> AudioStreamWAV:
 	var duration: float = 3.6
 	var num_samples: int = int(duration * SAMPLE_RATE)
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	var fanfare_notes: Array[float] = [392.0, 523.25, 659.25, 783.99, 1046.50]
-	var fanfare_times: Array[float] = [0.0, 0.22, 0.44, 0.66, 1.0]
-	var fanfare_durations: Array[float] = [0.2, 0.2, 0.2, 0.32, 2.5]
+	var fanfare_notes: Array[float] = [293.66, 369.99, 440.00, 587.33, 739.99, 880.00] # D4 -> F#4 -> A4 -> D5 -> F#5 -> A5
+	var fanfare_times: Array[float] = [0.0, 0.18, 0.36, 0.54, 0.72, 0.95]
+	var fanfare_durations: Array[float] = [0.18, 0.18, 0.18, 0.18, 0.23, 2.6]
 
 	for i in range(num_samples):
 		var t: float = float(i) / float(SAMPLE_RATE)
@@ -1562,22 +1806,24 @@ func _synth_jingle_victory() -> AudioStreamWAV:
 			if t >= start_t and t < start_t + note_dur:
 				var note_t: float = t - start_t
 				var f: float = fanfare_notes[n]
-				var env: float = (note_t / 0.04) if note_t < 0.04 else exp(-(note_t - 0.04) * (1.8 if n == 4 else 3.5))
-				var brass: float = sin(note_t * f * TAU) + 0.45 * sin(note_t * f * 2.0 * TAU) + 0.25 * sin(note_t * f * 3.0 * TAU)
-				total_sample += brass * env * 0.4
+				var env: float = (note_t / 0.03) if note_t < 0.03 else exp(-(note_t - 0.03) * (1.6 if n == 5 else 3.5))
+				var saw_a: float = fmod(note_t * f * 0.995, 1.0) * 2.0 - 1.0
+				var saw_b: float = fmod(note_t * f * 1.005, 1.0) * 2.0 - 1.0
+				var sin_v: float = sin(note_t * f * TAU)
+				total_sample += ((saw_a + saw_b) * 0.4 + sin_v * 0.6) * env * 0.42
 
-		if t >= 1.0:
-			var chime_t: float = t - 1.0
-			var chime_f: float = 2093.0
-			var shimmer: float = sin(chime_t * chime_f * TAU) * exp(-chime_t * 3.0) * 0.2
+		if t >= 0.95:
+			var chime_t: float = t - 0.95
+			var chime_f: float = 2349.32
+			var shimmer: float = sin(chime_t * chime_f * TAU) * exp(-chime_t * 2.8) * 0.22
 			total_sample += shimmer
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, false)
 
 
-# 16. Stage Clear Flourish (Short rewarding 1.8s jingle)
+# 15. Stage Clear: "Grid Clear" (1.8s)
 func _synth_jingle_stage_clear() -> AudioStreamWAV:
 	var duration: float = 1.8
 	var num_samples: int = int(duration * SAMPLE_RATE)
@@ -1596,25 +1842,25 @@ func _synth_jingle_stage_clear() -> AudioStreamWAV:
 			var note_t: float = t - float(note_idx) * step_dur
 			var f: float = notes[note_idx]
 			var env: float = exp(-note_t * 6.0)
-			total_sample = (sin(note_t * f * TAU) + 0.3 * sin(note_t * f * 2.0 * TAU)) * env * 0.45
+			total_sample = (sin(note_t * f * TAU) + 0.35 * (fmod(note_t * f, 1.0) * 2.0 - 1.0)) * env * 0.45
 		else:
 			var hold_t: float = t - step_dur * 4.0
-			var env: float = exp(-hold_t * 2.5)
+			var env: float = exp(-hold_t * 2.2)
 			total_sample = sin(hold_t * 1046.50 * TAU) * env * 0.35 + sin(hold_t * 2093.0 * TAU) * env * 0.15
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, false)
 
 
-# 17. Game Over Lament (Respectful knight's rest horn - 2.5s)
+# 16. Game Over: "Derezzed / Signal Lost" (2.5s)
 func _synth_jingle_game_over() -> AudioStreamWAV:
 	var duration: float = 2.5
 	var num_samples: int = int(duration * SAMPLE_RATE)
 	var samples: PackedFloat32Array = PackedFloat32Array()
 	samples.resize(num_samples)
 
-	var notes: Array[float] = [440.0, 349.23, 293.66, 146.83] # A4 -> F4 -> D4 -> D3
+	var notes: Array[float] = [440.0, 349.23, 293.66, 146.83]
 	var times: Array[float] = [0.0, 0.45, 0.9, 1.4]
 	var durs: Array[float] = [0.45, 0.45, 0.5, 1.1]
 
@@ -1629,9 +1875,10 @@ func _synth_jingle_game_over() -> AudioStreamWAV:
 				var note_t: float = t - start_t
 				var f: float = notes[n]
 				var env: float = sin(clampf(note_t / dur, 0.0, 1.0) * PI)
-				var horn: float = sin(note_t * f * TAU) + 0.35 * sin(note_t * f * 2.0 * TAU) + 0.15 * sin(note_t * f * 3.0 * TAU)
-				total_sample += horn * env * 0.4
+				var saw: float = fmod(note_t * f, 1.0) * 2.0 - 1.0
+				var sin_v: float = sin(note_t * f * TAU)
+				total_sample += (saw * 0.35 + sin_v * 0.65) * env * 0.38
 
-		samples[i] = total_sample * 0.85
+		samples[i] = total_sample * 0.82
 
 	return _create_wav_stream(samples, false)

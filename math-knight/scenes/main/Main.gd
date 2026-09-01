@@ -28,11 +28,28 @@ func _ready() -> void:
 	EventBus.countdown_tick.connect(_on_countdown_tick)
 	EventBus.score_changed.connect(_on_score_changed)
 
+	if has_node("/root/RunManager"):
+		var rm: Node = get_node("/root/RunManager")
+		if rm.is_run_active and not rm.current_stage_data.is_empty():
+			var cfg: MathConfig = rm.get_math_config_for_stage(rm.current_stage_data)
+			if has_node("/root/MathEngine"):
+				get_node("/root/MathEngine").set_difficulty(cfg)
+			if knight:
+				knight.max_hp = rm.knight_run_max_hp
+				knight.current_hp = rm.knight_run_hp
+				knight.attack_power = rm.knight_run_attack
+				knight.armor = rm.knight_run_armor
+				knight.dodge_chance = rm.knight_run_dodge
+
 	GameManager.start_game()
 	enemy_queue.initialize(knight.position.x)
 
 	if has_node("/root/AudioManager"):
-		get_node("/root/AudioManager").play_adaptive_battle_music()
+		var rm = get_node("/root/RunManager") if has_node("/root/RunManager") else null
+		if rm and rm.is_run_active and rm.current_stage_data.get("type", "") == "boss":
+			get_node("/root/AudioManager").play_music("boss")
+		else:
+			get_node("/root/AudioManager").play_adaptive_battle_music()
 
 
 func _on_set_started(_set_num: int, bubble_pool: Array[int]) -> void:
@@ -135,18 +152,31 @@ func _on_game_over() -> void:
 func _on_game_won(stats: Dictionary) -> void:
 	_spawn_damage_number(Vector2(320.0, 90.0), "👑 SIEG! GLORREICHER SIEG! 👑", Color(0.3, 1.0, 0.85))
 	EventBus.screen_shake_requested.emit(0.6)
-	
+
 	# Check if we're in a roguelike run
 	if has_node("/root/RunManager") and get_node("/root/RunManager").is_run_active:
-		var rm = get_node("/root/RunManager")
+		var rm: Node = get_node("/root/RunManager")
 		rm.pending_combat_result = false
-		rm.complete_current_node()
-		
-		# Delay then return to map
-		var timer: SceneTreeTimer = get_tree().create_timer(2.0)
-		timer.timeout.connect(func():
-			get_tree().change_scene_to_file("res://scenes/map/RunMap.tscn")
-		)
+		var is_final_boss: bool = (rm.current_stage_index >= RunManager.TOTAL_REGULAR_STAGES)
+
+		# Save current knight hp back to run manager
+		if knight:
+			rm.knight_run_hp = maxf(1.0, knight.current_hp)
+
+		rm.complete_current_stage()
+
+		if is_final_boss:
+			# Final boss defeated! Go to final chest opening & victory screen
+			var timer: SceneTreeTimer = get_tree().create_timer(1.8)
+			timer.timeout.connect(func():
+				get_tree().change_scene_to_file("res://scenes/ui/ChestReward.tscn")
+			)
+		else:
+			# Stage cleared -> Go to Merchant / Chest Hub
+			var timer: SceneTreeTimer = get_tree().create_timer(1.5)
+			timer.timeout.connect(func():
+				get_tree().change_scene_to_file("res://scenes/stage/StageRewardHub.tscn")
+			)
 	else:
 		game_over_screen.show_victory(stats)
 

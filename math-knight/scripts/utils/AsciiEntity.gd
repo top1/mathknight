@@ -21,7 +21,7 @@ signal splatter_finished
 # ---------------------------------------------------------------------------
 const SP := Vector2(6, 8)
 const BFS := 8
-const EFS := 14
+const EFS := 16
 
 const MC: Array[String] = [
 	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -636,7 +636,7 @@ func _insert_equation_slots() -> void:
 	var is_slime: bool = (entity_type == "slime")
 
 	if is_slime:
-		ctr = Vector2(0, 14)
+		ctr = Vector2(0, -26)
 	else:
 		ctr.y += 2.0
 
@@ -650,7 +650,7 @@ func _insert_equation_slots() -> void:
 	while i < eq.length():
 		var ch: String = eq[i]
 		if ch == " ":
-			total_w += 4.5
+			total_w += 5.0
 			char_positions.append({ "c": " ", "offset_x": total_w, "is_space": true })
 		else:
 			var is_digit: bool = (ch >= "0" and ch <= "9")
@@ -662,9 +662,9 @@ func _insert_equation_slots() -> void:
 			char_positions.append({ "c": ch, "offset_x": total_w, "is_space": false })
 
 			if is_digit and next_is_digit:
-				total_w += 8.0
+				total_w += 9.5
 			else:
-				total_w += 10.5
+				total_w += 11.5
 		i += 1
 
 	var start_x: float = ctr.x - total_w * 0.5
@@ -2105,17 +2105,25 @@ func _draw_entity_body() -> void:
 		if _is_splatting:
 			cp = Vector2(s.p)
 		else:
-			var base_local: Vector2 = Vector2(s.p) * scale_m
-			base_local = base_local.rotated(rot_m)
-			cp = base_local + pos + Vector2(0, sin(_t * 2.8) * 1.0)
+			if is_slime:
+				# Stable position above slime (moves with jump offset, preserves clean 1:1 shape)
+				cp = Vector2(s.p.x, s.p.y) + pos + Vector2(0, sin(_t * 2.8) * 1.0)
+			else:
+				var base_local: Vector2 = Vector2(s.p) * scale_m
+				base_local = base_local.rotated(rot_m)
+				cp = base_local + pos + Vector2(0, sin(_t * 2.8) * 1.0)
 
 		var draw_col := Color(eq_color, eq_alpha_pulse)
+		var outline_col := Color(0.03, 0.02, 0.06, 0.98)
 
-		if is_slime and not _is_splatting:
-			draw_circle(cp + Vector2(4, -4), 14.0, Color(0.39, 0.86, 0.09, 0.06))
+		# Crisp dark outline and drop shadow for maximum readability without closing inner loops (e.g. 4)
+		draw_char(font, cp + Vector2(-1.0, 0), s.c, EFS, outline_col)
+		draw_char(font, cp + Vector2(1.0, 0), s.c, EFS, outline_col)
+		draw_char(font, cp + Vector2(0, -1.0), s.c, EFS, outline_col)
+		draw_char(font, cp + Vector2(0, 1.0), s.c, EFS, outline_col)
+		draw_char(font, cp + Vector2(1.0, 1.0), s.c, EFS, outline_col)
 
-		draw_char(font, cp + Vector2(-1.2, 1.2), s.c, EFS + 2, Color(0, 0, 0, 0.95))
-		draw_char(font, cp, s.c, EFS + 2, Color(eq_color.r, eq_color.g, eq_color.b, 0.4))
+		# Sharp foreground glyph
 		draw_char(font, cp, s.c, EFS, draw_col)
 
 	# 4. Fixed Glowing Eyes

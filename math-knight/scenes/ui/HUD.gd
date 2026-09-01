@@ -78,10 +78,18 @@ func update_score(score: int) -> void:
 
 func update_stage(stage: int, total_stages: int) -> void:
 	if stage_label:
-		if total_stages <= 5:
+		if has_node("/root/RunManager") and get_node("/root/RunManager").is_run_active:
+			var rm = get_node("/root/RunManager")
+			var stg_idx: int = rm.current_stage_index
+			if stg_idx >= RunManager.TOTAL_REGULAR_STAGES:
+				stage_label.text = "👑 ENDBOSS"
+			else:
+				stage_label.text = "Stufe %d / %d (Welle %d)" % [stg_idx + 1, RunManager.TOTAL_REGULAR_STAGES, stage]
+		elif total_stages <= 5:
 			stage_label.text = "Welle: %d / %d" % [stage, total_stages]
 		else:
 			stage_label.text = "Stufe: %d / %d" % [stage, total_stages]
+
 		var t: Tween = create_tween()
 		stage_badge.scale = Vector2(1.15, 1.15)
 		t.tween_property(stage_badge, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -101,7 +109,12 @@ func update_combo(count: int) -> void:
 
 
 func _on_menu_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/menu/MainMenu.tscn")
+	if has_node("/root/RunManager") and get_node("/root/RunManager").is_run_active:
+		var rm = get_node("/root/RunManager")
+		rm.pending_combat_result = false
+		get_tree().change_scene_to_file("res://scenes/stage/StageSelectScreen.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/menu/MainMenu.tscn")
 
 
 func _on_countdown_tick(count_text: String) -> void:

@@ -171,4 +171,4 @@ func _buy_item(item: Dictionary, btn: Button, panel: PanelContainer) -> void:
 func _on_leave_pressed() -> void:
 	if has_node("/root/AudioManager"):
 		get_node("/root/AudioManager").play_sfx("click")
-	get_tree().change_scene_to_file("res://scenes/map/RunMap.tscn")
+	get_tree().change_scene_to_file("res://scenes/stage/StageSelectScreen.tscn")
