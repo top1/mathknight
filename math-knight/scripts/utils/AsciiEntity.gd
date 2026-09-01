@@ -1990,11 +1990,6 @@ func _draw_entity_body() -> void:
 			if part_colors.has(pi):
 				fill_col = part_colors[pi]
 			draw_colored_polygon(wp, Color(fill_col, 0.06))
-			if entity_type == "knight" and pi == 0:
-				var closed_wp: PackedVector2Array = wp.duplicate()
-				if not closed_wp.is_empty():
-					closed_wp.append(closed_wp[0])
-					draw_polyline(closed_wp, Color(fill_col.r, fill_col.g, fill_col.b, 0.35), 1.0)
 
 	# 2. Scattered Body Characters (3D Manikin Projected & Depth Sorted for Knight)
 	if entity_type == "knight" and not _is_splatting:
