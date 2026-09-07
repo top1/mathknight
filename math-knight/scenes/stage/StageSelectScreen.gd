@@ -5,14 +5,14 @@ extends Control
 ## glitch cipher decoders on hover, and smooth animated portal transitions.
 
 @onready var bg: MenuBackground = $MenuBackground
-@onready var stage_badge: Label = $MarginContainer/MainLayout/TopBar/StageBadge/StageLabel
-@onready var hp_label: Label = $MarginContainer/MainLayout/TopBar/HPBadge/HPContainer/HPLabel
-@onready var gold_label: Label = $MarginContainer/MainLayout/TopBar/GoldBadge/GoldContainer/GoldLabel
-@onready var diamond_label: Label = $MarginContainer/MainLayout/TopBar/DiamondBadge/DiamondContainer/DiamondLabel
+@onready var stage_badge: Label = $MarginContainer/MainLayout/TopBar/HBox/StageBadge/StageLabel
+@onready var hp_label: Label = $MarginContainer/MainLayout/TopBar/HBox/HPBadge/HPContainer/HPLabel
+@onready var gold_label: Label = $MarginContainer/MainLayout/TopBar/HBox/GoldBadge/GoldContainer/GoldLabel
+@onready var diamond_label: Label = $MarginContainer/MainLayout/TopBar/HBox/DiamondBadge/DiamondContainer/DiamondLabel
 @onready var cards_container: HBoxContainer = $MarginContainer/MainLayout/CardsArea/CardsContainer
 @onready var title_label: Label = $MarginContainer/MainLayout/Header/TitleLabel
 @onready var subtitle_label: Label = $MarginContainer/MainLayout/Header/SubtitleLabel
-@onready var rest_hub_btn: Button = $MarginContainer/MainLayout/TopBar/RestHubBtn
+@onready var rest_hub_btn: Button = $MarginContainer/MainLayout/TopBar/HBox/RestHubBtn
 
 var _card_panels: Array[Control] = []
 var _is_transitioning: bool = false

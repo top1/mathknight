@@ -21,6 +21,7 @@ var active_custom_method: InputMethodBase = null
 
 @onready var header_bar: ColorRect = $HeaderBar
 @onready var formula_bar: Label = $HeaderBar/FormulaBar
+@onready var undo_btn: Button = get_node_or_null("HeaderBar/UndoBtn")
 @onready var center_operator_bar: HBoxContainer = $HeaderBar/CenterOperatorBar
 @onready var op_btn_add: Button = $HeaderBar/CenterOperatorBar/OpBtnAdd
 @onready var op_btn_sub: Button = $HeaderBar/CenterOperatorBar/OpBtnSub
@@ -37,14 +38,43 @@ var active_custom_method: InputMethodBase = null
 func _ready() -> void:
 	call_deferred("_update_bubble_area")
 	_setup_active_input_method()
+	_setup_undo_button_style()
 	EventBus.problem_presented.connect(_on_problem_presented)
 	EventBus.answer_correct.connect(func(_p, _c): if active_custom_method: active_custom_method.on_answer_evaluated(true))
 	EventBus.answer_wrong.connect(func(_p): if active_custom_method: active_custom_method.on_answer_evaluated(false))
+
+	if undo_btn:
+		undo_btn.pressed.connect(_on_undo_pressed)
 
 	op_btn_add.pressed.connect(func(): _set_active_operator("+"))
 	op_btn_sub.pressed.connect(func(): _set_active_operator("-"))
 	op_btn_mul.pressed.connect(func(): _set_active_operator("×"))
 	op_btn_div.pressed.connect(func(): _set_active_operator("÷"))
+
+
+func _setup_undo_button_style() -> void:
+	if not undo_btn:
+		return
+	var normal_style = StyleBoxFlat.new()
+	normal_style.bg_color = Color(0.22, 0.14, 0.32, 0.95)
+	normal_style.border_color = Color(0.9, 0.7, 0.25)
+	normal_style.set_border_width_all(1)
+	normal_style.set_corner_radius_all(4)
+	normal_style.content_margin_left = 6
+	normal_style.content_margin_right = 6
+
+	var hover_style = normal_style.duplicate()
+	hover_style.bg_color = Color(0.38, 0.22, 0.52, 1.0)
+	hover_style.border_color = Color(1.0, 0.95, 0.5)
+
+	var pressed_style = normal_style.duplicate()
+	pressed_style.bg_color = Color(0.14, 0.08, 0.22, 1.0)
+
+	undo_btn.add_theme_stylebox_override("normal", normal_style)
+	undo_btn.add_theme_stylebox_override("hover", hover_style)
+	undo_btn.add_theme_stylebox_override("pressed", pressed_style)
+	undo_btn.add_theme_stylebox_override("focus", hover_style)
+	undo_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
 func _setup_active_input_method() -> void:
@@ -406,6 +436,7 @@ func _highlight_active_operator() -> void:
 
 
 func _style_op_btn(btn: Button, is_active: bool) -> void:
+	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if is_active:
 		btn.modulate = Color(1.8, 1.4, 0.4)
 	else:
@@ -440,7 +471,62 @@ func _reset_formula_display() -> void:
 	_update_formula_label()
 
 
+func _update_undo_button_visibility() -> void:
+	if not undo_btn:
+		return
+	var can_undo: bool = false
+	if _current_math_problem != null:
+		if _current_math_problem.is_three_operand and _current_math_problem.given_operand_index == -2:
+			can_undo = (_first_operand != -1 or _second_operand != -1)
+		else:
+			can_undo = (not _first_operand_is_prefilled and _first_operand != -1)
+	undo_btn.visible = can_undo
+	if can_undo:
+		undo_btn.scale = Vector2(0.85, 0.85)
+		var t = create_tween()
+		if t:
+			t.tween_property(undo_btn, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _on_undo_pressed() -> void:
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("click", 1.25)
+
+	# In 3-operand mode
+	if _current_math_problem != null and _current_math_problem.is_three_operand and _current_math_problem.given_operand_index == -2:
+		if _second_operand != -1:
+			if is_instance_valid(_second_bubble):
+				var t = create_tween()
+				if t:
+					t.tween_property(_second_bubble, "scale", Vector2.ONE, 0.1)
+			_second_operand = -1
+			_second_bubble = null
+			_update_formula_label()
+			return
+		elif _first_operand != -1:
+			if is_instance_valid(_first_bubble):
+				var t = create_tween()
+				if t:
+					t.tween_property(_first_bubble, "scale", Vector2.ONE, 0.1)
+			_first_operand = -1
+			_first_bubble = null
+			_update_formula_label()
+			return
+
+	# In 2-operand mode
+	if not _first_operand_is_prefilled and _first_operand != -1:
+		if is_instance_valid(_first_bubble):
+			var t = create_tween()
+			if t:
+				t.tween_property(_first_bubble, "scale", Vector2.ONE, 0.1)
+		_first_operand = -1
+		_first_bubble = null
+		_update_formula_label()
+
+
 func _update_formula_label() -> void:
+	_update_undo_button_visibility()
+
 	if _current_math_problem != null and _current_math_problem.is_three_operand and _current_math_problem.given_operand_index == -2:
 		var op1 = _current_op_symbol
 		var op2 = _current_math_problem.operator_symbol_2 if _current_math_problem.operator_symbol_2 != "" else "+"
@@ -488,6 +574,7 @@ func _handle_equation_selection(value: int, method: String, bubble: Area2D, slic
 				tween.tween_property(bubble, "scale", Vector2.ONE, 0.1)
 		elif _second_operand == -1:
 			if bubble == _first_bubble:
+				_on_undo_pressed()
 				return
 			_second_operand = value
 			_second_bubble = bubble
@@ -499,7 +586,12 @@ func _handle_equation_selection(value: int, method: String, bubble: Area2D, slic
 		else:
 			var third_operand: int = value
 			var third_bubble: Area2D = bubble
-			if third_bubble == _first_bubble or third_bubble == _second_bubble:
+			if third_bubble == _second_bubble:
+				_on_undo_pressed()
+				return
+			if third_bubble == _first_bubble:
+				_on_undo_pressed()
+				_on_undo_pressed()
 				return
 
 			var op1 = _current_op_symbol
@@ -590,17 +682,19 @@ func _handle_equation_selection(value: int, method: String, bubble: Area2D, slic
 	if _first_operand == -1:
 		_first_operand = value
 		_first_bubble = bubble
-		formula_bar.text = "[ " + str(_first_operand) + " ]  " + _current_op_symbol + "  ▶ [ ? ] ◀  =  " + str(_current_target_result)
+		_update_formula_label()
 		
 		if is_instance_valid(bubble):
 			var tween: Tween = create_tween()
-			tween.tween_property(bubble, "scale", Vector2(1.25, 1.25), 0.08)
-			tween.tween_property(bubble, "scale", Vector2.ONE, 0.1)
+			if tween:
+				tween.tween_property(bubble, "scale", Vector2(1.25, 1.25), 0.08)
+				tween.tween_property(bubble, "scale", Vector2.ONE, 0.1)
 	else:
 		var second_operand: int = value
 		var second_bubble: Area2D = bubble
 		
 		if second_bubble == _first_bubble:
+			_on_undo_pressed()
 			return
 
 		var calculated_result: int = _evaluate_operation(_first_operand, second_operand, _current_op_symbol)
@@ -616,6 +710,7 @@ func _handle_equation_selection(value: int, method: String, bubble: Area2D, slic
 			EventBus.answer_selected.emit(_current_target_result, method, null, slice_dir)
 			_first_operand = -1
 			_first_bubble = null
+			_update_undo_button_visibility()
 		else:
 			formula_bar.text = "[ " + str(_first_operand) + " ]  " + _current_op_symbol + "  [ " + str(second_operand) + " ]  ≠  " + str(_current_target_result) + "  ✗"
 			if is_instance_valid(_first_bubble) and _first_bubble.has_method("play_wrong_anim"):
@@ -626,6 +721,7 @@ func _handle_equation_selection(value: int, method: String, bubble: Area2D, slic
 			EventBus.answer_selected.emit(-999, method, null, slice_dir)
 			_first_operand = -1
 			_first_bubble = null
+			_update_undo_button_visibility()
 			var timer: SceneTreeTimer = get_tree().create_timer(0.45)
 			timer.timeout.connect(_reset_formula_display)
 

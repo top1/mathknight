@@ -8,7 +8,7 @@ class_name EnemyQueue
 @export var bubble_pool_size: int = 10
 @export var enemy_scene: PackedScene = preload("res://scenes/enemy/Enemy.tscn")
 @export var knight_x: float = 540.0
-@export var queue_slot_spacing: float = 36.0
+@export var queue_slot_spacing: float = 48.0
 @export var front_slot_x: float = 200.0
 
 var current_set_number: int = 1
@@ -151,6 +151,7 @@ func start_new_set() -> void:
 
 		var slot_x: float = front_slot_x - (float(i) * queue_slot_spacing)
 		enemy.position = Vector2(slot_x, 0.0)
+		enemy.z_index = 20 - i
 
 		enemies_in_set.append(enemy)
 
@@ -202,8 +203,10 @@ func update_active_problem() -> void:
 func _update_queue_focus() -> void:
 	for i in range(enemies_in_set.size()):
 		var enemy: Enemy = enemies_in_set[i]
-		if is_instance_valid(enemy) and enemy.has_method("set_focus"):
-			enemy.set_focus(i == 0)
+		if is_instance_valid(enemy):
+			enemy.z_index = 20 - i
+			if enemy.has_method("set_focus"):
+				enemy.set_focus(i == 0)
 
 
 func _on_enemy_defeated(enemy: Node2D) -> void:

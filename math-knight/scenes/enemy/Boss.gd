@@ -27,6 +27,9 @@ var is_enraged: bool = false
 var enrage_timer: Timer
 
 func _ready() -> void:
+	if ascii_entity:
+		ascii_entity.entity_type = "boss"
+		ascii_entity.facing_direction = 1.0
 	if has_node("/root/SpriteManager"):
 		var b_tex = get_node("/root/SpriteManager").get_boss_texture()
 		if b_tex and sprite:
@@ -58,6 +61,8 @@ func setup(b_name: String, phases: int, hp_per_phase: float, spd: float, dmg: fl
 
 func take_hit(damage: float) -> void:
 	current_hp -= damage
+	if ascii_entity:
+		ascii_entity.play_hurt()
 	
 	if current_hp <= 0:
 		advance_phase()

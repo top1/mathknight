@@ -35,13 +35,23 @@ const SWORD_CHARS: Array[String] = [
 # ---------------------------------------------------------------------------
 #  EXPORTS & CONFIG
 # ---------------------------------------------------------------------------
+var renderer_3d: Ascii3DRenderer = null
+
 @export_enum("knight", "goblin", "skeleton", "slime", "boss") var entity_type: String = "knight":
 	set(val):
 		entity_type = val
+		if renderer_3d and is_instance_valid(renderer_3d):
+			renderer_3d.entity_type = val
 		if is_inside_tree():
 			_build_entity()
 
-@export var facing_direction: float = 1.0 # 1.0 = Facing Right, -1.0 = Facing Left
+@export var facing_direction: float = 1.0: # 1.0 = Facing Right, -1.0 = Facing Left
+	set(val):
+		facing_direction = val
+		if renderer_3d and is_instance_valid(renderer_3d):
+			renderer_3d.facing_direction = val
+		queue_redraw()
+
 @export var rotation_yaw: float = 0.0 # Free 3D turntable yaw in radians (0 to TAU)
 @export var rotation_pitch: float = 0.0 # 3D tilt pitch in radians (-0.4 to 0.4)
 @export var equation_text: String = "":
@@ -51,9 +61,15 @@ const SWORD_CHARS: Array[String] = [
 			_rebuild_equation()
 
 @export var is_hovered: bool = false
+@export var is_focused: bool = true:
+	set(val):
+		is_focused = val
+		queue_redraw()
 @export var is_elite: bool = false:
 	set(val):
 		is_elite = val
+		if renderer_3d and is_instance_valid(renderer_3d):
+			renderer_3d.is_elite = val
 		if is_inside_tree():
 			_apply_elite_style()
 
@@ -147,6 +163,47 @@ func _ready() -> void:
 	_build_entity()
 	_load_saved_cosmetics()
 
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		if not sm.render_mode_changed.is_connected(_on_render_mode_changed):
+			sm.render_mode_changed.connect(_on_render_mode_changed)
+		_sync_3d_renderer(sm.render_mode_3d_shader)
+
+
+func _on_render_mode_changed(is_3d: bool) -> void:
+	_sync_3d_renderer(is_3d)
+
+
+func _sync_3d_renderer(enabled: bool) -> void:
+	if enabled:
+		if not renderer_3d:
+			renderer_3d = Ascii3DRenderer.new()
+			renderer_3d.name = "Ascii3DRenderer"
+			renderer_3d.render_mode = Ascii3DRenderer.RenderMode.SHADER_MATRIX
+			renderer_3d.entity_type = entity_type
+			renderer_3d.is_elite = is_elite
+			renderer_3d.facing_direction = facing_direction
+			add_child(renderer_3d)
+		renderer_3d.visible = true
+		renderer_3d.entity_type = entity_type
+		renderer_3d.is_elite = is_elite
+		renderer_3d.facing_direction = facing_direction
+		_update_3d_cosmetics()
+	else:
+		if renderer_3d:
+			renderer_3d.visible = false
+	queue_redraw()
+
+
+func _update_3d_cosmetics() -> void:
+	if renderer_3d and is_instance_valid(renderer_3d):
+		renderer_3d.apply_cosmetics({
+			"sword": equipped_sword,
+			"helmet": equipped_helmet,
+			"hat": equipped_hat,
+			"victory_anim": equipped_anim
+		})
+
 
 func _process(delta: float) -> void:
 	_t += delta
@@ -169,10 +226,24 @@ func _process(delta: float) -> void:
 	else:
 		_tick_animation(delta)
 
+	if renderer_3d and is_instance_valid(renderer_3d):
+		if entity_type == "slime":
+			renderer_3d.position = offset_mod
+		else:
+			renderer_3d.position = Vector2.ZERO
+
 	queue_redraw()
 
 
 func _draw() -> void:
+	# When 3D Shader Matrix renderer is active, bypass 2D legacy mesh,
+	# but ALWAYS draw the slime floor droplets and the math calculation (THE NUMBERS!)!
+	if renderer_3d and renderer_3d.visible:
+		if entity_type == "slime" or not slime_droplets.is_empty():
+			_draw_slime_droplets()
+		_draw_equation_numbers()
+		return
+
 	# 1. Slime floor droplets (underneath entity)
 	if entity_type == "slime" or not slime_droplets.is_empty():
 		_draw_slime_droplets()
@@ -830,14 +901,45 @@ func _init_sword_slots() -> void:
 
 
 func play_windup() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_windup()
 	_atk_state = AttackState.WINDUP
 	_atk_timer = 0.0
 
 
 func play_slash() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_slash()
 	_atk_state = AttackState.SLASH
 	_atk_timer = 0.0
 	_trigger_slash_burst()
+
+
+func play_attack() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_attack()
+	else:
+		play_slash()
+
+
+func play_walk() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_walk()
+
+
+func play_idle() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_idle()
+
+
+func play_hurt() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_hurt()
+
+
+func play_defeated() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_defeated()
 
 
 func play_special_anim(anim_name: String) -> void:
@@ -1922,6 +2024,8 @@ func _draw_slime_droplets() -> void:
 #  SPLATTER EXPLOSION
 # ---------------------------------------------------------------------------
 func trigger_splatter() -> void:
+	if renderer_3d and renderer_3d.visible:
+		renderer_3d.play_defeated()
 	_is_splatting = true
 	_splat_t = 0.0
 	var ctr := _centroid()
@@ -2129,6 +2233,43 @@ func _draw_entity_body() -> void:
 	# 4. Fixed Glowing Eyes
 	if not _is_splatting and not eyes.is_empty():
 		_draw_eyes(pos, scale_m, rot_m)
+
+
+func _draw_equation_numbers() -> void:
+	if equation_text.is_empty() or not font:
+		return
+
+	# Position equation numbers directly in the ground platform block beneath their feet
+	var target_y: float = 38.0
+
+	# Only the active front enemy (or hovered enemy) displays the equation badge at their feet!
+	if not is_focused and not is_hovered:
+		return
+
+	var total_w: float = font.get_string_size(equation_text, HORIZONTAL_ALIGNMENT_CENTER, -1, EFS).x
+	var start_x: float = -total_w * 0.5
+
+	# Focused target: High-visibility glowing golden battle pill badge
+	var pad_h: float = 8.0
+	var pad_v: float = 4.0
+	var badge_rect = Rect2(start_x - pad_h, target_y - EFS + 3.0 - pad_v, total_w + pad_h * 2.0, EFS + pad_v * 2.0)
+	draw_rect(badge_rect, Color(0.05, 0.03, 0.12, 0.95), true)
+	draw_rect(badge_rect, Color(eq_color.r, eq_color.g, eq_color.b, 1.0), false, 1.5)
+
+	# Pulsing golden glow
+	var eq_alpha_pulse: float = 0.92 + sin(_t * 3.5) * 0.08
+	var draw_col := Color(eq_color, eq_alpha_pulse)
+	var outline_col := Color(0.02, 0.02, 0.04, 0.98)
+
+	var draw_pos = Vector2(start_x, target_y)
+	draw_string(font, draw_pos + Vector2(-1.0, 0), equation_text, HORIZONTAL_ALIGNMENT_LEFT, -1, EFS, outline_col)
+	draw_string(font, draw_pos + Vector2(1.0, 0), equation_text, HORIZONTAL_ALIGNMENT_LEFT, -1, EFS, outline_col)
+	draw_string(font, draw_pos + Vector2(0, -1.0), equation_text, HORIZONTAL_ALIGNMENT_LEFT, -1, EFS, outline_col)
+	draw_string(font, draw_pos + Vector2(0, 1.0), equation_text, HORIZONTAL_ALIGNMENT_LEFT, -1, EFS, outline_col)
+	draw_string(font, draw_pos + Vector2(1.0, 1.0), equation_text, HORIZONTAL_ALIGNMENT_LEFT, -1, EFS, outline_col)
+
+	# Main crisp glowing text
+	draw_string(font, draw_pos, equation_text, HORIZONTAL_ALIGNMENT_LEFT, -1, EFS, draw_col)
 
 
 func _draw_eyes(entity_anchor: Vector2, scale_m: Vector2, rot_m: float) -> void:

@@ -39,13 +39,17 @@ func _ready() -> void:
 		if not rm.is_run_active:
 			rm.start_new_run()
 		
-		# Convert RunManager map format to display format
-		_map_data = _convert_run_manager_map(rm)
+		# Convert RunManager map format to display format if available
+		if "run_map" in rm and rm.run_map is Array:
+			_map_data = _convert_run_manager_map(rm)
+		else:
+			_map_data = _generate_fallback_map()
 		
 		# Check if returning from combat
 		if rm.pending_combat_result:
 			rm.pending_combat_result = false
-			rm.complete_current_node()
+			if rm.has_method("complete_current_node"):
+				rm.complete_current_node()
 			_sync_states_from_run_manager(rm)
 	else:
 		# Standalone fallback
@@ -108,6 +112,8 @@ func _convert_run_manager_map(rm) -> Array:
 	return tiers
 
 func _sync_states_from_run_manager(rm) -> void:
+	if not rm.has_method("get_node_state"):
+		return
 	for tier in _map_data:
 		for node in tier:
 			node["state"] = rm.get_node_state(node["id"])

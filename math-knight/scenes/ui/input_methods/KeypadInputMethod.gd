@@ -5,6 +5,7 @@ extends "res://scenes/ui/input_methods/InputMethodBase.gd"
 
 @onready var prompt_label: Label = $HeaderBar/PromptLabel
 @onready var buffer_label: Label = $HeaderBar/BufferLabel
+@onready var undo_btn: Button = get_node_or_null("HeaderBar/UndoBtn")
 @onready var grid_container: GridContainer = $GridContainer
 
 var digit_buffer: String = ""
@@ -15,6 +16,35 @@ func _ready() -> void:
 		if btn is Button:
 			var btn_text: String = btn.text
 			btn.pressed.connect(_on_key_pressed.bind(btn_text))
+
+	if undo_btn:
+		undo_btn.pressed.connect(_on_undo_pressed)
+		_setup_undo_button_style()
+
+
+func _setup_undo_button_style() -> void:
+	if not undo_btn:
+		return
+	var normal_style = StyleBoxFlat.new()
+	normal_style.bg_color = Color(0.22, 0.14, 0.32, 0.95)
+	normal_style.border_color = Color(0.9, 0.7, 0.25)
+	normal_style.set_border_width_all(1)
+	normal_style.set_corner_radius_all(4)
+	normal_style.content_margin_left = 6
+	normal_style.content_margin_right = 6
+
+	var hover_style = normal_style.duplicate()
+	hover_style.bg_color = Color(0.38, 0.22, 0.52, 1.0)
+	hover_style.border_color = Color(1.0, 0.95, 0.5)
+
+	var pressed_style = normal_style.duplicate()
+	pressed_style.bg_color = Color(0.14, 0.08, 0.22, 1.0)
+
+	undo_btn.add_theme_stylebox_override("normal", normal_style)
+	undo_btn.add_theme_stylebox_override("hover", hover_style)
+	undo_btn.add_theme_stylebox_override("pressed", pressed_style)
+	undo_btn.add_theme_stylebox_override("focus", hover_style)
+	undo_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
 func on_problem_presented(problem: RefCounted) -> void:
@@ -35,22 +65,44 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_key_pressed(str(keycode - KEY_0))
 		elif keycode >= KEY_KP_0 and keycode <= KEY_KP_9:
 			_on_key_pressed(str(keycode - KEY_KP_0))
-		elif keycode == KEY_BACKSPACE or keycode == KEY_DELETE or keycode == KEY_C:
-			_on_key_pressed("C")
+		elif keycode == KEY_BACKSPACE or keycode == KEY_DELETE:
+			_on_undo_pressed()
+		elif keycode == KEY_C or keycode == KEY_ESCAPE:
+			_on_clear_pressed()
 		elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER or keycode == KEY_SPACE:
 			_on_key_pressed("OK")
+
+
+func _on_undo_pressed() -> void:
+	if not is_active or is_in_countdown():
+		return
+	if not digit_buffer.is_empty():
+		digit_buffer = digit_buffer.substr(0, digit_buffer.length() - 1)
+		_update_display()
+		if is_inside_tree() and has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx("click", 0.9)
+
+
+func _on_clear_pressed() -> void:
+	if not is_active or is_in_countdown():
+		return
+	digit_buffer = ""
+	_update_display()
+	if is_inside_tree() and has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("click", 0.8)
 
 
 func _on_key_pressed(key_text: String) -> void:
 	if not is_active or is_in_countdown():
 		return
 
-	if has_node("/root/AudioManager"):
+	if is_inside_tree() and has_node("/root/AudioManager"):
 		get_node("/root/AudioManager").play_sfx("click", 1.1)
 
-	if key_text.contains("C") or key_text.contains("↺"):
-		digit_buffer = ""
-		_update_display()
+	if key_text.contains("⌫"):
+		_on_undo_pressed()
+	elif key_text.contains("C") or key_text.contains("↺"):
+		_on_clear_pressed()
 	elif key_text.contains("OK") or key_text.contains("⚔"):
 		_commit_answer()
 	else:
@@ -87,6 +139,14 @@ func _update_display() -> void:
 	else:
 		buffer_label.text = "[ " + digit_buffer + " ]"
 
+	if undo_btn:
+		undo_btn.visible = not digit_buffer.is_empty()
+		if undo_btn.visible and is_inside_tree():
+			undo_btn.scale = Vector2(0.85, 0.85)
+			var t = create_tween()
+			if t:
+				t.tween_property(undo_btn, "scale", Vector2.ONE, 0.1).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
 
 func play_correct_feedback() -> void:
 	if buffer_label:
@@ -96,11 +156,12 @@ func play_correct_feedback() -> void:
 func play_wrong_feedback() -> void:
 	if buffer_label:
 		buffer_label.modulate = Color(1.0, 0.3, 0.3)
-		var tween = create_tween()
-		if tween:
-			tween.tween_interval(0.3)
-			tween.tween_callback(func():
-				if buffer_label:
-					buffer_label.modulate = Color(1.0, 0.9, 0.3)
-			)
+		if is_inside_tree():
+			var tween = create_tween()
+			if tween:
+				tween.tween_interval(0.3)
+				tween.tween_callback(func():
+					if buffer_label:
+						buffer_label.modulate = Color(1.0, 0.9, 0.3)
+				)
 

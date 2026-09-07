@@ -21,31 +21,35 @@ const SFX_FILES: Dictionary = {
 
 const BGM_FILES: Dictionary = {
 	# Menu & Exploration
-	"title": "res://assets/audio/bgm_title.wav",
-	"menu": "res://assets/audio/bgm_menu.wav",
-	"menu_tavern": "res://assets/audio/bgm_menu.wav",
-	"shop": "res://assets/audio/bgm_shop.wav",
-	"map": "res://assets/audio/bgm_map.wav",
+	"title": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
+	"menu": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
+	"menu_tavern": "res://assets/audio/music_new/gb_menu_bazaar_shop.mp3",
+	"shop": "res://assets/audio/music_new/gb_menu_bazaar_shop.mp3",
+	"map": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
+	"stage_select": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
 	
 	# Operation-Specific Battles
-	"battle": "res://assets/audio/bgm_battle.wav",
-	"battle_addition": "res://assets/audio/bgm_addition.wav",
-	"battle_subtraction": "res://assets/audio/bgm_subtraction.wav",
-	"battle_multiplication": "res://assets/audio/bgm_multiplication.wav",
-	"battle_division": "res://assets/audio/bgm_division.wav",
-	"battle_mixed": "res://assets/audio/bgm_mixed.wav",
+	"battle": "res://assets/audio/music_new/gb_combat_goblin_skirmish.mp3",
+	"battle_addition": "res://assets/audio/music_new/gb_mode_arithmetic_arena.mp3",
+	"battle_subtraction": "res://assets/audio/music_new/gb_mode_logic_labyrinth.mp3",
+	"battle_multiplication": "res://assets/audio/music_new/gb_mode_geometric_grid.mp3",
+	"battle_division": "res://assets/audio/music_new/gb_mode_fractal_abyss.mp3",
+	"battle_mixed": "res://assets/audio/music_new/gb_combat_mind_over_magic.mp3",
 	
-	# Game Mode Battles
-	"battle_forge": "res://assets/audio/bgm_forge.wav",
-	"battle_chain": "res://assets/audio/bgm_chain.wav",
+	# Game Mode Battles & Archetypes
+	"battle_forge": "res://assets/audio/music_new/gb_mode_geometric_grid.mp3",
+	"battle_chain": "res://assets/audio/music_new/gb_mode_prime_cavern.mp3",
+	"battle_speed": "res://assets/audio/music_new/gb_mode_speed_sprint.mp3",
+	"battle_skirmish": "res://assets/audio/music_new/gb_combat_goblin_skirmish.mp3",
 	
 	# Encounters
-	"elite": "res://assets/audio/bgm_elite.wav",
-	"boss": "res://assets/audio/bgm_boss.wav",
+	"elite": "res://assets/audio/music_new/gb_combat_arcane_duel.mp3",
+	"boss": "res://assets/audio/music_new/gb_combat_golem_guardian.mp3",
 	
 	# Jingles
-	"victory": "res://assets/audio/jingle_victory.wav",
-	"stage_clear": "res://assets/audio/jingle_stage_clear.wav",
+	"victory": "res://assets/audio/music_new/gb_menu_chest_fanfare.mp3",
+	"stage_clear": "res://assets/audio/music_new/gb_menu_chest_fanfare.mp3",
+	"fanfare": "res://assets/audio/music_new/gb_menu_chest_fanfare.mp3",
 	"game_over": "res://assets/audio/jingle_game_over.wav"
 }
 
@@ -71,6 +75,7 @@ var _sfx_pool_index: int = 0
 var _current_track_name: String = ""
 var _music_crossfade_tween: Tween
 var _is_ducked_for_jingle: bool = false
+var _last_finished_time: float = 0.0
 
 
 func _ready() -> void:
@@ -102,6 +107,7 @@ func _setup_audio_players() -> void:
 	_jingle_player = AudioStreamPlayer.new()
 	_jingle_player.name = "JinglePlayer"
 	_jingle_player.bus = "Master"
+	_jingle_player.finished.connect(_on_jingle_player_finished)
 	add_child(_jingle_player)
 
 	# Polyphonic SFX Pool
@@ -114,24 +120,32 @@ func _setup_audio_players() -> void:
 
 
 func _on_music_player_finished(player: AudioStreamPlayer) -> void:
-	# Loop safety fallback: if non-looping stream finishes, safely replay on next frame
-	if player == _active_music_player and music_enabled and _current_track_name != "":
+	# Loop safety fallback: if non-looping stream finishes, safely replay with throttle guard
+	if player != _active_music_player or not music_enabled or _current_track_name == "":
+		return
+	var now: float = float(Time.get_ticks_msec()) / 1000.0
+	if now - _last_finished_time < 0.25:
+		return
+	_last_finished_time = now
+
+	if player.stream and player.stream.get_length() > 0.1:
 		player.call_deferred("play")
 
 
 func _sync_with_save_manager() -> void:
-	if has_node("/root/SaveManager"):
-		var sm = get_node("/root/SaveManager")
-		if "sfx_enabled" in sm:
-			sfx_enabled = sm.sfx_enabled
-		if "music_enabled" in sm:
-			music_enabled = sm.music_enabled
-		else:
-			sm.set("music_enabled", true)
+	if not is_inside_tree() or not has_node("/root/SaveManager"):
+		return
+	var sm = get_node("/root/SaveManager")
+	if "sfx_enabled" in sm:
+		sfx_enabled = sm.sfx_enabled
+	if "music_enabled" in sm:
+		music_enabled = sm.music_enabled
+	else:
+		sm.set("music_enabled", true)
 
 
 func _connect_event_bus() -> void:
-	if not has_node("/root/EventBus"):
+	if not is_inside_tree() or not has_node("/root/EventBus"):
 		return
 	var eb = get_node("/root/EventBus")
 
@@ -239,7 +253,7 @@ func _on_run_node_entered(node_data: Dictionary) -> void:
 # === Public Playback API ===
 
 func play_sfx(sound_name: String, pitch_scale: float = 1.0, volume_db: float = 0.0) -> AudioStreamPlayer:
-	if not sfx_enabled:
+	if not sfx_enabled or not is_inside_tree():
 		return null
 	if not sounds.has(sound_name):
 		push_warning("AudioManager: SFX '%s' not found!" % sound_name)
@@ -271,7 +285,7 @@ func play_music(track_name: String, fade_duration: float = 0.6) -> void:
 
 	_current_track_name = track_name
 
-	if not music_enabled:
+	if not music_enabled or not is_inside_tree():
 		return
 
 	if not sounds.has(track_name):
@@ -295,6 +309,8 @@ func play_music(track_name: String, fade_duration: float = 0.6) -> void:
 
 	incoming_player.stream = next_stream
 	var target_volume_db: float = linear_to_db(music_volume * master_volume)
+	if _is_ducked_for_jingle:
+		target_volume_db = -22.0
 	incoming_player.volume_db = -60.0
 	incoming_player.play()
 
@@ -303,20 +319,39 @@ func play_music(track_name: String, fade_duration: float = 0.6) -> void:
 
 	_music_crossfade_tween = create_tween().set_parallel(true)
 	_music_crossfade_tween.tween_property(incoming_player, "volume_db", target_volume_db, fade_duration)
-	if outgoing_player.playing:
+	if outgoing_player and outgoing_player.playing:
 		_music_crossfade_tween.tween_property(outgoing_player, "volume_db", -60.0, fade_duration)
 		_music_crossfade_tween.chain().tween_callback(outgoing_player.stop)
 
 	_active_music_player = incoming_player
 
 
-func play_adaptive_battle_music(config: RefCounted = null, is_boss: bool = false, is_elite: bool = false) -> void:
+func play_adaptive_battle_music(config: RefCounted = null, is_boss: bool = false, is_elite: bool = false, archetype: String = "") -> void:
 	if is_boss:
 		play_music("boss")
 		return
-	if is_elite:
+	if is_elite or archetype == "elite":
 		play_music("elite")
 		return
+	if archetype == "speed":
+		play_music("battle_speed")
+		return
+
+	# If RunManager is active, check current stage data if not explicitly provided
+	if has_node("/root/RunManager"):
+		var rm = get_node("/root/RunManager")
+		if rm and rm.is_run_active and rm.current_stage_data is Dictionary:
+			var stg_type = rm.current_stage_data.get("type", "")
+			var stg_arch = rm.current_stage_data.get("archetype", "")
+			if stg_type == "boss":
+				play_music("boss")
+				return
+			if stg_type == "elite" or stg_arch == "elite":
+				play_music("elite")
+				return
+			if stg_type == "speed" or stg_arch == "speed":
+				play_music("battle_speed")
+				return
 
 	if config == null and has_node("/root/MathEngine"):
 		config = get_node("/root/MathEngine").current_config
@@ -359,9 +394,9 @@ func stop_music(fade_duration: float = 0.8) -> void:
 	if _music_crossfade_tween and _music_crossfade_tween.is_valid():
 		_music_crossfade_tween.kill()
 
-	if fade_duration <= 0.0:
-		_music_player_a.stop()
-		_music_player_b.stop()
+	if not is_inside_tree() or fade_duration <= 0.0 or (not _music_player_a.playing and not _music_player_b.playing):
+		if _music_player_a: _music_player_a.stop()
+		if _music_player_b: _music_player_b.stop()
 		return
 
 	_music_crossfade_tween = create_tween().set_parallel(true)
@@ -374,35 +409,38 @@ func stop_music(fade_duration: float = 0.8) -> void:
 
 
 func play_jingle(jingle_name: String) -> void:
-	if not sounds.has(jingle_name):
+	if not is_inside_tree() or not sounds.has(jingle_name):
 		return
 	var stream: AudioStream = sounds[jingle_name]
 	if not stream:
 		return
 
-	# Temporarily duck music cleanly
+	# Temporarily duck music cleanly if active player is playing
 	_is_ducked_for_jingle = true
-	var duck_tween: Tween = create_tween().set_parallel(true)
-	if _music_player_a.playing:
-		duck_tween.tween_property(_music_player_a, "volume_db", -22.0, 0.25)
-	if _music_player_b.playing:
-		duck_tween.tween_property(_music_player_b, "volume_db", -22.0, 0.25)
+	if _music_player_a.playing or _music_player_b.playing:
+		var duck_tween: Tween = create_tween().set_parallel(true)
+		if _music_player_a.playing:
+			duck_tween.tween_property(_music_player_a, "volume_db", -22.0, 0.25)
+		if _music_player_b.playing:
+			duck_tween.tween_property(_music_player_b, "volume_db", -22.0, 0.25)
 
+	_jingle_player.stop()
 	_jingle_player.stream = stream
 	_jingle_player.volume_db = linear_to_db(music_volume * master_volume) + 2.0
 	_jingle_player.play()
 
-	# Restore music volume cleanly once jingle finishes
-	var callable: Callable = func():
-		_is_ducked_for_jingle = false
+
+func _on_jingle_player_finished() -> void:
+	_is_ducked_for_jingle = false
+	if not is_inside_tree():
+		return
+	if (_music_player_a and _music_player_a.playing) or (_music_player_b and _music_player_b.playing):
 		var restore_tween: Tween = create_tween().set_parallel(true)
 		var target_vol: float = linear_to_db(music_volume * master_volume)
-		if _music_player_a.playing:
+		if _music_player_a and _music_player_a.playing:
 			restore_tween.tween_property(_music_player_a, "volume_db", target_vol, 0.8)
-		if _music_player_b.playing:
+		if _music_player_b and _music_player_b.playing:
 			restore_tween.tween_property(_music_player_b, "volume_db", target_vol, 0.8)
-
-	_jingle_player.finished.connect(callable, CONNECT_ONE_SHOT)
 
 
 func set_music_enabled(p_enabled: bool) -> void:
@@ -436,23 +474,33 @@ func get_current_track() -> String:
 # === Audio Loading & Procedural Synthesis Engine ===
 
 func _load_or_generate_all_audio() -> void:
-	DirAccess.make_dir_recursive_absolute("res://assets/audio/")
-
-	# 1. SFX: Generate in-memory stream directly so it never depends on .import flags
+	# 1. SFX: Load from disk first, fallback to in-memory synthesis without disk writes
 	for key in SFX_FILES:
 		var file_path: String = SFX_FILES[key]
-		var stream: AudioStream = _synthesize_sfx(key)
-		if stream is AudioStreamWAV:
-			_save_wav_file(file_path, stream as AudioStreamWAV)
+		var stream: AudioStream = null
+		if ResourceLoader.exists(file_path):
+			stream = load(file_path) as AudioStream
+		if not stream:
+			stream = _synthesize_sfx(key)
 		sounds[key] = stream
 
-	# 2. BGM & Jingles: Generate full in-memory AudioStreamWAV with precise sample loop bounds
+	# 2. BGM & Jingles: Load high-quality audio files from disk (MP3 / WAV)
 	for key in BGM_FILES:
 		var file_path: String = BGM_FILES[key]
-		var stream: AudioStreamWAV = _synthesize_bgm(key)
-		if stream:
-			_save_wav_file(file_path, stream)
-			sounds[key] = stream
+		var stream: AudioStream = null
+		if ResourceLoader.exists(file_path):
+			stream = load(file_path) as AudioStream
+
+		if stream is AudioStreamMP3:
+			# Non-looping for fanfares/jingles, looping for background music
+			var is_jingle: bool = (key in ["victory", "stage_clear", "fanfare", "game_over"])
+			stream.loop = not is_jingle
+			stream.loop_offset = 0.0
+		elif not stream:
+			# In-memory synthesis fallback if file is missing
+			stream = _synthesize_bgm(key)
+
+		sounds[key] = stream
 
 
 func _synthesize_sfx(sfx_key: String) -> AudioStreamWAV:

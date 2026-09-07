@@ -34,10 +34,13 @@ var equipped_cosmetics: Dictionary = {
 # Highscores (top 10)
 var best_scores: Array[Dictionary] = []
 
+signal render_mode_changed(is_3d: bool)
+
 # Settings
 var tutorial_tips_enabled: bool = true
 var sfx_enabled: bool = true
 var music_enabled: bool = true
+var render_mode_3d_shader: bool = true
 
 
 func _ready() -> void:
@@ -224,7 +227,8 @@ func save_data() -> void:
 		"best_scores": best_scores,
 		"tutorial_tips_enabled": tutorial_tips_enabled,
 		"sfx_enabled": sfx_enabled,
-		"music_enabled": music_enabled
+		"music_enabled": music_enabled,
+		"render_mode_3d_shader": render_mode_3d_shader
 	}
 
 	var json_string: String = JSON.stringify(data, "\t")
@@ -289,6 +293,19 @@ func load_data() -> void:
 	tutorial_tips_enabled = d.get("tutorial_tips_enabled", true)
 	sfx_enabled = d.get("sfx_enabled", true)
 	music_enabled = d.get("music_enabled", true)
+	render_mode_3d_shader = d.get("render_mode_3d_shader", true)
+
+
+func set_render_mode_3d_shader(enabled: bool) -> void:
+	if render_mode_3d_shader != enabled:
+		render_mode_3d_shader = enabled
+		save_data()
+		render_mode_changed.emit(render_mode_3d_shader)
+
+
+func toggle_render_mode_3d_shader() -> bool:
+	set_render_mode_3d_shader(!render_mode_3d_shader)
+	return render_mode_3d_shader
 
 
 func reset_all_data() -> void:

@@ -408,6 +408,120 @@ func _ready() -> void:
 	ia.queue_free()
 
 	# -----------------------------------------------------------------
+	# Test 14: Keypad Undo / Backspace
+	# -----------------------------------------------------------------
+	total_tests += 1
+	print("\n[TEST 14] Testing Keypad Undo / Backspace Button...")
+	var kp_scene = load("res://scenes/ui/input_methods/KeypadInputMethod.tscn")
+	var kp = kp_scene.instantiate() as KeypadInputMethod
+	add_child(kp)
+
+	var kp_prob = MathProblem.new()
+	kp_prob.correct_answer = 999
+	kp.on_problem_presented(kp_prob)
+
+	var kp_undo = kp.get_node_or_null("HeaderBar/UndoBtn") as Button
+	var kp_ok = true
+	if kp_undo == null:
+		printerr("  ✗ FAIL: Keypad HeaderBar/UndoBtn does not exist")
+		kp_ok = false
+	elif kp_undo.visible:
+		printerr("  ✗ FAIL: Keypad UndoBtn should be hidden when empty")
+		kp_ok = false
+
+	# Type 4, 8
+	kp._on_key_pressed("4")
+	if kp.digit_buffer != "4" or not kp_undo.visible:
+		printerr("  ✗ FAIL: Buffer should be '4' and UndoBtn visible")
+		kp_ok = false
+
+	kp._on_key_pressed("8")
+	if kp.digit_buffer != "48":
+		printerr("  ✗ FAIL: Buffer should be '48'")
+		kp_ok = false
+
+	# Undo backspace
+	kp._on_undo_pressed()
+	if kp.digit_buffer != "4" or not kp_undo.visible:
+		printerr("  ✗ FAIL: Buffer should be '4' after undo")
+		kp_ok = false
+
+	kp._on_undo_pressed()
+	if kp.digit_buffer != "" or kp_undo.visible:
+		printerr("  ✗ FAIL: Buffer should be empty and UndoBtn hidden")
+		kp_ok = false
+
+	if kp_ok:
+		print("  ✓ Keypad Undo / Backspace button and single-digit undo verified.")
+		pass_count += 1
+	kp.queue_free()
+
+	# -----------------------------------------------------------------
+	# Test 15: InputArea Equation Builder Undo & Deselection
+	# -----------------------------------------------------------------
+	total_tests += 1
+	print("\n[TEST 15] Testing InputArea Equation Builder Undo & Deselection...")
+	var eq_scene = load("res://scenes/ui/InputArea.tscn")
+	var eq_ia = eq_scene.instantiate()
+	add_child(eq_ia)
+
+	var eq_prob = MathProblem.new()
+	eq_prob.operand_a = 5
+	eq_prob.operand_b = 7
+	eq_prob.operator_symbol = "+"
+	eq_prob.correct_answer = 12
+	eq_prob.given_operand_index = -1
+	var eq_cfg = MathConfig.new()
+	eq_cfg.game_mode = MathConfig.GameMode.RESULT_TO_EQUATION
+	eq_cfg.input_type = MathConfig.InputType.BUBBLES
+	MathEngine.current_config = eq_cfg
+
+	eq_ia._on_problem_presented(eq_prob)
+	var eq_undo = eq_ia.get_node_or_null("HeaderBar/UndoBtn") as Button
+	var eq_ok = true
+
+	if eq_undo == null:
+		printerr("  ✗ FAIL: InputArea HeaderBar/UndoBtn does not exist")
+		eq_ok = false
+	elif eq_undo.visible:
+		printerr("  ✗ FAIL: InputArea UndoBtn should be hidden on new problem")
+		eq_ok = false
+
+	var bub_scene = load("res://scenes/ui/NumberBubble.tscn")
+	var b1 = bub_scene.instantiate()
+	eq_ia.bubble_container.add_child(b1)
+	b1.setup(5, Vector2(50, 50), "left", 1)
+
+	# User picks b1
+	eq_ia._handle_equation_selection(5, "tap", b1, Vector2.ZERO)
+	if eq_ia._first_operand != 5 or not eq_undo.visible:
+		printerr("  ✗ FAIL: _first_operand should be 5 and UndoBtn visible")
+		eq_ok = false
+
+	# Press Undo Button
+	eq_ia._on_undo_pressed()
+	if eq_ia._first_operand != -1 or eq_undo.visible:
+		printerr("  ✗ FAIL: _first_operand should be reset to -1 and UndoBtn hidden")
+		eq_ok = false
+
+	# Pick b1 again, then tap b1 again to deselect
+	eq_ia._handle_equation_selection(5, "tap", b1, Vector2.ZERO)
+	if eq_ia._first_operand != 5:
+		printerr("  ✗ FAIL: _first_operand should be 5 again")
+		eq_ok = false
+	eq_ia._handle_equation_selection(5, "tap", b1, Vector2.ZERO)
+	if eq_ia._first_operand != -1 or eq_undo.visible:
+		printerr("  ✗ FAIL: tapping same bubble should deselect and hide UndoBtn")
+		eq_ok = false
+
+	if eq_ok:
+		print("  ✓ InputArea Equation Undo button and bubble deselection verified.")
+		pass_count += 1
+
+	b1.queue_free()
+	eq_ia.queue_free()
+
+	# -----------------------------------------------------------------
 	# Summary
 	# -----------------------------------------------------------------
 	print("\n==================================================")

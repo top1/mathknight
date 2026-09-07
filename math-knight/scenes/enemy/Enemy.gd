@@ -144,6 +144,9 @@ func set_focus(is_focused: bool) -> void:
 		if shield_label:
 			shield_label.modulate = Color(0.7, 0.7, 0.7, 0.6)
 
+	if ascii_entity:
+		ascii_entity.is_focused = is_focused
+
 	var tween: Tween = create_tween()
 	tween.tween_property(self, "modulate", target_mod, 0.2)
 
@@ -151,6 +154,8 @@ func set_focus(is_focused: bool) -> void:
 func activate() -> void:
 	state = "walking"
 	set_focus(true)
+	if ascii_entity:
+		ascii_entity.play_walk()
 
 
 func _process(delta: float) -> void:
@@ -180,12 +185,17 @@ func _start_attacking() -> void:
 	state = "attacking"
 	attack_timer.wait_time = attack_interval
 	attack_timer.start()
+	if ascii_entity:
+		ascii_entity.play_idle()
 	enemy_reached_knight.emit(self)
 
 
 func _on_attack_timer_timeout() -> void:
 	if state != "attacking" or GameManager.state == GameManager.GameState.GAME_OVER:
 		return
+
+	if ascii_entity:
+		ascii_entity.play_attack()
 
 	EventBus.enemy_attacks_knight.emit(attack_damage)
 
@@ -199,6 +209,9 @@ func _on_attack_timer_timeout() -> void:
 func take_hit(damage: float) -> void:
 	if state == "defeated":
 		return
+
+	if ascii_entity:
+		ascii_entity.play_hurt()
 
 	# If Elite enemy has more problems remaining, advance to next problem!
 	if is_elite and current_problem_idx + 1 < total_problems_count:

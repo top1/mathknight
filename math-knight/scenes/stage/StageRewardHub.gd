@@ -9,9 +9,9 @@ const CosmeticDB = preload("res://scripts/resources/CosmeticDatabase.gd")
 
 @onready var bg: MenuBackground = $MenuBackground
 @onready var stage_title: Label = $MarginContainer/MainLayout/Header/StageTitle
-@onready var hp_label: Label = $MarginContainer/MainLayout/TopBar/HPBadge/HPContainer/HPLabel
-@onready var gold_label: Label = $MarginContainer/MainLayout/TopBar/GoldBadge/GoldContainer/GoldLabel
-@onready var diamond_label: Label = $MarginContainer/MainLayout/TopBar/DiamondBadge/DiamondContainer/DiamondLabel
+@onready var hp_label: Label = $MarginContainer/MainLayout/TopBar/HBox/HPBadge/HPContainer/HPLabel
+@onready var gold_label: Label = $MarginContainer/MainLayout/TopBar/HBox/GoldBadge/GoldContainer/GoldLabel
+@onready var diamond_label: Label = $MarginContainer/MainLayout/TopBar/HBox/DiamondBadge/DiamondContainer/DiamondLabel
 
 @onready var tab_shop_btn: Button = $MarginContainer/MainLayout/TabButtons/ShopTabBtn
 @onready var tab_chest_btn: Button = $MarginContainer/MainLayout/TabButtons/ChestTabBtn

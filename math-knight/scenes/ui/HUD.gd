@@ -10,10 +10,12 @@ extends CanvasLayer
 @onready var menu_btn: Button = $MarginContainer/TopBar/MenuBtn
 @onready var countdown_label: Label = $CountdownContainer/CountdownLabel
 
+var render_mode_btn: Button
 var _countdown_tween: Tween
 
 
 func _ready() -> void:
+	_setup_render_mode_button()
 	_setup_styles()
 	EventBus.knight_damaged.connect(_on_knight_damaged)
 	EventBus.score_changed.connect(update_score)
@@ -24,6 +26,40 @@ func _ready() -> void:
 		menu_btn.pressed.connect(_on_menu_pressed)
 	update_combo(0)
 	update_stage(GameManager.current_stage, GameManager.TOTAL_STAGES)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F3:
+			_on_render_mode_pressed()
+
+
+func _setup_render_mode_button() -> void:
+	render_mode_btn = Button.new()
+	render_mode_btn.name = "RenderModeBtn"
+	render_mode_btn.focus_mode = Control.FOCUS_NONE
+	var top_bar = $MarginContainer/TopBar
+	top_bar.add_child(render_mode_btn)
+	if menu_btn:
+		top_bar.move_child(render_mode_btn, menu_btn.get_index())
+	render_mode_btn.pressed.connect(_on_render_mode_pressed)
+	_update_render_mode_btn()
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").render_mode_changed.connect(func(_is_3d): _update_render_mode_btn())
+
+
+func _on_render_mode_pressed() -> void:
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").toggle_render_mode_3d_shader()
+
+
+func _update_render_mode_btn() -> void:
+	if not render_mode_btn:
+		return
+	var is_3d: bool = true
+	if has_node("/root/SaveManager"):
+		is_3d = get_node("/root/SaveManager").render_mode_3d_shader
+	render_mode_btn.text = "🎨 3D MATRIX" if is_3d else "🎨 2D ASCII"
 
 
 func _setup_styles() -> void:
@@ -59,6 +95,12 @@ func _setup_styles() -> void:
 	menu_btn.add_theme_stylebox_override("hover", btn_hover)
 	menu_btn.add_theme_stylebox_override("pressed", btn_style)
 	menu_btn.add_theme_stylebox_override("focus", btn_hover)
+
+	if render_mode_btn:
+		render_mode_btn.add_theme_stylebox_override("normal", btn_style)
+		render_mode_btn.add_theme_stylebox_override("hover", btn_hover)
+		render_mode_btn.add_theme_stylebox_override("pressed", btn_style)
+		render_mode_btn.add_theme_stylebox_override("focus", btn_hover)
 
 
 func update_hp(current: float, max_hp: float) -> void:

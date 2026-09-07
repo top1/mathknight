@@ -116,6 +116,13 @@ func _ready() -> void:
 	_start_title_cipher()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F3:
+			if has_node("/root/SaveManager"):
+				get_node("/root/SaveManager").toggle_render_mode_3d_shader()
+
+
 func _setup_rune_ring() -> void:
 	pass
 

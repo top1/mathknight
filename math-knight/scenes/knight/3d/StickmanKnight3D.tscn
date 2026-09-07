@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8m3stickmanknight3d"]
+
+[ext_resource type="Script" path="res://scenes/knight/3d/StickmanKnight3D.gd" id="1_stickman"]
+
+[node name="StickmanKnight3D" type="Node3D"]
+script = ExtResource("1_stickman")

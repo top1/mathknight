@@ -1,0 +1,102 @@
+[gd_scene load_steps=6 format=3 uid="uid://b1con5tud10"]
+
+[ext_resource type="Script" path="res://scenes/tools/AppIconStudio.gd" id="1_studio"]
+[ext_resource type="Script" path="res://scripts/utils/MenuBackground.gd" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiPedestal.gd" id="3_pedestal"]
+[ext_resource type="Script" path="res://scripts/utils/AsciiEntity.gd" id="4_knight"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="5_font"]
+
+[node name="AppIconStudio" type="Node2D"]
+script = ExtResource("1_studio")
+
+[node name="MainViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = false
+size = Vector2i(512, 512)
+render_target_update_mode = 3
+
+[node name="BgColor" type="ColorRect" parent="MainViewport"]
+offset_right = 512.0
+offset_bottom = 512.0
+color = Color(0.027, 0.043, 0.078, 1)
+
+[node name="MenuBackground" type="Control" parent="MainViewport"]
+offset_right = 512.0
+offset_bottom = 512.0
+script = ExtResource("2_bg")
+column_spacing = 18
+
+[node name="AsciiPedestal" type="Control" parent="MainViewport"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 210.0
+offset_top = 405.0
+offset_right = 210.0
+offset_bottom = 405.0
+script = ExtResource("3_pedestal")
+radius_x = 76.0
+radius_y = 22.0
+base_height = 14.0
+
+[node name="AsciiKnight" type="Node2D" parent="MainViewport"]
+position = Vector2(210, 325)
+scale = Vector2(2.8, 2.8)
+script = ExtResource("4_knight")
+entity_type = "knight"
+facing_direction = 1.0
+
+[node name="TitleLabel" type="Label" parent="MainViewport"]
+offset_top = 34.0
+offset_right = 512.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(1, 0.88, 0.22, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_constants/shadow_offset_x = 4
+theme_override_constants/shadow_offset_y = 4
+theme_override_constants/shadow_outline_size = 6
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 24
+text = "MATH KNIGHT"
+horizontal_alignment = 1
+
+[node name="FgViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(432, 432)
+render_target_update_mode = 3
+
+[node name="AsciiPedestal" type="Control" parent="FgViewport"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 175.0
+offset_top = 345.0
+offset_right = 175.0
+offset_bottom = 345.0
+script = ExtResource("3_pedestal")
+radius_x = 64.0
+radius_y = 18.0
+base_height = 12.0
+
+[node name="AsciiKnight" type="Node2D" parent="FgViewport"]
+position = Vector2(175, 275)
+scale = Vector2(2.35, 2.35)
+script = ExtResource("4_knight")
+entity_type = "knight"
+facing_direction = 1.0
+
+[node name="BgViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = false
+size = Vector2i(432, 432)
+render_target_update_mode = 3
+
+[node name="BgColor" type="ColorRect" parent="BgViewport"]
+offset_right = 432.0
+offset_bottom = 432.0
+color = Color(0.027, 0.043, 0.078, 1)
+
+[node name="MenuBackground" type="Control" parent="BgViewport"]
+offset_right = 432.0
+offset_bottom = 432.0
+script = ExtResource("2_bg")
+column_spacing = 16
