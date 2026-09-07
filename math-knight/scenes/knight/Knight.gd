@@ -129,8 +129,25 @@ func calculate_attack_strike(answer_time_sec: float, combo_streak: int, chain_co
 	# Determine comic onomatopoeia banner tag
 	var onomatopoeia: String = "POW!"
 	var archetype: String = "attack"
+	# Check for elemental weapon affix from SaveManager
+	var affix: String = ""
+	if has_node("/root/SaveManager"):
+		affix = get_node("/root/SaveManager").weapon_affix
+
 	if is_crit:
 		onomatopoeia = "KRRRANG!"
+		archetype = "crit"
+	elif affix == "flame":
+		onomatopoeia = "FLAME-STRIKE!"
+		archetype = "cleave"
+	elif affix == "frost":
+		onomatopoeia = "FROST-CHILL!"
+		archetype = "blitz"
+	elif affix == "greed":
+		onomatopoeia = "GREED-SLASH!"
+		archetype = "attack"
+	elif affix == "storm":
+		onomatopoeia = "STORM-ZAP!"
 		archetype = "crit"
 	elif speed_tier == "blitz":
 		onomatopoeia = "BLITZ!"
@@ -153,7 +170,8 @@ func calculate_attack_strike(answer_time_sec: float, combo_streak: int, chain_co
 		"combo_multiplier": combo_mult,
 		"chain_multiplier": chain_mult,
 		"tag": onomatopoeia,
-		"archetype": archetype
+		"archetype": archetype,
+		"affix": affix
 	}
 
 

@@ -1,0 +1,183 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/lumber/LumberYard.gd" id="1_lumber"]
+[ext_resource type="FontFile" path="res://assets/fonts/LilitaOne-Regular.ttf" id="2_font"]
+
+[sub_resource type="Gradient" id="Gradient_sawdust"]
+colors = PackedColorArray(0.9, 0.7, 0.4, 1, 0.6, 0.4, 0.2, 0)
+
+[node name="LumberYard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lumber")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.15, 0.08, 1)
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 15.0
+offset_top = 10.0
+offset_right = -15.0
+offset_bottom = 45.0
+grow_horizontal = 2
+
+[node name="BackBtn" type="Button" parent="TopBar"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+text = "← ZURÜCK"
+
+[node name="Title" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.95, 0.85, 0.4, 1)
+text = "🪓 DER KÖNIGLICHE HOLZPLATZ"
+horizontal_alignment = 1
+
+[node name="WoodLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+text = "🪵 0 Holz  |  🪙 0 Gold"
+
+[node name="MainBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -120.0
+offset_right = 220.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="PromptLabel" type="Label" parent="MainBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 0.95, 0.7, 1)
+text = "STAMM-LÄNGE: 12 METER"
+horizontal_alignment = 1
+
+[node name="ReqLabel" type="Label" parent="MainBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.8, 0.9, 0.7, 1)
+text = "LAGER-ANFORDERUNG: Balken der Länge 3m (12 ÷ 3 = ?)"
+horizontal_alignment = 1
+
+[node name="SawbenchArea" type="VBoxContainer" parent="MainBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SawVisual" type="Label" parent="MainBox/SawbenchArea"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "⚙️"
+horizontal_alignment = 1
+
+[node name="LogDisplay" type="Control" parent="MainBox/SawbenchArea"]
+custom_minimum_size = Vector2(340, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="LogWood" type="ColorRect" parent="MainBox/SawbenchArea/LogDisplay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.55, 0.33, 0.16, 1)
+
+[node name="CutMarkers" type="Control" parent="MainBox/SawbenchArea/LogDisplay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SawBtn" type="Button" parent="MainBox/SawbenchArea"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 15
+text = "🪓 SÄGEN!"
+
+[node name="StretchToolArea" type="VBoxContainer" parent="MainBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="StretchSlider" type="HSlider" parent="MainBox/StretchToolArea"]
+custom_minimum_size = Vector2(340, 20)
+layout_mode = 2
+size_flags_horizontal = 4
+min_value = 1.0
+max_value = 12.0
+step = 1.0
+value = 1.0
+ticks_on_borders = true
+
+[node name="ValueLabel" type="Label" parent="MainBox/StretchToolArea"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "Schnitt-Länge: 1m (12 Schnitte)"
+horizontal_alignment = 1
+
+[node name="StorageArea" type="VBoxContainer" parent="MainBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="StorageTitle" type="Label" parent="MainBox/StorageArea"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+text = "Lager-Fächer:"
+horizontal_alignment = 1
+
+[node name="RackSlots" type="HBoxContainer" parent="MainBox/StorageArea"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="Sawdust" type="CPUParticles2D" parent="."]
+position = Vector2(320, 160)
+emitting = false
+amount = 20
+lifetime = 0.4
+one_shot = true
+explosiveness = 0.9
+spread = 180.0
+gravity = Vector2(0, 80)
+initial_velocity_min = 40.0
+initial_velocity_max = 85.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color_ramp = SubResource("Gradient_sawdust")

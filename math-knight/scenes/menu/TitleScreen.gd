@@ -12,6 +12,8 @@ extends Control
 @onready var training_btn: Button = $MainContainer/VBox/ContentRow/ButtonSection/TrainingBtn
 @onready var equip_btn: Button = $MainContainer/VBox/ContentRow/ButtonSection/BottomRow/EquipBtn
 @onready var settings_btn: Button = $MainContainer/VBox/ContentRow/ButtonSection/BottomRow/SettingsBtn
+@onready var forge_btn: Button = $MainContainer/VBox/ContentRow/ButtonSection/MiniGamesRow/ForgeBtn
+@onready var lumber_btn: Button = $MainContainer/VBox/ContentRow/ButtonSection/MiniGamesRow/LumberBtn
 @onready var level_badge: Label = $MainContainer/VBox/TopBar/LevelBadge
 @onready var diamond_label: Label = $MainContainer/VBox/TopBar/DiamondLabel
 
@@ -40,6 +42,8 @@ const CIPHER_CHARS: Array[String] = [
 var _btn_config: Dictionary = {
 	"new_game": {"text": "⚔ NEUES SPIEL", "color": Color("#f7c52a"), "size": 13},
 	"training": {"text": "⚡ TRAINING", "color": Color("#29b6f6"), "size": 11},
+	"forge": {"text": "🔨 SCHMIEDE", "color": Color("#ff9800"), "size": 9},
+	"lumber": {"text": "🪓 HOLZPLATZ", "color": Color("#8bc34a"), "size": 9},
 	"equip": {"text": "🎒 AUSRÜSTUNG", "color": Color("#ab47bc"), "size": 9},
 	"settings": {"text": "⬆ HELD & TALENTE", "color": Color("#26a69a"), "size": 9}
 }
@@ -64,7 +68,7 @@ var _title_settings: LabelSettings
 var _button_glitch_tweens: Dictionary = {}
 
 func _ready() -> void:
-	buttons = [new_game_btn, training_btn, equip_btn, settings_btn]
+	buttons = [new_game_btn, training_btn, forge_btn, lumber_btn, equip_btn, settings_btn]
 	
 	_decoded_indices.resize(TARGET_TITLE.length())
 	_decoded_indices.fill(false)
@@ -447,6 +451,8 @@ func _trigger_button_text_glitch(btn: Button, target_text: String, accent_color:
 func _setup_button_juice() -> void:
 	_attach_button_behavior(new_game_btn, _btn_config["new_game"]["text"], _btn_config["new_game"]["color"])
 	_attach_button_behavior(training_btn, _btn_config["training"]["text"], _btn_config["training"]["color"])
+	_attach_button_behavior(forge_btn, _btn_config["forge"]["text"], _btn_config["forge"]["color"])
+	_attach_button_behavior(lumber_btn, _btn_config["lumber"]["text"], _btn_config["lumber"]["color"])
 	_attach_button_behavior(equip_btn, _btn_config["equip"]["text"], _btn_config["equip"]["color"])
 	_attach_button_behavior(settings_btn, _btn_config["settings"]["text"], _btn_config["settings"]["color"])
 
@@ -499,6 +505,16 @@ func _setup_signals() -> void:
 		training_btn.pressed.connect(func():
 			if has_node("/root/AudioManager"): get_node("/root/AudioManager").play_sfx("click")
 			_on_training_pressed()
+		)
+	if forge_btn:
+		forge_btn.pressed.connect(func():
+			if has_node("/root/AudioManager"): get_node("/root/AudioManager").play_sfx("click")
+			get_tree().change_scene_to_file("res://scenes/forge/BlacksmithForge.tscn")
+		)
+	if lumber_btn:
+		lumber_btn.pressed.connect(func():
+			if has_node("/root/AudioManager"): get_node("/root/AudioManager").play_sfx("click")
+			get_tree().change_scene_to_file("res://scenes/lumber/LumberYard.tscn")
 		)
 	if equip_btn:
 		equip_btn.pressed.connect(func():

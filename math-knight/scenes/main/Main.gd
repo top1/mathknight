@@ -89,6 +89,23 @@ func _on_answer_correct(_problem: RefCounted, chain_count: int = 1) -> void:
 		# Comic onomatopoeia popup burst ("POW!", "BLITZ!", "CLEAVE!", "KRRRANG!")
 		JuiceManager.spawn_comic_popup(self, comic_tag, enemy_pos + Vector2(0, -35), comic_archetype)
 
+		# Elemental Affix triggers
+		var affix: String = strike_data.get("affix", "")
+		if front_enemy and is_instance_valid(front_enemy):
+			if affix == "frost":
+				front_enemy.speed = maxf(12.0, front_enemy.speed * 0.65)
+				front_enemy.modulate = Color(0.7, 0.9, 1.3)
+			elif affix == "greed":
+				if has_node("/root/RunManager"):
+					get_node("/root/RunManager").add_run_gold(randi_range(2, 4), "Gier-Klinge")
+			elif affix == "flame" and front_enemy.hp > 0.0:
+				var burn_timer = get_tree().create_timer(0.4)
+				burn_timer.timeout.connect(func():
+					if front_enemy and is_instance_valid(front_enemy) and front_enemy.hp > 0.0:
+						front_enemy.take_hit(1.0)
+						_spawn_damage_number(front_enemy.global_position, "🔥 1", Color(1.0, 0.4, 0.1))
+				)
+
 		if chain_count >= 2:
 			# Spawn X-Cut double slash arcs on impact
 			_spawn_slash_arc(enemy_pos, -0.4, Color(0.3, 1.0, 1.0))

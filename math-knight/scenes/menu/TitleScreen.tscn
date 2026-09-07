@@ -166,6 +166,22 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("5_font_silk")
 
+[node name="MiniGamesRow" type="HBoxContainer" parent="MainContainer/VBox/ContentRow/ButtonSection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ForgeBtn" type="Button" parent="MainContainer/VBox/ContentRow/ButtonSection/MiniGamesRow"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("5_font_silk")
+
+[node name="LumberBtn" type="Button" parent="MainContainer/VBox/ContentRow/ButtonSection/MiniGamesRow"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("5_font_silk")
+
 [node name="BottomRow" type="HBoxContainer" parent="MainContainer/VBox/ContentRow/ButtonSection"]
 layout_mode = 2
 theme_override_constants/separation = 8

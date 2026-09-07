@@ -34,6 +34,34 @@ func spend_gold(amount: int) -> bool:
 	return false
 
 
+var wood: int = 0
+var weapon_affix: String = "" # "flame", "frost", "greed", "storm"
+var forge_level: int = 1
+var lumber_level: int = 1
+
+
+func add_wood(amount: int) -> void:
+	if amount <= 0:
+		return
+	wood += amount
+	save_data()
+
+
+func spend_wood(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if wood >= amount:
+		wood -= amount
+		save_data()
+		return true
+	return false
+
+
+func set_weapon_affix(affix: String) -> void:
+	weapon_affix = affix
+	save_data()
+
+
 # Knight permanent stats
 var knight_level: int = 1
 var knight_xp: int = 0
@@ -240,6 +268,10 @@ func save_data() -> void:
 		"version": 2,
 		"diamonds": diamonds,
 		"gold": gold,
+		"wood": wood,
+		"weapon_affix": weapon_affix,
+		"forge_level": forge_level,
+		"lumber_level": lumber_level,
 		"total_gold_earned": total_gold_earned,
 		"total_runs_completed": total_runs_completed,
 		"total_runs_started": total_runs_started,
@@ -288,6 +320,10 @@ func load_data() -> void:
 
 	diamonds = d.get("diamonds", 0)
 	gold = d.get("gold", 0)
+	wood = d.get("wood", 0)
+	weapon_affix = str(d.get("weapon_affix", ""))
+	forge_level = d.get("forge_level", 1)
+	lumber_level = d.get("lumber_level", 1)
 	total_gold_earned = d.get("total_gold_earned", 0)
 	total_runs_completed = d.get("total_runs_completed", 0)
 	total_runs_started = d.get("total_runs_started", 0)
@@ -337,6 +373,10 @@ func toggle_render_mode_3d_shader() -> bool:
 func reset_all_data() -> void:
 	diamonds = 0
 	gold = 0
+	wood = 0
+	weapon_affix = ""
+	forge_level = 1
+	lumber_level = 1
 	total_gold_earned = 0
 	total_runs_completed = 0
 	total_runs_started = 0
