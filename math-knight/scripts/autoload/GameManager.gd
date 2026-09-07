@@ -40,6 +40,7 @@ var current_stage: int = 1
 # Run statistics
 var _run_start_msec: int = 0
 var _problem_start_msec: int = 0
+var last_answer_time_sec: float = 2.0
 var fastest_answer_time: float = 999.0
 var total_answer_time: float = 0.0
 var correct_answers_count: int = 0
@@ -248,6 +249,7 @@ func _on_answer_selected(value: int, method: String, bubble: Area2D, slice_dir: 
 	if value == current_problem.correct_answer:
 		# CORRECT ANSWER!
 		var elapsed_sec: float = float(Time.get_ticks_msec() - _problem_start_msec) / 1000.0
+		last_answer_time_sec = elapsed_sec
 		if elapsed_sec >= 0.05 and elapsed_sec < fastest_answer_time:
 			fastest_answer_time = elapsed_sec
 		total_answer_time += elapsed_sec

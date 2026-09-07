@@ -74,16 +74,27 @@ func _on_answer_correct(_problem: RefCounted, chain_count: int = 1) -> void:
 	var front_enemy: Node2D = enemy_queue.get_front_enemy()
 	var enemy_pos: Vector2 = front_enemy.global_position if (front_enemy and is_instance_valid(front_enemy)) else Vector2(480, 170)
 
+	# Calculate RPG attack damage with speed, combo, and crit multipliers
+	var answer_time: float = GameManager.last_answer_time_sec if ("last_answer_time_sec" in GameManager) else 2.0
+	var combo_streak: int = GameManager.combo if ("combo" in GameManager) else 0
+	var strike_data: Dictionary = knight.calculate_attack_strike(answer_time, combo_streak, chain_count)
+	var final_damage: float = strike_data.get("damage", knight.attack_power * chain_count)
+	var comic_tag: String = strike_data.get("tag", "POW!")
+	var comic_archetype: String = strike_data.get("archetype", "attack")
+
 	var on_hit_impact: Callable = func():
 		if front_enemy and is_instance_valid(front_enemy):
-			front_enemy.take_hit(knight.attack_power * chain_count)
+			front_enemy.take_hit(final_damage)
+
+		# Comic onomatopoeia popup burst ("POW!", "BLITZ!", "CLEAVE!", "KRRRANG!")
+		JuiceManager.spawn_comic_popup(self, comic_tag, enemy_pos + Vector2(0, -35), comic_archetype)
 
 		if chain_count >= 2:
 			# Spawn X-Cut double slash arcs on impact
 			_spawn_slash_arc(enemy_pos, -0.4, Color(0.3, 1.0, 1.0))
 			_spawn_slash_arc(enemy_pos, 0.8, Color(1.0, 0.9, 0.3))
 			_spawn_hit_effect(enemy_pos)
-			_spawn_damage_number(enemy_pos + Vector2(0, -25), "⚡ MEHRFACH-SCHLAG x" + str(chain_count) + "! ⚡", Color(0.2, 1.0, 1.0))
+			_spawn_damage_number(enemy_pos + Vector2(0, -25), "⚡ " + str(int(final_damage)) + " ⚡", Color(0.2, 1.0, 1.0))
 			JuiceManager.start_cinematic_slowmo(get_tree(), 0.35, 0.3)
 			EventBus.screen_shake_requested.emit(0.65)
 			if has_node("/root/AudioManager"):
@@ -92,9 +103,11 @@ func _on_answer_correct(_problem: RefCounted, chain_count: int = 1) -> void:
 			# Snappy single slash impact
 			_spawn_slash_arc(enemy_pos, -0.25, Color(0.3, 1.0, 1.0))
 			_spawn_hit_effect(enemy_pos)
-			_spawn_damage_number(enemy_pos, str(int(knight.attack_power)), Color(1.0, 0.88, 0.2))
-			JuiceManager.hit_stop(get_tree(), 0.06, 0.05)
-			EventBus.screen_shake_requested.emit(0.4)
+			_spawn_damage_number(enemy_pos, str(int(final_damage)), Color(1.0, 0.88, 0.2))
+			# 4-frame (~66ms) hitstop impact freeze
+			JuiceManager.hit_stop(get_tree(), 0.066, 0.04)
+			var shake_impulse: float = 0.55 if strike_data.get("is_crit", false) else 0.38
+			EventBus.screen_shake_requested.emit(shake_impulse)
 			if has_node("/root/AudioManager"):
 				get_node("/root/AudioManager").play_sfx("sword_slash", randf_range(1.0, 1.2), 1.0)
 

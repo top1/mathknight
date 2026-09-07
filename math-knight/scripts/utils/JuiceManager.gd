@@ -3,13 +3,29 @@ extends RefCounted
 
 static var _hit_stop_id: int = 0
 
-static func hit_stop(tree: SceneTree, duration: float = 0.06, scale: float = 0.05) -> void:
+static func hit_stop(tree: SceneTree, duration: float = 0.066, scale: float = 0.05) -> void:
 	_hit_stop_id += 1
 	var current_id: int = _hit_stop_id
 	Engine.time_scale = scale
 	await tree.create_timer(duration, true, false, true).timeout
 	if current_id == _hit_stop_id:
 		Engine.time_scale = 1.0
+
+
+## 4 frames (~0.066s) of impact freeze for sword strikes
+static func hit_stop_4_frames(tree: SceneTree) -> void:
+	await hit_stop(tree, 0.066, 0.04)
+
+
+## Spawns a floating comic onomatopoeia popup ("POW!", "BLITZ!", "WHOOSH!", "CLANG!")
+static func spawn_comic_popup(parent: Node, tag: String, pos: Vector2, archetype: String = "attack") -> void:
+	if not parent or not parent.is_inside_tree():
+		return
+	var scene: PackedScene = load("res://scenes/effects/ComicPopup.tscn")
+	if scene:
+		var popup = scene.instantiate()
+		parent.add_child(popup)
+		popup.setup(tag, pos, archetype)
 
 static func start_cinematic_slowmo(tree: SceneTree, duration: float = 0.45, slow_scale: float = 0.3) -> void:
 	_hit_stop_id += 1

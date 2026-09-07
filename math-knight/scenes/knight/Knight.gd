@@ -90,39 +90,125 @@ func _start_idle_bobbing() -> void:
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
+@export var crit_chance: float = 0.08 # 8% base crit chance
+
+
+## Computes RPG attack damage based on base ATK, answer speed, combo streak, and critical rolls
+func calculate_attack_strike(answer_time_sec: float, combo_streak: int, chain_count: int = 1) -> Dictionary:
+	var base_dmg: float = attack_power
+	
+	# Speed multiplier: fast answers reward juicy bonus damage!
+	var speed_mult: float = 1.0
+	var speed_tier: String = "normal"
+	if answer_time_sec > 0.0:
+		if answer_time_sec <= 1.5:
+			speed_mult = 1.75
+			speed_tier = "blitz"
+		elif answer_time_sec <= 3.0:
+			speed_mult = 1.35
+			speed_tier = "fast"
+		elif answer_time_sec <= 6.0:
+			speed_mult = 1.0
+			speed_tier = "normal"
+		else:
+			speed_mult = 0.85
+			speed_tier = "slow"
+	
+	# Combo bonus: +12% damage per combo streak point (max +120%)
+	var combo_mult: float = 1.0 + minf(float(combo_streak) * 0.12, 1.2)
+	
+	# Chain count multiplier from multi-slice swipes
+	var chain_mult: float = maxf(1.0, float(chain_count))
+	
+	# Critical hit check
+	var is_crit: bool = (randf() < crit_chance) or (combo_streak >= 10 and randf() < 0.35)
+	var crit_mult: float = 2.0 if is_crit else 1.0
+	
+	var total_damage: float = maxf(1.0, base_dmg * speed_mult * combo_mult * chain_mult * crit_mult)
+	
+	# Determine comic onomatopoeia banner tag
+	var onomatopoeia: String = "POW!"
+	var archetype: String = "attack"
+	if is_crit:
+		onomatopoeia = "KRRRANG!"
+		archetype = "crit"
+	elif speed_tier == "blitz":
+		onomatopoeia = "BLITZ!"
+		archetype = "blitz"
+	elif chain_count >= 2:
+		onomatopoeia = "CLEAVE!"
+		archetype = "cleave"
+	elif combo_streak >= 5:
+		onomatopoeia = "THWACK!"
+		archetype = "cleave"
+	else:
+		onomatopoeia = ["POW!", "THWACK!", "WHAM!"][randi() % 3]
+		archetype = "attack"
+		
+	return {
+		"damage": total_damage,
+		"is_crit": is_crit,
+		"speed_tier": speed_tier,
+		"speed_multiplier": speed_mult,
+		"combo_multiplier": combo_mult,
+		"chain_multiplier": chain_mult,
+		"tag": onomatopoeia,
+		"archetype": archetype
+	}
+
+
 func take_damage(amount: float) -> void:
-	if state == "dead" or GameManager.state == GameManager.GameState.GAME_OVER:
+	if state == "dead":
 		return
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.state == gm.GameState.GAME_OVER:
+			return
 
+	# Agility Dodge Check: completely evades damage
 	if randf() < dodge_chance:
+		JuiceManager.spawn_comic_popup(get_parent(), "WHOOSH!", global_position + Vector2(0, -35), "whoosh")
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx("sword_slash", 1.8, 0.6)
+		var dodge_tween: Tween = create_tween()
+		dodge_tween.tween_property(self, "position:x", _base_position.x + 18.0, 0.1).set_trans(Tween.TRANS_BACK)
+		dodge_tween.tween_property(self, "position:x", _base_position.x, 0.15).set_trans(Tween.TRANS_SINE)
 		return
 
-	var actual_damage: float = maxf(0.5, amount - armor)
+	# Armor Mitigation: reduces damage, minimum 1.0
+	var actual_damage: float = maxf(1.0, amount - armor)
 	current_hp -= actual_damage
 
-	# Visual feedback — flash white
+	# Hit flash & feedback
 	modulate = Color(3.0, 3.0, 3.0)
 	hit_flash_timer.start()
 
-	EventBus.knight_damaged.emit(current_hp, max_hp)
-	EventBus.screen_shake_requested.emit(0.35)
+	JuiceManager.spawn_comic_popup(get_parent(), "OUCH!", global_position + Vector2(0, -30), "defeat")
+	if has_node("/root/EventBus"):
+		var eb = get_node("/root/EventBus")
+		eb.knight_damaged.emit(current_hp, max_hp)
+		eb.screen_shake_requested.emit(0.4)
 
 	if current_hp <= 0.0:
 		current_hp = 0.0
-		_die()
+		_honorable_retreat()
 	else:
 		state = "hurt"
 
 
-func _die() -> void:
+func _honorable_retreat() -> void:
 	state = "dead"
 	if _idle_tween and _idle_tween.is_valid():
 		_idle_tween.kill()
-	var tween: Tween = create_tween()
-	tween.tween_property(self, "rotation_degrees", 90.0, 0.5) \
-		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	tween.tween_property(self, "modulate:a", 0.3, 0.3)
-	EventBus.knight_died.emit()
+	
+	# Gentle respectful retreat: kneel down slightly and fade out
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "position:y", _base_position.y + 12.0, 0.45) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "rotation_degrees", 8.0, 0.45)
+	tween.tween_property(self, "modulate:a", 0.4, 0.6)
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").knight_died.emit()
 
 
 func _on_hit_flash_timer_timeout() -> void:

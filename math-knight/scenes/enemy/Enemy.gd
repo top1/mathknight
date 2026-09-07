@@ -5,6 +5,7 @@ class_name Enemy
 ## Displays a math problem on its badge.
 
 @export var speed: float = 40.0
+@export var max_hp: float = 1.0
 @export var hp: float = 1.0
 @export var attack_damage: float = 1.0
 @export var attack_interval: float = 2.0
@@ -41,7 +42,7 @@ func _ready() -> void:
 	_start_idle_anim()
 
 
-func setup(prob: MathProblem, spd: float, dmg: float = 1.0, interval: float = 2.0, chosen_type: String = "") -> void:
+func setup(prob: MathProblem, spd: float, dmg: float = 1.0, interval: float = 2.0, chosen_type: String = "", stage_idx: int = 1) -> void:
 	is_elite = false
 	problem = prob
 	problems_list = [prob]
@@ -50,16 +51,29 @@ func setup(prob: MathProblem, spd: float, dmg: float = 1.0, interval: float = 2.
 	problem_text = prob.question_text
 	answer_value = prob.correct_answer
 	speed = spd
-	hp = 1.0
 	attack_damage = dmg
 	attack_interval = interval
 
-	# Pick enemy type if not specified (goblin, skeleton, slime)
+	# Pick enemy type if not specified (goblin, skeleton, slime, orc)
 	if chosen_type != "":
 		enemy_type_name = chosen_type
 	elif enemy_type_name == "goblin" and randf() < 0.65:
-		var types: Array[String] = ["goblin", "skeleton", "slime"]
+		var types: Array[String] = ["goblin", "skeleton", "slime", "orc"]
 		enemy_type_name = types[randi() % types.size()]
+
+	# Configure base HP pools based on archetype and stage
+	match enemy_type_name:
+		"slime":
+			max_hp = 1.0
+		"goblin":
+			max_hp = 2.0 + (float(stage_idx) * 0.25)
+		"skeleton":
+			max_hp = 3.0 + (float(stage_idx) * 0.35)
+		"orc":
+			max_hp = 5.0 + (float(stage_idx) * 0.5)
+		_:
+			max_hp = 2.0
+	hp = max_hp
 
 	if is_inside_tree():
 		_apply_ascii_config()
@@ -76,6 +90,7 @@ func setup_elite(probs: Array[MathProblem], spd: float, dmg: float = 1.5, interv
 	answer_value = problem.correct_answer
 	speed = spd
 	hp = float(total_problems_count)
+	max_hp = hp
 	attack_damage = dmg
 	attack_interval = interval
 	scale = Vector2(1.28, 1.28)
@@ -83,7 +98,7 @@ func setup_elite(probs: Array[MathProblem], spd: float, dmg: float = 1.5, interv
 	if chosen_type != "":
 		enemy_type_name = chosen_type
 	else:
-		var types: Array[String] = ["goblin", "skeleton", "slime"]
+		var types: Array[String] = ["goblin", "skeleton", "slime", "orc"]
 		enemy_type_name = types[randi() % types.size()]
 
 	if is_inside_tree():
@@ -100,21 +115,23 @@ func _apply_ascii_config() -> void:
 
 func _update_label_display() -> void:
 	_apply_ascii_config()
+	var hp_header: String = ""
+	if is_elite:
+		for i in range(total_problems_count):
+			hp_header += "◆" if i >= current_problem_idx else "◇"
+	elif max_hp > 1.0:
+		var full_pips: int = int(ceil(hp))
+		var total_pips: int = int(ceil(max_hp))
+		for i in range(total_pips):
+			hp_header += "♥" if i < full_pips else "♡"
+
 	if ascii_entity:
-		var display_eq: String = problem_text
-		if is_elite:
-			var pips = ""
-			for i in range(total_problems_count):
-				pips += "◆" if i >= current_problem_idx else "◇"
-			display_eq = pips + " " + problem_text
+		var display_eq: String = (hp_header + " " + problem_text) if hp_header != "" else problem_text
 		ascii_entity.set_equation(display_eq, Color("#ffd600") if not is_elite else Color("#ffd600"))
 
 	if shield_label:
-		if is_elite:
-			var pips = ""
-			for i in range(total_problems_count):
-				pips += "◆" if i >= current_problem_idx else "◇"
-			shield_label.text = pips + "\n" + problem_text
+		if hp_header != "":
+			shield_label.text = hp_header + "\n" + problem_text
 		else:
 			shield_label.text = problem_text
 		_adjust_label_size()
@@ -191,13 +208,18 @@ func _start_attacking() -> void:
 
 
 func _on_attack_timer_timeout() -> void:
-	if state != "attacking" or GameManager.state == GameManager.GameState.GAME_OVER:
+	if state != "attacking":
 		return
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.state == gm.GameState.GAME_OVER:
+			return
 
 	if ascii_entity:
 		ascii_entity.play_attack()
 
-	EventBus.enemy_attacks_knight.emit(attack_damage)
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").enemy_attacks_knight.emit(attack_damage)
 
 	var tween: Tween = create_tween()
 	tween.tween_property(self, "position:x", position.x + 14.0, 0.08) \
@@ -213,8 +235,8 @@ func take_hit(damage: float) -> void:
 	if ascii_entity:
 		ascii_entity.play_hurt()
 
-	# If Elite enemy has more problems remaining, advance to next problem!
-	if is_elite and current_problem_idx + 1 < total_problems_count:
+	# If Elite enemy has more problems remaining and took standard pip damage
+	if is_elite and current_problem_idx + 1 < total_problems_count and damage < float(total_problems_count - current_problem_idx):
 		current_problem_idx += 1
 		hp -= 1.0
 		problem = problems_list[current_problem_idx]
@@ -222,8 +244,12 @@ func take_hit(damage: float) -> void:
 		answer_value = problem.correct_answer
 
 		_update_label_display()
-		GameManager.current_problem = problem
-		EventBus.problem_presented.emit(problem)
+		if has_node("/root/GameManager"):
+			get_node("/root/GameManager").current_problem = problem
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").problem_presented.emit(problem)
+
+		JuiceManager.spawn_comic_popup(get_parent(), "THWACK!", global_position + Vector2(0, -35), "attack")
 
 		# Visual hit flash & knockback
 		modulate = Color(3.0, 3.0, 3.0)
@@ -235,20 +261,45 @@ func take_hit(damage: float) -> void:
 		knockback_tween.tween_property(self, "position:x", position.x, 0.12)
 		return
 
-	# Final hit (or standard enemy)
+	# Deduct damage
 	hp -= damage
 
+	# Hit flash & knockback scaled by impact
 	modulate = Color(3.0, 3.0, 3.0)
 	var flash_tween: Tween = create_tween()
 	flash_tween.tween_property(self, "modulate", Color.WHITE, 0.1)
 
+	var knockback_dist: float = minf(32.0, 14.0 + (damage * 3.0))
 	var knockback_tween: Tween = create_tween()
-	knockback_tween.tween_property(self, "position:x", position.x - 15.0, 0.05)
+	knockback_tween.tween_property(self, "position:x", position.x - knockback_dist, 0.05)
 	knockback_tween.tween_property(self, "position:x", position.x, 0.1)
 
 	if hp <= 0.0:
 		defeat()
 	else:
+		# Survived hit! Spawn comic hit feedback and update problem/pips
+		JuiceManager.spawn_comic_popup(get_parent(), "CLONK!", global_position + Vector2(0, -35), "attack")
+
+		# Advance to next problem if available, or generate a fresh one
+		if current_problem_idx + 1 < problems_list.size():
+			current_problem_idx += 1
+			problem = problems_list[current_problem_idx]
+		else:
+			if has_node("/root/MathEngine"):
+				problem = get_node("/root/MathEngine").generate_problem()
+			problems_list.append(problem)
+			current_problem_idx = problems_list.size() - 1
+
+		if problem:
+			problem_text = problem.question_text
+			answer_value = problem.correct_answer
+
+		_update_label_display()
+		if has_node("/root/GameManager"):
+			get_node("/root/GameManager").current_problem = problem
+		if has_node("/root/EventBus") and problem:
+			get_node("/root/EventBus").problem_presented.emit(problem)
+
 		state = "hurt"
 		var resume_tween: Tween = create_tween()
 		resume_tween.tween_interval(0.2)
@@ -266,6 +317,11 @@ func defeat() -> void:
 	state = "defeated"
 	attack_timer.stop()
 	enemy_defeated.emit(self)
+
+	# Comic defeat onomatopoeia
+	var defeat_tags: Array[String] = ["DIVIDED!", "POOF!", "OUCH!", "CURSE THY MATH!"]
+	var chosen_tag = defeat_tags[randi() % defeat_tags.size()]
+	JuiceManager.spawn_comic_popup(get_parent(), chosen_tag, global_position + Vector2(0, -40), "defeat")
 
 	# Trigger numerical ASCII splatter explosion!
 	if ascii_entity:

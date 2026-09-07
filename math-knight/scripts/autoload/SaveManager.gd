@@ -6,9 +6,33 @@ const SAVE_PATH: String = "user://mathknight_save.json"
 
 # === Persistent Player Data ===
 var diamonds: int = 0
+var gold: int = 0
 var total_gold_earned: int = 0
 var total_runs_completed: int = 0
 var total_runs_started: int = 0
+
+
+func add_gold(amount: int) -> void:
+	if amount <= 0:
+		return
+	gold += amount
+	total_gold_earned += amount
+	save_data()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").gold_changed.emit(gold)
+
+
+func spend_gold(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if gold >= amount:
+		gold -= amount
+		save_data()
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").gold_changed.emit(gold)
+		return true
+	return false
+
 
 # Knight permanent stats
 var knight_level: int = 1
@@ -215,6 +239,7 @@ func save_data() -> void:
 	var data: Dictionary = {
 		"version": 2,
 		"diamonds": diamonds,
+		"gold": gold,
 		"total_gold_earned": total_gold_earned,
 		"total_runs_completed": total_runs_completed,
 		"total_runs_started": total_runs_started,
@@ -262,6 +287,7 @@ func load_data() -> void:
 	var d: Dictionary = data as Dictionary
 
 	diamonds = d.get("diamonds", 0)
+	gold = d.get("gold", 0)
 	total_gold_earned = d.get("total_gold_earned", 0)
 	total_runs_completed = d.get("total_runs_completed", 0)
 	total_runs_started = d.get("total_runs_started", 0)
@@ -310,6 +336,7 @@ func toggle_render_mode_3d_shader() -> bool:
 
 func reset_all_data() -> void:
 	diamonds = 0
+	gold = 0
 	total_gold_earned = 0
 	total_runs_completed = 0
 	total_runs_started = 0

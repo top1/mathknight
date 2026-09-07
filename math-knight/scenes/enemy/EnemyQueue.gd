@@ -143,7 +143,7 @@ func start_new_set() -> void:
 		else:
 			var prob: MathProblem = problems[prob_idx] as MathProblem if prob_idx < problems.size() else MathEngine.generate_problem()
 			prob_idx += 1
-			enemy.setup(prob, enemy_spd, stage_cfg.damage, stage_cfg.interval, chosen_type)
+			enemy.setup(prob, enemy_spd, stage_cfg.damage, stage_cfg.interval, chosen_type, current_set_number)
 
 		enemy.target_x = knight_x - 50.0
 		enemy.enemy_defeated.connect(_on_enemy_defeated)

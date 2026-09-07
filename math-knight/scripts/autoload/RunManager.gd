@@ -127,7 +127,7 @@ func end_run(is_victory: bool) -> Dictionary:
 	if has_node("/root/SaveManager"):
 		var sm: Node = get_node("/root/SaveManager")
 		sm.add_xp(xp_reward)
-		sm.total_gold_earned += run_gold
+		sm.add_gold(run_gold)
 		if is_victory:
 			sm.total_runs_completed += 1
 		sm.add_highscore(stats)
