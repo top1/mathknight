@@ -177,6 +177,8 @@ func _evaluate_cut(is_correct: bool) -> void:
 			var sm = get_node("/root/SaveManager")
 			sm.add_wood(wood_earned)
 			sm.add_gold(gold_earned)
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").lumber_cut_completed.emit(wood_earned)
 		_update_wood_display()
 
 		_shift_logs_cleared += 1
@@ -207,4 +209,7 @@ func _update_wood_display() -> void:
 
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")
+	if ResourceLoader.exists("res://scenes/village/VillageHub.tscn"):
+		get_tree().change_scene_to_file("res://scenes/village/VillageHub.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")

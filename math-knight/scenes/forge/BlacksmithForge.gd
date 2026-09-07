@@ -258,6 +258,8 @@ func _show_forge_results() -> void:
 			sm.set_weapon_affix(affix)
 		if bonus_gold > 0:
 			sm.add_gold(bonus_gold)
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").forge_item_crafted.emit(affix)
 
 	if result_title:
 		result_title.text = "SCHWERT GESCHMIEDET!\n" + stars
@@ -269,4 +271,7 @@ func _show_forge_results() -> void:
 
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")
+	if ResourceLoader.exists("res://scenes/village/VillageHub.tscn"):
+		get_tree().change_scene_to_file("res://scenes/village/VillageHub.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")

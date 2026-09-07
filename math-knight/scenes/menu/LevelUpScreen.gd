@@ -44,6 +44,20 @@ const STAT_INFOS = [
 		"desc": "+15% Gold-Bonus bei allen Drops & seltenere Truhen",
 		"icon_path": "res://assets/sprites/ui/icon_wisdom.png",
 		"icon_color": Color(0.9, 0.6, 1.0)
+	},
+	{
+		"id": "focus",
+		"name": "FOKUS",
+		"desc": "+3% Kritische Trefferchance (Verdoppelt Angriffsschaden)",
+		"icon_path": "res://assets/sprites/ui/icon_strength.png",
+		"icon_color": Color(1.0, 0.25, 0.65)
+	},
+	{
+		"id": "crafting",
+		"name": "HANDWERK",
+		"desc": "+5% Schmiede- & Holzqualität (Bessere Klingen & Boni)",
+		"icon_path": "res://assets/sprites/ui/icon_wisdom.png",
+		"icon_color": Color(1.0, 0.75, 0.2)
 	}
 ]
 
@@ -156,6 +170,10 @@ func _create_stat_row(info: Dictionary) -> PanelContainer:
 				stat_summary = "%d%% Ausw" % int(sm.get_dodge_chance() * 100.0)
 			"wisdom":
 				stat_summary = "+%d%% Gold" % int((sm.get_gold_multiplier() - 1.0) * 100.0)
+			"focus":
+				stat_summary = "%d%% Krit" % int(sm.get_crit_chance() * 100.0)
+			"crafting":
+				stat_summary = "+%d%% Qlt" % int(sm.get_crafting_bonus() * 100.0)
 
 	var stat_val_lbl = Label.new()
 	stat_val_lbl.text = "[" + stat_summary + "]"
@@ -163,12 +181,9 @@ func _create_stat_row(info: Dictionary) -> PanelContainer:
 	stat_val_lbl.add_theme_font_size_override("font_size", 9)
 	hbox.add_child(stat_val_lbl)
 
-	# Level pips (e.g. ★ ★ ★ ☆ ☆)
+	# Level pips (e.g. Lv. 3/10)
 	var pips_label = Label.new()
-	var pip_str = ""
-	for i in range(5):
-		pip_str += "★ " if i < cur_val else "☆ "
-	pips_label.text = pip_str
+	pips_label.text = "Lv. %d/10" % cur_val
 	pips_label.add_theme_color_override("font_color", info.icon_color)
 	pips_label.add_theme_font_size_override("font_size", 10)
 	hbox.add_child(pips_label)
@@ -180,7 +195,7 @@ func _create_stat_row(info: Dictionary) -> PanelContainer:
 	up_btn.add_theme_font_size_override("font_size", 9)
 	
 	var btn_style = StyleBoxFlat.new()
-	btn_style.bg_color = Color(0.25, 0.45, 0.3) if cur_val < 5 else Color(0.2, 0.2, 0.25)
+	btn_style.bg_color = Color(0.25, 0.45, 0.3) if cur_val < 10 else Color(0.2, 0.2, 0.25)
 	btn_style.set_corner_radius_all(4)
 	up_btn.add_theme_stylebox_override("normal", btn_style)
 	

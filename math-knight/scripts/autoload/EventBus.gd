@@ -75,3 +75,9 @@ signal run_node_exited(node_data: Dictionary)
 
 # Flawless signals
 signal flawless_set_achieved(set_number: int)
+
+# Mini-Games & Quests
+signal forge_item_crafted(affix: String)
+signal lumber_cut_completed(wood_earned: int)
+signal quest_completed(quest_id: String)
+signal quest_reward_claimed(quest_id: String)

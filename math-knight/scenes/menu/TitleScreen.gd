@@ -40,7 +40,7 @@ const CIPHER_CHARS: Array[String] = [
 
 # Button text & color mapping
 var _btn_config: Dictionary = {
-	"new_game": {"text": "⚔ NEUES SPIEL", "color": Color("#f7c52a"), "size": 13},
+	"new_game": {"text": "🏰 ZUM DORF / START", "color": Color("#f7c52a"), "size": 12},
 	"training": {"text": "⚡ TRAINING", "color": Color("#29b6f6"), "size": 11},
 	"forge": {"text": "🔨 SCHMIEDE", "color": Color("#ff9800"), "size": 9},
 	"lumber": {"text": "🪓 HOLZPLATZ", "color": Color("#8bc34a"), "size": 9},
@@ -651,7 +651,7 @@ func _play_pedestal_bobbing() -> void:
 
 
 func _on_new_game_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/menu/LoadingScreen.tscn")
+	get_tree().change_scene_to_file("res://scenes/village/VillageHub.tscn")
 
 
 func _on_training_pressed() -> void:

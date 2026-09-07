@@ -25,6 +25,7 @@ SaveManager="*res://scripts/autoload/SaveManager.gd"
 RunManager="*res://scripts/autoload/RunManager.gd"
 AudioManager="*res://scripts/autoload/AudioManager.gd"
 SpriteManager="*res://scripts/autoload/SpriteManager.gd"
+QuestManager="*res://scripts/autoload/QuestManager.gd"
 
 [display]
 

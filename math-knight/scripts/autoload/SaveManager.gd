@@ -62,6 +62,54 @@ func set_weapon_affix(affix: String) -> void:
 	save_data()
 
 
+const MAX_BUILDING_LEVEL: int = 3
+
+func get_building_level(building: String) -> int:
+	match building.to_lower():
+		"forge": return forge_level
+		"lumber": return lumber_level
+		_: return 1
+
+func get_building_upgrade_cost(building: String) -> Dictionary:
+	var cur_level: int = get_building_level(building)
+	if cur_level >= MAX_BUILDING_LEVEL:
+		return {"gold": 0, "wood": 0, "maxed": true}
+	
+	if building.to_lower() == "forge":
+		if cur_level == 1:
+			return {"gold": 100, "wood": 50, "maxed": false}
+		else:
+			return {"gold": 300, "wood": 150, "maxed": false}
+	elif building.to_lower() == "lumber":
+		if cur_level == 1:
+			return {"gold": 80, "wood": 30, "maxed": false}
+		else:
+			return {"gold": 250, "wood": 100, "maxed": false}
+	return {"gold": 999, "wood": 999, "maxed": false}
+
+func can_upgrade_building(building: String) -> bool:
+	var cost: Dictionary = get_building_upgrade_cost(building)
+	if cost.get("maxed", false):
+		return false
+	return gold >= cost.get("gold", 0) and wood >= cost.get("wood", 0)
+
+func upgrade_building(building: String) -> bool:
+	if not can_upgrade_building(building):
+		return false
+	var cost: Dictionary = get_building_upgrade_cost(building)
+	gold -= cost.get("gold", 0)
+	wood -= cost.get("wood", 0)
+	match building.to_lower():
+		"forge":
+			forge_level += 1
+		"lumber":
+			lumber_level += 1
+	save_data()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").gold_changed.emit(gold)
+	return true
+
+
 # Knight permanent stats
 var knight_level: int = 1
 var knight_xp: int = 0
@@ -71,8 +119,15 @@ var knight_stats: Dictionary = {
 	"endurance": 0,    # +Max HP
 	"defense": 0,      # +Armor
 	"agility": 0,      # +Dodge chance
-	"wisdom": 0        # +Gold drop rate, +Chest quality
+	"wisdom": 0,       # +Gold drop rate, +Chest quality
+	"focus": 0,        # +Crit chance (+3% per point)
+	"crafting": 0      # +Forge & Lumber quality bonus (+5% per point)
 }
+
+# Royal Mastery Badges & Arena Tracking
+var mastery_badges: Array[String] = []
+var arena_last_played_date: String = ""
+var best_arena_wave: int = 0
 
 # Cosmetics
 var unlocked_cosmetics: Array[String] = []
@@ -99,7 +154,7 @@ func _ready() -> void:
 	load_data()
 
 
-# === XP & Level System ===
+# === XP & Level System (1 - 50) ===
 
 const XP_PER_LEVEL: Array[int] = [
 	0,     # Level 1 (start)
@@ -126,11 +181,36 @@ const XP_PER_LEVEL: Array[int] = [
 	24500, # Level 22
 	29000, # Level 23
 	34000, # Level 24
-	40000  # Level 25 (max)
+	40000, # Level 25
+	47000, # Level 26
+	55000, # Level 27
+	64000, # Level 28
+	74000, # Level 29
+	85000, # Level 30
+	97000, # Level 31
+	110000, # Level 32
+	124000, # Level 33
+	139000, # Level 34
+	155000, # Level 35
+	172000, # Level 36
+	190000, # Level 37
+	209000, # Level 38
+	229000, # Level 39
+	250000, # Level 40
+	272000, # Level 41
+	295000, # Level 42
+	319000, # Level 43
+	344000, # Level 44
+	370000, # Level 45
+	397000, # Level 46
+	425000, # Level 47
+	454000, # Level 48
+	484000, # Level 49
+	515000  # Level 50 (max)
 ]
 
-const MAX_LEVEL: int = 25
-const MAX_STAT_LEVEL: int = 5
+const MAX_LEVEL: int = 50
+const MAX_STAT_LEVEL: int = 10
 
 
 func add_xp(amount: int) -> void:
@@ -198,6 +278,17 @@ func get_gold_multiplier() -> float:
 
 func get_chest_quality_bonus() -> int:
 	return knight_stats.get("wisdom", 0)
+
+func get_crit_chance() -> float:
+	return 0.05 + (float(knight_stats.get("focus", 0)) * 0.03)
+
+func get_crafting_bonus() -> float:
+	return float(knight_stats.get("crafting", 0)) * 0.05
+
+func award_mastery_badge(badge_id: String) -> void:
+	if not mastery_badges.has(badge_id):
+		mastery_badges.append(badge_id)
+		save_data()
 
 
 # === Diamonds ===
@@ -272,6 +363,9 @@ func save_data() -> void:
 		"weapon_affix": weapon_affix,
 		"forge_level": forge_level,
 		"lumber_level": lumber_level,
+		"mastery_badges": mastery_badges,
+		"arena_last_played_date": arena_last_played_date,
+		"best_arena_wave": best_arena_wave,
 		"total_gold_earned": total_gold_earned,
 		"total_runs_completed": total_runs_completed,
 		"total_runs_started": total_runs_started,
@@ -352,6 +446,14 @@ func load_data() -> void:
 			if entry is Dictionary:
 				best_scores.append(entry)
 
+	if d.has("mastery_badges") and d["mastery_badges"] is Array:
+		mastery_badges.clear()
+		for b in d["mastery_badges"]:
+			mastery_badges.append(str(b))
+
+	arena_last_played_date = str(d.get("arena_last_played_date", ""))
+	best_arena_wave = int(d.get("best_arena_wave", 0))
+
 	tutorial_tips_enabled = d.get("tutorial_tips_enabled", true)
 	sfx_enabled = d.get("sfx_enabled", true)
 	music_enabled = d.get("music_enabled", true)
@@ -383,7 +485,10 @@ func reset_all_data() -> void:
 	knight_level = 1
 	knight_xp = 0
 	knight_stat_points = 0
-	knight_stats = {"strength": 0, "endurance": 0, "defense": 0, "agility": 0, "wisdom": 0}
+	knight_stats = {"strength": 0, "endurance": 0, "defense": 0, "agility": 0, "wisdom": 0, "focus": 0, "crafting": 0}
+	mastery_badges.clear()
+	arena_last_played_date = ""
+	best_arena_wave = 0
 	unlocked_cosmetics.clear()
 	equipped_cosmetics = {"sword": "", "helmet": "", "hat": "", "victory_anim": ""}
 	best_scores.clear()

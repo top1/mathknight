@@ -1,0 +1,99 @@
+[gd_scene load_steps=2 format=3 uid="uid://bhub77xvillage"]
+
+[ext_resource type="Script" path="res://scenes/village/VillageHub.gd" id="1_vh"]
+
+[node name="VillageHub" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_vh")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.07, 0.11, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
+
+[node name="MainVBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TopBar" type="HBoxContainer" parent="Margin/MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="KnightTitleLabel" type="Label" parent="Margin/MainVBox/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "🛡️ Sir Solv-a-Lot (Stufe 1)"
+
+[node name="TalentBadgeBtn" type="Button" parent="Margin/MainVBox/TopBar"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = "★ Talentpunkte!"
+
+[node name="Spacer" type="Control" parent="Margin/MainVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WalletHBox" type="HBoxContainer" parent="Margin/MainVBox/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="GoldLabel" type="Label" parent="Margin/MainVBox/TopBar/WalletHBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "🪙 0"
+
+[node name="WoodLabel" type="Label" parent="Margin/MainVBox/TopBar/WalletHBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.85, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "🪵 0"
+
+[node name="DiamondLabel" type="Label" parent="Margin/MainVBox/TopBar/WalletHBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "💎 0"
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/MainVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BuildingsGrid" type="GridContainer" parent="Margin/MainVBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="Margin/MainVBox"]
+layout_mode = 2
+
+[node name="MainMenuBtn" type="Button" parent="Margin/MainVBox/BottomBar"]
+custom_minimum_size = Vector2(130, 32)
+layout_mode = 2
+text = "◀ Hauptmenü"

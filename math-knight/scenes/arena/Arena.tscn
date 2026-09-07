@@ -1,0 +1,276 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7arena44xgaunt"]
+
+[ext_resource type="Script" path="res://scenes/arena/Arena.gd" id="1_arena"]
+
+[node name="Arena" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_arena")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.09, 0.08, 1)
+
+[node name="LobbyPanel" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="LobbyPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -160.0
+offset_right = 280.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="LobbyPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "⚔️ DIE KÖNIGLICHE ARENA"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="LobbyPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.75, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "Tägliches Turnier & Endlos-Wettkampf des Königreichs"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="LobbyPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "★ Heutiger königlicher Wettkampf: OFFEN! ★"
+horizontal_alignment = 1
+
+[node name="RecordLabel" type="Label" parent="LobbyPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "Beste Welle: Welle 0"
+horizontal_alignment = 1
+
+[node name="BadgesTitle" type="Label" parent="LobbyPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 11
+text = "KÖNIGLICHE MEISTER-ABZEICHEN:"
+horizontal_alignment = 1
+
+[node name="BadgesHBox" type="HBoxContainer" parent="LobbyPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="LobbyPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="StartBtn" type="Button" parent="LobbyPanel/VBox/Buttons"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "⚔️ TURNIER STARTEN"
+
+[node name="BackBtn" type="Button" parent="LobbyPanel/VBox/Buttons"]
+custom_minimum_size = Vector2(140, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "◀ Zum Dorf"
+
+[node name="BattlePanel" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopBar" type="HBoxContainer" parent="BattlePanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = -16.0
+offset_bottom = 42.0
+grow_horizontal = 2
+theme_override_constants/separation = 16
+
+[node name="WaveLabel" type="Label" parent="BattlePanel/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "★ WELLE 1 ★"
+
+[node name="HPLabel" type="Label" parent="BattlePanel/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+text = "❤️ 10 / 10"
+
+[node name="ScoreLabel" type="Label" parent="BattlePanel/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 14
+text = "🪙 +0"
+horizontal_alignment = 1
+
+[node name="RetreatBtn" type="Button" parent="BattlePanel/TopBar"]
+custom_minimum_size = Vector2(110, 30)
+layout_mode = 2
+text = "Abzug 🏳️"
+
+[node name="Battlefield" type="Node2D" parent="BattlePanel"]
+position = Vector2(0, 50)
+
+[node name="SandGround" type="ColorRect" parent="BattlePanel/Battlefield"]
+offset_top = 110.0
+offset_right = 640.0
+offset_bottom = 160.0
+color = Color(0.35, 0.26, 0.16, 1)
+
+[node name="ColosseumWall" type="ColorRect" parent="BattlePanel/Battlefield"]
+offset_right = 640.0
+offset_bottom = 110.0
+color = Color(0.18, 0.14, 0.12, 1)
+
+[node name="KnightVisual" type="Node2D" parent="BattlePanel/Battlefield"]
+position = Vector2(80, 115)
+
+[node name="SpriteStub" type="ColorRect" parent="BattlePanel/Battlefield/KnightVisual"]
+offset_left = -12.0
+offset_top = -24.0
+offset_right = 12.0
+offset_bottom = 12.0
+color = Color(0.4, 0.6, 0.9, 1)
+
+[node name="Enemies" type="Node2D" parent="BattlePanel/Battlefield"]
+position = Vector2(0, 115)
+
+[node name="InputArea" type="Control" parent="BattlePanel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -140.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Background" type="ColorRect" parent="BattlePanel/InputArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.07, 0.1, 1)
+
+[node name="VBox" type="VBoxContainer" parent="BattlePanel/InputArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 8.0
+offset_right = -20.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="ProblemLabel" type="Label" parent="BattlePanel/InputArea/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.6, 1)
+theme_override_font_sizes/font_size = 22
+text = "7 + 5 = ?"
+horizontal_alignment = 1
+
+[node name="ChoiceGrid" type="GridContainer" parent="BattlePanel/InputArea/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 6
+columns = 4
+
+[node name="ResultsPanel" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="ResultsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -130.0
+offset_right = 260.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ResultTitle" type="Label" parent="ResultsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 22
+text = "EHRENVOLL GEKÄMPFT!"
+horizontal_alignment = 1
+
+[node name="ResultWave" type="Label" parent="ResultsPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Erreichte Welle: Welle 1"
+horizontal_alignment = 1
+
+[node name="ResultRewards" type="Label" parent="ResultsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "Belohnungen gesichert:"
+horizontal_alignment = 1
+
+[node name="ResultBadges" type="Label" parent="ResultsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="HubBtn" type="Button" parent="ResultsPanel/VBox"]
+custom_minimum_size = Vector2(180, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Zum Dorf zurückkehren 🏰"
