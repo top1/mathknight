@@ -248,7 +248,7 @@ func _render_choices(choices: Array[int]) -> void:
 		var btn = Button.new()
 		btn.text = str(val)
 		btn.custom_minimum_size = Vector2(80, 48)
-		btn.theme_override_font_sizes.font_size = 20
+		btn.add_theme_font_size_override("font_size", 20)
 		btn.pressed.connect(func(): _on_answer_submitted(val, btn))
 		choice_grid.add_child(btn)
 

@@ -1,0 +1,527 @@
+[gd_scene load_steps=6 format=3 uid="uid://bakery77xscene"]
+
+[ext_resource type="Script" path="res://scenes/bakery/Bakery.gd" id="1_bakery"]
+[ext_resource type="FontFile" path="res://assets/fonts/LilitaOne-Regular.ttf" id="2_font"]
+
+[sub_resource type="Gradient" id="Gradient_flour"]
+colors = PackedColorArray(1, 1, 1, 0.9, 0.9, 0.9, 0.9, 0)
+
+[sub_resource type="Gradient" id="Gradient_sparkles"]
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.5, 0.1, 0)
+
+[sub_resource type="Gradient" id="Gradient_fire"]
+colors = PackedColorArray(1, 0.9, 0.2, 1, 0.9, 0.3, 0.1, 0.2)
+
+[node name="Bakery" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bakery")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.09, 0.08, 1)
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 42.0
+grow_horizontal = 2
+theme_override_constants/separation = 10
+
+[node name="BackBtn" type="Button" parent="TopBar"]
+custom_minimum_size = Vector2(85, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+text = "◀ ZURÜCK"
+
+[node name="LevelSelector" type="OptionButton" parent="TopBar"]
+custom_minimum_size = Vector2(175, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+
+[node name="PhaseLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(1, 0.88, 0.4, 1)
+text = "1. ZUTATEN ABWIEGEN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BreadLabel" type="Label" parent="TopBar"]
+custom_minimum_size = Vector2(60, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(1, 0.78, 0.4, 1)
+text = "🥖 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MuteBtn" type="Button" parent="TopBar"]
+custom_minimum_size = Vector2(48, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "🔊"
+
+[node name="MainArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 44.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScaleArea" type="Control" parent="MainArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RecipeLabel" type="Label" parent="MainArea/ScaleArea"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 4.0
+offset_right = -16.0
+offset_bottom = 36.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.95, 0.9, 0.75, 1)
+text = "📜 REZEPT: Wiege genau 10 kg Königliches Feinmehl ab!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScaleDrawArea" type="Control" parent="MainArea/ScaleArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="FlourExplosion" type="CPUParticles2D" parent="MainArea/ScaleArea"]
+position = Vector2(320, 140)
+emitting = false
+amount = 40
+lifetime = 0.85
+one_shot = true
+explosiveness = 0.95
+spread = 180.0
+gravity = Vector2(0, 160)
+initial_velocity_min = 70.0
+initial_velocity_max = 190.0
+scale_amount_min = 4.0
+scale_amount_max = 9.0
+color_ramp = SubResource("Gradient_flour")
+
+[node name="SuccessSparkles" type="CPUParticles2D" parent="MainArea/ScaleArea"]
+position = Vector2(320, 140)
+emitting = false
+amount = 35
+lifetime = 1.0
+one_shot = true
+explosiveness = 0.85
+spread = 180.0
+gravity = Vector2(0, 80)
+initial_velocity_min = 50.0
+initial_velocity_max = 130.0
+scale_amount_min = 3.0
+scale_amount_max = 6.0
+color_ramp = SubResource("Gradient_sparkles")
+
+[node name="WeightsPrompt" type="Label" parent="MainArea/ScaleArea"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -88.0
+offset_bottom = -72.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.85, 0.8, 0.7, 1)
+text = "Ziehe die echten Messinggewichte auf die rechte Schale (oder antippen):"
+horizontal_alignment = 1
+
+[node name="WeightsShelf" type="HBoxContainer" parent="MainArea/ScaleArea"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = -70.0
+offset_right = -130.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="BtnClearScale" type="Button" parent="MainArea/ScaleArea"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -56.0
+offset_right = -25.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.95, 0.4, 0.35, 1)
+text = "🗑️ LEEREN"
+
+[node name="OvenArea" type="Control" parent="MainArea"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OvenTitle" type="Label" parent="MainArea/OvenArea"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 4.0
+offset_right = -16.0
+offset_bottom = 30.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "🔥 DER KÖNIGLICHE STEINOFEN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OvenVisual" type="Panel" parent="MainArea/OvenArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -95.0
+offset_top = -125.0
+offset_right = 95.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OvenOpening" type="ColorRect" parent="MainArea/OvenArea/OvenVisual"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -75.0
+offset_top = -45.0
+offset_right = 75.0
+offset_bottom = 45.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.04, 0.03, 1)
+
+[node name="OvenInteriorDrawArea" type="Control" parent="MainArea/OvenArea/OvenVisual/OvenOpening"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="FireParticles" type="CPUParticles2D" parent="MainArea/OvenArea/OvenVisual"]
+position = Vector2(95, 80)
+amount = 26
+lifetime = 0.6
+emission_shape = 3
+emission_rect_extents = Vector2(50, 10)
+direction = Vector2(0, -1)
+spread = 30.0
+gravity = Vector2(0, -50)
+initial_velocity_min = 35.0
+initial_velocity_max = 75.0
+scale_amount_min = 2.0
+scale_amount_max = 5.0
+color_ramp = SubResource("Gradient_fire")
+
+[node name="TempBox" type="VBoxContainer" parent="MainArea/OvenArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = 4.0
+offset_right = 180.0
+offset_bottom = 54.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="TempLabel" type="Label" parent="MainArea/OvenArea/TempBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.9, 0.7, 1)
+text = "OFENTEMPERATUR: 100°C / ZIEL: 180°C"
+horizontal_alignment = 1
+
+[node name="TempBar" type="ProgressBar" parent="MainArea/OvenArea/TempBox"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+min_value = 100.0
+max_value = 220.0
+value = 100.0
+show_percentage = false
+
+[node name="WoodPrompt" type="Label" parent="MainArea/OvenArea"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -88.0
+offset_bottom = -72.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.85, 0.8, 0.7, 1)
+text = "Ziehe das Kaminholz in den Steinofen (oder antippen):"
+horizontal_alignment = 1
+
+[node name="WoodShelf" type="HBoxContainer" parent="MainArea/OvenArea"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = -70.0
+offset_right = -160.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="BtnCoolOven" type="Button" parent="MainArea/OvenArea"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -60.0
+offset_right = -25.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.5, 0.8, 1, 1)
+text = "❄️ LÜFTEN (-15°)"
+
+[node name="OvenOverlay" type="Control" parent="MainArea/OvenArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ClockArea" type="Control" parent="MainArea"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ClockDrawArea" type="Control" parent="MainArea/ClockArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -142.0
+offset_right = 90.0
+offset_bottom = 38.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ClockPrompt" type="Label" parent="MainArea/ClockArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = 40.0
+offset_right = 280.0
+offset_bottom = 86.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
+text = "⏰ REZEPT: Das Brot kommt um 08:00 Uhr in den Ofen.
+Backdauer: 45 Minuten!
+➜ Drehe den Uhrzeiger mit dem Finger auf die fertige Zeit!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ClockTimeBox" type="PanelContainer" parent="MainArea/ClockArea"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = 88.0
+offset_right = 160.0
+offset_bottom = 118.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ClockTimeLabel" type="Label" parent="MainArea/ClockArea/ClockTimeBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+text = "⏰ EINGESTELLTE BACKZEIT: 08:00 UHR"
+horizontal_alignment = 1
+
+[node name="ClockControls" type="HBoxContainer" parent="MainArea/ClockArea"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -54.0
+offset_right = -40.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+theme_override_constants/separation = 14
+
+[node name="BtnResetClock" type="Button" parent="MainArea/ClockArea/ClockControls"]
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "↺ STARTZEIT"
+
+[node name="BtnConfirmClock" type="Button" parent="MainArea/ClockArea/ClockControls"]
+custom_minimum_size = Vector2(240, 36)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+text = "🔔 OFEN ÖFFNEN / FERTIG!"
+
+[node name="ResultPanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -120.0
+offset_right = 220.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="ResultPanel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="ResultTitle" type="Label" parent="ResultPanel/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+text = "🥖 KÖNIGSBROT GEBACKEN!"
+horizontal_alignment = 1
+
+[node name="ResultDesc" type="Label" parent="ResultPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+text = "Du hast das Mehl exakt abgewogen, den Ofen auf 180°C vorgeheizt und die Zeit perfekt berechnet!
+
+Belohnung:
++1 Frisches Königsbrot 🥖
++25 Gold 🪙
++40 Ritter-XP ★"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="BtnRow" type="HBoxContainer" parent="ResultPanel/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 14
+
+[node name="BtnBakeAgain" type="Button" parent="ResultPanel/VBox/BtnRow"]
+custom_minimum_size = Vector2(170, 36)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+text = "🥖 WEITER BACKEN"
+
+[node name="BtnBackVillage" type="Button" parent="ResultPanel/VBox/BtnRow"]
+custom_minimum_size = Vector2(150, 36)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+text = "◀ ZURÜCK ZUM DORF"

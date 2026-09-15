@@ -38,6 +38,8 @@ func _ready() -> void:
 
 	_update_wood_display()
 	start_new_log()
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_music("village")
 
 
 func start_new_log() -> void:

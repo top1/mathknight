@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://testexpansionsuite44"]
+[gd_scene load_steps=2 format=3 uid="uid://bx3nutwvojiup"]
 
 [ext_resource type="Script" path="res://scenes/test/TestExpansionSuite.gd" id="1_test"]
 

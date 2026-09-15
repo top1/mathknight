@@ -1,74 +1,40 @@
 class_name AsciiLoadingSpinner
 extends Control
-## Circular ASCII Math Glyph Loading Spinner with multi-layer neon glow.
-## Replaces static bitmap spinners with animated cyber-math characters.
+## Clean cartoon spinning loading indicator for Math Knight.
 
-@export var radius: float = 14.0
-@export var symbol_count: int = 8
-@export var spin_speed: float = 3.5
-@export var core_color: Color = Color(0.3, 0.9, 1.0, 1.0)
-@export var halo_color: Color = Color(0.1, 0.5, 1.0, 0.4)
+@export var radius: float = 16.0
+@export var spin_speed: float = 4.0
+@export var core_color: Color = Color("#f0b830") # Gold
 
-var _font: Font
 var _t: float = 0.0
-var _symbols: Array[String] = []
-var _mutate_timers: Array[float] = []
+var _coin_texture: Texture2D = null
 
-const MATH_CHARS: Array[String] = [
-	"0", "1", "7", "+", "-", "×", "÷", "=", "%", "#", "*", "<", ">", "!"
-]
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(radius * 2.5, radius * 2.5)
-	if ResourceLoader.exists("res://assets/fonts/Silkscreen-Bold.ttf"):
-		_font = load("res://assets/fonts/Silkscreen-Bold.ttf")
-	else:
-		_font = ThemeDB.fallback_font
-		
-	_symbols.resize(symbol_count)
-	_mutate_timers.resize(symbol_count)
-	for i in range(symbol_count):
-		_symbols[i] = MATH_CHARS[randi() % MATH_CHARS.size()]
-		_mutate_timers[i] = randf_range(0.08, 0.3)
+	if ResourceLoader.exists("res://assets/sprites/effects/coin_gold.png"):
+		_coin_texture = load("res://assets/sprites/effects/coin_gold.png")
+
 
 func _process(delta: float) -> void:
 	_t += delta
-	for i in range(symbol_count):
-		_mutate_timers[i] -= delta
-		if _mutate_timers[i] <= 0.0:
-			_mutate_timers[i] = randf_range(0.08, 0.3)
-			_symbols[i] = MATH_CHARS[randi() % MATH_CHARS.size()]
 	queue_redraw()
 
+
 func _draw() -> void:
-	var center = size * 0.5
-	if not _font:
-		return
-		
-	# Draw center soft aura
-	draw_circle(center, radius * 0.7, Color(core_color.r, core_color.g, core_color.b, 0.12 + sin(_t * 4.0) * 0.05))
-	
-	# Current active scanner angle
-	var scan_angle = fmod(_t * spin_speed, TAU)
-	
-	for i in range(symbol_count):
-		var angle = (float(i) / float(symbol_count)) * TAU
-		var pos = center + Vector2(cos(angle), sin(angle)) * radius
-		
-		# Distance to current scan line along circle
-		var diff = angle - scan_angle
-		while diff < -PI: diff += TAU
-		while diff > PI: diff -= TAU
-		var intensity = max(0.2, 1.0 - abs(diff) / 1.8)
-		
-		var sym = _symbols[i]
-		var sym_size = 9 if intensity > 0.7 else 8
-		
-		# Halo glow
-		if intensity > 0.5:
-			draw_circle(pos, 6.0 * intensity, Color(halo_color.r, halo_color.g, halo_color.b, halo_color.a * intensity))
-			draw_string(_font, pos + Vector2(-3.5, 3.5), sym, HORIZONTAL_ALIGNMENT_CENTER, -1, sym_size + 1, Color(core_color.r, core_color.g, core_color.b, intensity * 0.4))
-		
-		# Core glyph
-		var glyph_col = Color.WHITE if intensity > 0.85 else Color(core_color.r, core_color.g, core_color.b, intensity)
-		draw_string(_font, pos + Vector2(-3.5, 3.5), sym, HORIZONTAL_ALIGNMENT_CENTER, -1, sym_size, glyph_col)
+	var center := size * 0.5
+	if _coin_texture:
+		# Draw rotating bouncing coin
+		var s := 1.0 + sin(_t * 6.0) * 0.15
+		var w := 28.0 * s
+		var h := 28.0 * s
+		var rect := Rect2(center.x - w * 0.5, center.y - h * 0.5, w, h)
+		draw_texture_rect(_coin_texture, rect, false)
+	else:
+		# 6 clean dots orbiting
+		var dot_count := 6
+		for i in range(dot_count):
+			var angle := (float(i) / float(dot_count)) * TAU + _t * spin_speed
+			var pos := center + Vector2(cos(angle), sin(angle)) * radius
+			var a := float(i + 1) / float(dot_count)
+			draw_circle(pos, 3.5, Color(core_color.r, core_color.g, core_color.b, a))

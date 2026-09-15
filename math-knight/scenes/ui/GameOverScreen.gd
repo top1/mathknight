@@ -144,6 +144,8 @@ func show_end_screen(stats: Dictionary) -> void:
 	stat_time_label.text = "⏳ Zeit: %dm %02ds" % [minutes, seconds]
 
 	_set_visibility(true)
+	if is_victory and has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_music("success", 0.8)
 
 	background.modulate.a = 0.0
 	center.modulate.a = 0.0
@@ -177,7 +179,5 @@ func _on_menu_button_pressed() -> void:
 	if has_node("/root/RunManager") and get_node("/root/RunManager").is_run_active:
 		var rm = get_node("/root/RunManager")
 		rm.end_run(false)
-		get_tree().change_scene_to_file("res://scenes/menu/TitleScreen.tscn")
-	else:
-		get_tree().change_scene_to_file("res://scenes/menu/MainMenu.tscn")
+	get_tree().change_scene_to_file("res://scenes/village/VillageHub.tscn")
 

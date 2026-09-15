@@ -38,6 +38,8 @@ signal game_won(stats: Dictionary)
 signal gold_earned(amount: int, reason: String)
 signal diamonds_earned(amount: int)
 signal gold_changed(new_total: int)
+signal bread_changed(new_total: int)
+signal sound_mute_toggled(is_muted: bool)
 
 # Chest & Loot signals
 signal chest_collected(chest_data: Dictionary)
@@ -81,3 +83,18 @@ signal forge_item_crafted(affix: String)
 signal lumber_cut_completed(wood_earned: int)
 signal quest_completed(quest_id: String)
 signal quest_reward_claimed(quest_id: String)
+
+# Siege Gate Maze (Castle Attack)
+signal siege_gate_started(level_data: Dictionary)
+signal siege_gate_lever_switched(gate_id: int, path_index: int)
+signal siege_gate_operation_applied(op_label: String, old_count: int, new_count: int)
+signal siege_gate_completed(final_count: int, castle_defense: int, is_victory: bool, optimality_pct: float)
+
+# Village Economy
+signal hut_built(total_huts: int)
+signal villager_arrived(total_villagers: int)
+signal villagers_changed(total_villagers: int)
+signal taxes_collected(gold_earned: int, fed_villagers: int)
+signal weapons_changed(total_weapons: int)
+signal soldier_recruited(total_soldiers: int)
+signal soldiers_changed(total_soldiers: int)

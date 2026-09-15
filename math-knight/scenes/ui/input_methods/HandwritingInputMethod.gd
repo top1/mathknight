@@ -20,10 +20,16 @@ const PointCloudRecognizerClass = preload("res://scenes/ui/input_methods/recogni
 
 var recognizer = null
 var strokes: Array[PackedVector2Array] = []
+var strokes_times: Array = []
 var current_stroke: PackedVector2Array = []
+var current_stroke_times: Array = []
 var is_drawing: bool = false
 var digit_buffer: String = ""
 var expected_digits_count: int = 1
+
+## Google ML Kit Android plugin bridge
+var ml_kit_plugin: Object = null
+var is_ml_kit_available: bool = false
 
 var stroke_color: Color = Color(0.3, 0.95, 1.0, 0.9)
 var stroke_width: float = 6.0
@@ -33,6 +39,7 @@ var debounce_duration: float = 0.75
 
 func _ready() -> void:
 	recognizer = PointCloudRecognizerClass.new()
+	_init_ml_kit()
 	if debounce_timer:
 		debounce_timer.timeout.connect(_on_debounce_timeout)
 	if clear_btn:
@@ -45,6 +52,23 @@ func _ready() -> void:
 		feedback_panel.modulate.a = 0.0
 	if timer_bar:
 		timer_bar.value = 0.0
+	if draw_surface and not draw_surface.is_connected("draw", Callable(self, "_on_draw_surface_draw")):
+		draw_surface.draw.connect(_on_draw_surface_draw)
+
+
+func _init_ml_kit() -> void:
+	if Engine.has_singleton("MathKnightMLKit"):
+		ml_kit_plugin = Engine.get_singleton("MathKnightMLKit")
+		if ml_kit_plugin:
+			is_ml_kit_available = true
+			if not ml_kit_plugin.is_connected("ink_recognized", Callable(self, "_on_ml_kit_ink_recognized")):
+				ml_kit_plugin.connect("ink_recognized", Callable(self, "_on_ml_kit_ink_recognized"))
+			if not ml_kit_plugin.is_connected("model_status_changed", Callable(self, "_on_ml_kit_model_status")):
+				ml_kit_plugin.connect("model_status_changed", Callable(self, "_on_ml_kit_model_status"))
+			ml_kit_plugin.initializeModel("de")
+			print("HandwritingInputMethod: Connected to MathKnightMLKit native plugin.")
+	else:
+		print("HandwritingInputMethod: MathKnightMLKit not active (desktop/fallback mode).")
 
 
 func _process(_delta: float) -> void:
@@ -83,9 +107,15 @@ func on_problem_presented(problem: RefCounted) -> void:
 			prompt_label.text = "✍️ ZEICHNE DIE ZAHL:"
 
 
+func _to_local_pos(screen_pos: Vector2) -> Vector2:
+	return to_local_pos(screen_pos, draw_surface)
+
+
 func _is_in_bounds(local_pos: Vector2) -> bool:
-	var effective_size: Vector2 = size if (size.x > 0.0 and size.y > 0.0) else Vector2(640.0, 142.0)
-	return Rect2(Vector2.ZERO, effective_size).has_point(local_pos)
+	var target_size = draw_surface.size if (draw_surface and draw_surface.size.x > 0.0 and draw_surface.size.y > 0.0) else size
+	if target_size.x <= 0.0 or target_size.y <= 0.0:
+		target_size = Vector2(640.0, 142.0)
+	return Rect2(Vector2.ZERO, target_size).has_point(local_pos)
 
 
 func _input(event: InputEvent) -> void:
@@ -93,7 +123,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		var local_pos: Vector2 = event.position - global_position
+		var local_pos: Vector2 = _to_local_pos(event.position)
 		var in_bounds: bool = _is_in_bounds(local_pos)
 
 		if event.pressed:
@@ -102,7 +132,9 @@ func _input(event: InputEvent) -> void:
 				if debounce_timer:
 					debounce_timer.stop()
 				current_stroke = PackedVector2Array([local_pos])
+				current_stroke_times = [Time.get_ticks_msec()]
 				strokes.append(current_stroke)
+				strokes_times.append(current_stroke_times)
 				if draw_surface:
 					draw_surface.queue_redraw()
 		else:
@@ -113,15 +145,17 @@ func _input(event: InputEvent) -> void:
 
 	elif event is InputEventMouseMotion:
 		if is_drawing and current_stroke.size() > 0:
-			var local_pos: Vector2 = event.position - global_position
+			var local_pos: Vector2 = _to_local_pos(event.position)
 			if local_pos.distance_squared_to(current_stroke[-1]) > 9.0: # 3px smoothing
 				current_stroke.append(local_pos)
+				current_stroke_times.append(Time.get_ticks_msec())
 				strokes[-1] = current_stroke
+				strokes_times[-1] = current_stroke_times
 				if draw_surface:
 					draw_surface.queue_redraw()
 
 	elif event is InputEventScreenTouch:
-		var local_pos: Vector2 = event.position - global_position
+		var local_pos: Vector2 = _to_local_pos(event.position)
 		var in_bounds: bool = _is_in_bounds(local_pos)
 
 		if event.pressed:
@@ -130,7 +164,9 @@ func _input(event: InputEvent) -> void:
 				if debounce_timer:
 					debounce_timer.stop()
 				current_stroke = PackedVector2Array([local_pos])
+				current_stroke_times = [Time.get_ticks_msec()]
 				strokes.append(current_stroke)
+				strokes_times.append(current_stroke_times)
 				if draw_surface:
 					draw_surface.queue_redraw()
 		else:
@@ -141,10 +177,12 @@ func _input(event: InputEvent) -> void:
 
 	elif event is InputEventScreenDrag:
 		if is_drawing and current_stroke.size() > 0:
-			var local_pos: Vector2 = event.position - global_position
+			var local_pos: Vector2 = _to_local_pos(event.position)
 			if local_pos.distance_squared_to(current_stroke[-1]) > 9.0:
 				current_stroke.append(local_pos)
+				current_stroke_times.append(Time.get_ticks_msec())
 				strokes[-1] = current_stroke
+				strokes_times[-1] = current_stroke_times
 				if draw_surface:
 					draw_surface.queue_redraw()
 
@@ -156,15 +194,24 @@ func _on_draw_surface_draw() -> void:
 			draw_surface.draw_polyline(stroke, Color(0.1, 0.4, 0.8, 0.35), stroke_width + 4.0, true)
 			# Draw main bright stroke
 			draw_surface.draw_polyline(stroke, stroke_color, stroke_width, true)
+			for pt in stroke:
+				draw_surface.draw_circle(pt, stroke_width * 0.5, stroke_color)
 		elif stroke.size() == 1:
-			draw_surface.draw_circle(stroke[0], stroke_width * 0.5, stroke_color)
+			draw_surface.draw_circle(stroke[0], stroke_width * 0.7, stroke_color)
 
 
 func _on_debounce_timeout() -> void:
 	if strokes.is_empty():
 		return
 
-	# Perform segmented multi-digit recognition
+	if is_ml_kit_available and ml_kit_plugin != null and ml_kit_plugin.isModelReady():
+		var stroke_json: String = _serialize_strokes_to_json()
+		ml_kit_plugin.recognizeStrokes(stroke_json)
+	else:
+		_recognize_with_fallback()
+
+
+func _recognize_with_fallback() -> void:
 	var results: Array[Dictionary] = recognizer.recognize_segmented(strokes)
 	var recognized_str: String = ""
 	var any_valid: bool = false
@@ -181,6 +228,37 @@ func _on_debounce_timeout() -> void:
 	else:
 		_show_feedback("?", Color(1.0, 0.4, 0.4))
 		_clear_canvas()
+
+
+func _on_ml_kit_ink_recognized(text: String, _score: float) -> void:
+	var recognized_str: String = text.strip_edges()
+	if not recognized_str.is_empty():
+		_on_digits_recognized(recognized_str)
+	else:
+		_show_feedback("?", Color(1.0, 0.4, 0.4))
+		_clear_canvas()
+
+
+func _on_ml_kit_model_status(status: String) -> void:
+	print("HandwritingInputMethod: ML Kit model status: ", status)
+	if status == "downloading" and prompt_label:
+		prompt_label.text = "✍️ LADE SCHRIFTERKENNUNG..."
+	elif status == "ready" and prompt_label:
+		prompt_label.text = "✍️ ZEICHNE DIE ZAHL:"
+
+
+func _serialize_strokes_to_json() -> String:
+	var root_arr: Array = []
+	for s_idx in range(strokes.size()):
+		var s = strokes[s_idx]
+		var times = strokes_times[s_idx] if s_idx < strokes_times.size() else []
+		var stroke_points: Array = []
+		for p_idx in range(s.size()):
+			var pt = s[p_idx]
+			var t = times[p_idx] if p_idx < times.size() else Time.get_ticks_msec()
+			stroke_points.append({"x": pt.x, "y": pt.y, "t": t})
+		root_arr.append(stroke_points)
+	return JSON.stringify(root_arr)
 
 
 func _on_digits_recognized(digits_text: String) -> void:
@@ -239,7 +317,9 @@ func _on_clear_pressed() -> void:
 
 func _clear_canvas() -> void:
 	strokes.clear()
+	strokes_times.clear()
 	current_stroke.clear()
+	current_stroke_times.clear()
 	if draw_surface:
 		draw_surface.queue_redraw()
 	if debounce_timer:

@@ -16,40 +16,62 @@ const SFX_FILES: Dictionary = {
 	"click": "res://assets/audio/sfx_click.wav",
 	"levelup": "res://assets/audio/sfx_levelup.wav",
 	"chest_open": "res://assets/audio/sfx_chest_open.wav",
-	"chest_break": "res://assets/audio/sfx_chest_break.wav"
+	"chest_break": "res://assets/audio/sfx_chest_break.wav",
+	"anvil_hit": "res://assets/audio/sfx_anvil_hit.wav",
+	"anvil_clonk": "res://assets/audio/sfx_anvil_clonk.wav"
 }
 
 const BGM_FILES: Dictionary = {
-	# Menu & Exploration
-	"title": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
-	"menu": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
-	"menu_tavern": "res://assets/audio/music_new/gb_menu_bazaar_shop.mp3",
-	"shop": "res://assets/audio/music_new/gb_menu_bazaar_shop.mp3",
-	"map": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
-	"stage_select": "res://assets/audio/music_new/gb_menu_level_selection.mp3",
+	# Menu & Exploration (MENUE1 & MENU2)
+	"title": "res://assets/audio/MENUE1_Tomes_and_Tally.mp3",
+	"menu": "res://assets/audio/MENUE1_Tomes_and_Tally.mp3",
+	"menu1": "res://assets/audio/MENUE1_Tomes_and_Tally.mp3",
+	"stage_select": "res://assets/audio/MENUE1_Tomes_and_Tally.mp3",
 	
-	# Operation-Specific Battles
-	"battle": "res://assets/audio/music_new/gb_combat_goblin_skirmish.mp3",
-	"battle_addition": "res://assets/audio/music_new/gb_mode_arithmetic_arena.mp3",
-	"battle_subtraction": "res://assets/audio/music_new/gb_mode_logic_labyrinth.mp3",
-	"battle_multiplication": "res://assets/audio/music_new/gb_mode_geometric_grid.mp3",
-	"battle_division": "res://assets/audio/music_new/gb_mode_fractal_abyss.mp3",
-	"battle_mixed": "res://assets/audio/music_new/gb_combat_mind_over_magic.mp3",
+	"map": "res://assets/audio/MENU2_Sunlight_on_Parchment.mp3",
+	"menu2": "res://assets/audio/MENU2_Sunlight_on_Parchment.mp3",
+	"menu_tavern": "res://assets/audio/MENU2_Sunlight_on_Parchment.mp3",
+	"shop": "res://assets/audio/MENU2_Sunlight_on_Parchment.mp3",
 	
-	# Game Mode Battles & Archetypes
-	"battle_forge": "res://assets/audio/music_new/gb_mode_geometric_grid.mp3",
-	"battle_chain": "res://assets/audio/music_new/gb_mode_prime_cavern.mp3",
-	"battle_speed": "res://assets/audio/music_new/gb_mode_speed_sprint.mp3",
-	"battle_skirmish": "res://assets/audio/music_new/gb_combat_goblin_skirmish.mp3",
+	# Action 1 (Courtyard skirmishes & standard combat)
+	"battle": "res://assets/audio/ACTION1_A_Gambit_in_the_Courtyard.mp3",
+	"action1": "res://assets/audio/ACTION1_A_Gambit_in_the_Courtyard.mp3",
+	"battle_skirmish": "res://assets/audio/ACTION1_A_Gambit_in_the_Courtyard.mp3",
+	"battle_addition": "res://assets/audio/ACTION1_A_Gambit_in_the_Courtyard.mp3",
+	"battle_subtraction": "res://assets/audio/ACTION1_A_Gambit_in_the_Courtyard.mp3",
+	"battle_multiplication": "res://assets/audio/ACTION1_A_Gambit_in_the_Courtyard.mp3",
 	
-	# Encounters
-	"elite": "res://assets/audio/music_new/gb_combat_arcane_duel.mp3",
-	"boss": "res://assets/audio/music_new/gb_combat_golem_guardian.mp3",
+	# Action 2 (The Fencing Master's Gambit: boss, elite, speed, high stakes)
+	"action2": "res://assets/audio/ACTION2_The_Fencing_Master_s_Gambit.mp3",
+	"boss": "res://assets/audio/ACTION2_The_Fencing_Master_s_Gambit.mp3",
+	"elite": "res://assets/audio/ACTION2_The_Fencing_Master_s_Gambit.mp3",
+	"battle_speed": "res://assets/audio/ACTION2_The_Fencing_Master_s_Gambit.mp3",
+	"battle_mixed": "res://assets/audio/ACTION2_The_Fencing_Master_s_Gambit.mp3",
+	
+	# Crafting & Smithing (Blacksmith Forge & Result-to-Equation)
+	"crafting": "res://assets/audio/CRAFTING_SMITHING_Steel_Beneath_The_Hearth.mp3",
+	"smithing": "res://assets/audio/CRAFTING_SMITHING_Steel_Beneath_The_Hearth.mp3",
+	"battle_forge": "res://assets/audio/CRAFTING_SMITHING_Steel_Beneath_The_Hearth.mp3",
+	"forge": "res://assets/audio/CRAFTING_SMITHING_Steel_Beneath_The_Hearth.mp3",
+	
+	# Puzzle (The Scholar's Gambit: chain calculation, siege gate, puzzle modes)
+	"puzzle": "res://assets/audio/PUZZLE_The_Scholar_s_Gambit.mp3",
+	"battle_chain": "res://assets/audio/PUZZLE_The_Scholar_s_Gambit.mp3",
+	"battle_division": "res://assets/audio/PUZZLE_The_Scholar_s_Gambit.mp3",
+	
+	# Castle Town, Village Hub, Workshops & Success (CASTLE_TOWN_SUCCESS)
+	"village": "res://assets/audio/CASTLE_TOWN_SUCCESS_The_Lathe_s_Morning.mp3",
+	"town": "res://assets/audio/CASTLE_TOWN_SUCCESS_The_Lathe_s_Morning.mp3",
+	"castle_town": "res://assets/audio/CASTLE_TOWN_SUCCESS_The_Lathe_s_Morning.mp3",
+	"castle": "res://assets/audio/CASTLE_TOWN_SUCCESS_The_Lathe_s_Morning.mp3",
+	"lumber": "res://assets/audio/CASTLE_TOWN_SUCCESS_The_Lathe_s_Morning.mp3",
+	"bakery": "res://assets/audio/CASTLE_TOWN_SUCCESS_The_Lathe_s_Morning.mp3",
+	"success": "res://assets/audio/CASTLE_TOWN_SUCCESS_The_Lathe_s_Morning.mp3",
 	
 	# Jingles
-	"victory": "res://assets/audio/music_new/gb_menu_chest_fanfare.mp3",
-	"stage_clear": "res://assets/audio/music_new/gb_menu_chest_fanfare.mp3",
-	"fanfare": "res://assets/audio/music_new/gb_menu_chest_fanfare.mp3",
+	"victory": "res://assets/audio/jingle_victory.wav",
+	"stage_clear": "res://assets/audio/jingle_stage_clear.wav",
+	"fanfare": "res://assets/audio/jingle_victory.wav",
 	"game_over": "res://assets/audio/jingle_game_over.wav"
 }
 
@@ -142,6 +164,8 @@ func _sync_with_save_manager() -> void:
 		music_enabled = sm.music_enabled
 	else:
 		sm.set("music_enabled", true)
+	if "master_muted" in sm:
+		set_master_muted(sm.master_muted)
 
 
 func _connect_event_bus() -> void:
@@ -471,6 +495,31 @@ func get_current_track() -> String:
 	return _current_track_name
 
 
+func toggle_mute() -> bool:
+	var new_state: bool = not is_master_muted()
+	set_master_muted(new_state)
+	return new_state
+
+
+func is_master_muted() -> bool:
+	var bus_idx: int = AudioServer.get_bus_index("Master")
+	return AudioServer.is_bus_mute(bus_idx)
+
+
+func set_master_muted(muted: bool) -> void:
+	var bus_idx: int = AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_mute(bus_idx, muted)
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		sm.set("master_muted", muted)
+		if sm.has_method("save_data"):
+			sm.save_data()
+	if has_node("/root/EventBus"):
+		var eb = get_node("/root/EventBus")
+		if eb.has_signal("sound_mute_toggled"):
+			eb.sound_mute_toggled.emit(muted)
+
+
 # === Audio Loading & Procedural Synthesis Engine ===
 
 func _load_or_generate_all_audio() -> void:
@@ -496,6 +545,10 @@ func _load_or_generate_all_audio() -> void:
 			var is_jingle: bool = (key in ["victory", "stage_clear", "fanfare", "game_over"])
 			stream.loop = not is_jingle
 			stream.loop_offset = 0.0
+		elif stream is AudioStreamWAV:
+			var is_jingle: bool = (key in ["victory", "stage_clear", "fanfare", "game_over"])
+			if is_jingle:
+				stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
 		elif not stream:
 			# In-memory synthesis fallback if file is missing
 			stream = _synthesize_bgm(key)
@@ -515,6 +568,8 @@ func _synthesize_sfx(sfx_key: String) -> AudioStreamWAV:
 		"levelup": return _synth_levelup()
 		"chest_open": return _synth_chest_open()
 		"chest_break": return _synth_chest_break()
+		"anvil_hit": return _synth_anvil_hit()
+		"anvil_clonk": return _synth_anvil_clonk()
 		_: return _synth_click()
 
 
@@ -806,6 +861,51 @@ func _synth_chest_break() -> AudioStreamWAV:
 		var thud: float = sin(phase_thud) * exp(-t * 14.0) * 0.65
 		var glitch: float = (randf_range(-1.0, 1.0) * exp(-t * 20.0) * 0.45) if (t < 0.15) else 0.0
 		samples[i] = thud + glitch
+	return _create_wav_stream(samples, false)
+
+
+func _synth_anvil_hit() -> AudioStreamWAV:
+	var duration: float = 0.55
+	var num_samples: int = int(duration * SAMPLE_RATE)
+	var samples: PackedFloat32Array = PackedFloat32Array()
+	samples.resize(num_samples)
+	# Metallic ring frequencies (inharmonic steel resonance)
+	var harmonics: Array[float] = [1280.0, 2450.0, 3820.0, 5600.0]
+	var decays: Array[float] = [8.0, 14.0, 22.0, 32.0]
+	var phase_body: float = 0.0
+	for i in range(num_samples):
+		var t: float = float(i) / float(SAMPLE_RATE)
+		# Deep punch transient
+		var f_body: float = lerpf(240.0, 85.0, clampf(t / 0.1, 0.0, 1.0))
+		phase_body += f_body * (TAU / SAMPLE_RATE)
+		var punch: float = sin(phase_body) * exp(-t * 26.0) * 0.55
+
+		# Bright metallic click/strike transient in first 10ms
+		var click: float = (randf_range(-1.0, 1.0) * exp(-t * 120.0) * 0.6) if t < 0.03 else 0.0
+
+		# Metallic ringing bells
+		var ring: float = 0.0
+		for h in range(harmonics.size()):
+			var bell: float = sin(t * harmonics[h] * TAU)
+			ring += bell * exp(-t * decays[h]) * (0.35 / float(h + 1))
+
+		samples[i] = clampf(punch + click + ring, -1.0, 1.0) * 0.9
+	return _create_wav_stream(samples, false)
+
+
+func _synth_anvil_clonk() -> AudioStreamWAV:
+	var duration: float = 0.22
+	var num_samples: int = int(duration * SAMPLE_RATE)
+	var samples: PackedFloat32Array = PackedFloat32Array()
+	samples.resize(num_samples)
+	var phase: float = 0.0
+	for i in range(num_samples):
+		var t: float = float(i) / float(SAMPLE_RATE)
+		var f: float = lerpf(180.0, 55.0, t / duration)
+		phase += f * (TAU / SAMPLE_RATE)
+		var thud: float = (sin(phase) + 0.4 * sin(phase * 2.3)) * exp(-t * 22.0) * 0.75
+		var noise: float = (randf_range(-1.0, 1.0) * exp(-t * 40.0) * 0.35) if t < 0.05 else 0.0
+		samples[i] = clampf(thud + noise, -1.0, 1.0) * 0.85
 	return _create_wav_stream(samples, false)
 
 

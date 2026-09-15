@@ -17,7 +17,9 @@ func generate_problem(config: MathConfig = null) -> MathProblem:
 	var cfg: MathConfig = config if config else current_config
 	var problem: MathProblem
 	
-	if cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION:
+	if cfg.curriculum_level != MathConfig.CurriculumLevel.NONE:
+		problem = _generate_curriculum_problem(cfg)
+	elif cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION:
 		problem = _generate_multi_op(cfg)
 	else:
 		var chosen_op: MathConfig.Operation = cfg.operation
@@ -474,3 +476,315 @@ func _generate_smart_distractors(answer: int, a: int, b: int, count: int) -> Arr
 			dict[r] = true
 			
 	return choices
+
+
+# === Curriculum Generators (L1 to L6) ===
+
+func _generate_curriculum_problem(cfg: MathConfig) -> MathProblem:
+	var p: MathProblem
+	match cfg.curriculum_level:
+		MathConfig.CurriculumLevel.L1_BASIS_10:
+			p = _generate_l1(cfg)
+		MathConfig.CurriculumLevel.L2_BIS_20_OHNE_UEBERGANG:
+			p = _generate_l2(cfg)
+		MathConfig.CurriculumLevel.L3_ZEHNERUEBERGANG_ZEIT:
+			p = _generate_l3(cfg)
+		MathConfig.CurriculumLevel.L4_HUNDERTER_SCHRITTE:
+			p = _generate_l4(cfg)
+		MathConfig.CurriculumLevel.L5_EINMALEINS:
+			p = _generate_l5(cfg)
+		MathConfig.CurriculumLevel.L6_DIVISION:
+			p = _generate_l6(cfg)
+		_:
+			p = _generate_addition(cfg)
+
+	p.curriculum_level = int(cfg.curriculum_level)
+	p.curriculum_subtype = int(cfg.curriculum_subtype)
+
+	if cfg.game_mode == MathConfig.GameMode.RESULT_TO_EQUATION:
+		p.question_text = "?" + p.operator_symbol + "?=" + str(p.correct_answer)
+
+	return p
+
+
+func _generate_l1(cfg: MathConfig) -> MathProblem:
+	var p: MathProblem = MathProblem.new()
+	var subtype = cfg.curriculum_subtype
+
+	# Multi-op equation within numbers 1..10
+	if cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION:
+		p.is_three_operand = true
+		p.operator_symbol = "+"
+		p.operator_symbol_2 = "+"
+		p.operand_a = randi_range(1, 4)
+		p.operand_b = randi_range(1, 4)
+		var rem_max = max(1, 10 - p.operand_a - p.operand_b)
+		p.operand_c = randi_range(1, rem_max)
+		p.correct_answer = p.operand_a + p.operand_b + p.operand_c
+		p.question_text = "%d+%d+%d" % [p.operand_a, p.operand_b, p.operand_c]
+		p.hint_text = "Drei Zahlen zusammenzählen: %d + %d + %d = %d" % [p.operand_a, p.operand_b, p.operand_c, p.correct_answer]
+		return p
+
+	if subtype == MathConfig.CurriculumSubtype.VERLIEBTE_ZAHLEN:
+		if randf() < 0.65:
+			p.operator_symbol = "+"
+			p.operand_a = randi_range(1, 9)
+			p.operand_b = 10 - p.operand_a
+			p.correct_answer = 10
+			p.question_text = str(p.operand_a) + "+" + str(p.operand_b)
+			p.hint_text = "Verliebte Zahlen ergeben immer 10! %d + %d = 10" % [p.operand_a, p.operand_b]
+			p.display_note = "❤️ %d + %d = 10" % [p.operand_a, p.operand_b]
+		else:
+			p.operator_symbol = "-"
+			p.operand_a = 10
+			p.operand_b = randi_range(1, 9)
+			p.correct_answer = 10 - p.operand_b
+			p.question_text = "10-" + str(p.operand_b)
+			p.hint_text = "10 minus %d: Welcher verliebte Partner bleibt übrig?" % p.operand_b
+			p.display_note = "❤️ 10 - %d = %d" % [p.operand_b, p.correct_answer]
+	elif subtype == MathConfig.CurriculumSubtype.VERDOPPELN_HALBIEREN:
+		if randf() < 0.5:
+			var val = randi_range(1, 5)
+			p.operator_symbol = "+"
+			p.operand_a = val
+			p.operand_b = val
+			p.correct_answer = val * 2
+			p.question_text = str(val) + "+" + str(val)
+			p.hint_text = "Verdoppeln: %d + %d = %d" % [val, val, val * 2]
+			p.display_note = "Das Doppelte von %d ist %d" % [val, val * 2]
+		else:
+			var half = randi_range(1, 5)
+			var total = half * 2
+			p.operator_symbol = "÷"
+			p.operand_a = total
+			p.operand_b = 2
+			p.correct_answer = half
+			p.question_text = str(total) + "÷2"
+			p.hint_text = "Halbieren: Die Hälfte von %d ist %d" % [total, half]
+			p.display_note = "Hälfte von %d = %d" % [total, half]
+	else:
+		var do_add = (cfg.operation == MathConfig.Operation.ADDITION) or (cfg.operation != MathConfig.Operation.SUBTRACTION and randf() < 0.5)
+		if do_add:
+			p.operator_symbol = "+"
+			p.operand_a = randi_range(1, 8)
+			p.operand_b = randi_range(1, 10 - p.operand_a)
+			p.correct_answer = p.operand_a + p.operand_b
+			p.question_text = str(p.operand_a) + "+" + str(p.operand_b)
+			p.hint_text = "Zähle zusammen: %d + %d = %d" % [p.operand_a, p.operand_b, p.correct_answer]
+		else:
+			p.operator_symbol = "-"
+			p.operand_a = randi_range(2, 10)
+			p.operand_b = randi_range(1, p.operand_a - 1)
+			p.correct_answer = p.operand_a - p.operand_b
+			p.question_text = str(p.operand_a) + "-" + str(p.operand_b)
+			p.hint_text = "Zähle rückwärts: %d - %d = %d" % [p.operand_a, p.operand_b, p.correct_answer]
+
+	return p
+
+
+func _generate_l2(cfg: MathConfig) -> MathProblem:
+	var p: MathProblem = MathProblem.new()
+
+	if cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION:
+		p.is_three_operand = true
+		p.operator_symbol = "+"
+		p.operator_symbol_2 = "+"
+		p.operand_a = 10
+		p.operand_b = randi_range(1, 4)
+		p.operand_c = randi_range(1, 5)
+		p.correct_answer = p.operand_a + p.operand_b + p.operand_c
+		p.question_text = "%d+%d+%d" % [p.operand_a, p.operand_b, p.operand_c]
+		p.hint_text = "Erst 10 + %d = %d, dann + %d = %d" % [p.operand_b, 10 + p.operand_b, p.operand_c, p.correct_answer]
+		return p
+
+	var do_add = (cfg.operation == MathConfig.Operation.ADDITION) or (cfg.operation != MathConfig.Operation.SUBTRACTION and randf() < 0.5)
+	if do_add:
+		p.operator_symbol = "+"
+		var units_a = randi_range(1, 7)
+		var a = 10 + units_a
+		var b = randi_range(1, 9 - units_a)
+		if randf() < 0.3:
+			p.operand_a = b
+			p.operand_b = a
+		else:
+			p.operand_a = a
+			p.operand_b = b
+		p.correct_answer = a + b
+		p.question_text = str(p.operand_a) + "+" + str(p.operand_b)
+		p.hint_text = "Rechne erst die Einer zusammen: %d + %d = %d, dann die Zehn: %d!" % [units_a, b, units_a + b, a + b]
+		p.display_note = "%d + %d = %d  (kein Zehnerübergang)" % [p.operand_a, p.operand_b, p.correct_answer]
+	else:
+		p.operator_symbol = "-"
+		var units_a = randi_range(1, 9)
+		var a = 10 + units_a
+		var b = randi_range(1, units_a)
+		p.operand_a = a
+		p.operand_b = b
+		p.correct_answer = a - b
+		p.question_text = str(a) + "-" + str(b)
+		p.hint_text = "Ziehe nur die Einer ab: %d - %d = %d, die Zehn bleibt: %d!" % [units_a, b, units_a - b, a - b]
+		p.display_note = "%d - %d = %d  (kein Zehnerübergang)" % [a, b, p.correct_answer]
+
+	return p
+
+
+func _generate_l3(cfg: MathConfig) -> MathProblem:
+	var p: MathProblem = MathProblem.new()
+
+	if cfg.curriculum_subtype == MathConfig.CurriculumSubtype.UHRZEIT_ZEITSPANNE:
+		p.operator_symbol = "+"
+		var start_mins = [10, 15, 20, 30, 40, 45]
+		var durations = [10, 15, 20, 30, 45]
+		var m_start = start_mins.pick_random()
+		var m_dur = durations.pick_random()
+		p.operand_a = m_start
+		p.operand_b = m_dur
+		p.correct_answer = m_start + m_dur
+		p.question_text = "%d+%d" % [m_start, m_dur]
+		p.hint_text = "Uhrzeit-Rechnen: %d Minuten + %d Minuten = %d Minuten" % [m_start, m_dur, p.correct_answer]
+		p.display_note = "⏱️ %d min + %d min = %d min" % [m_start, m_dur, p.correct_answer]
+		return p
+
+	if cfg.game_mode == MathConfig.GameMode.MULTI_OP_EQUATION:
+		p.is_three_operand = true
+		p.operator_symbol = "+"
+		p.operator_symbol_2 = "+"
+		p.operand_a = randi_range(4, 8)
+		p.operand_b = randi_range(4, 8)
+		p.operand_c = randi_range(2, 5)
+		p.correct_answer = p.operand_a + p.operand_b + p.operand_c
+		p.question_text = "%d+%d+%d" % [p.operand_a, p.operand_b, p.operand_c]
+		p.hint_text = "Schrittweise addieren: %d + %d + %d = %d" % [p.operand_a, p.operand_b, p.operand_c, p.correct_answer]
+		return p
+
+	var do_add = (cfg.operation == MathConfig.Operation.ADDITION) or (cfg.operation != MathConfig.Operation.SUBTRACTION and randf() < 0.5)
+	if do_add:
+		p.operator_symbol = "+"
+		var a = randi_range(3, 9)
+		var min_b = 11 - a
+		var b = randi_range(min_b, 9)
+		p.operand_a = a
+		p.operand_b = b
+		p.correct_answer = a + b
+		p.question_text = str(a) + "+" + str(b)
+		var to_ten = 10 - a
+		var rest = b - to_ten
+		p.hint_text = "Zehnerübergang: erst %d + %d = 10, dann noch + %d = %d!" % [a, to_ten, rest, a + b]
+		p.display_note = "⚡ %d + %d = %d (über die 10)" % [a, b, a + b]
+	else:
+		p.operator_symbol = "-"
+		var units_a = randi_range(1, 7)
+		var a = 10 + units_a
+		var min_b = units_a + 1
+		var b = randi_range(min_b, min(9, a - 2))
+		p.operand_a = a
+		p.operand_b = b
+		p.correct_answer = a - b
+		p.question_text = str(a) + "-" + str(b)
+		var from_ten = b - units_a
+		p.hint_text = "Zehnerübergang: erst %d - %d = 10, dann noch - %d = %d!" % [a, units_a, from_ten, a - b]
+		p.display_note = "⚡ %d - %d = %d (unter die 10)" % [a, b, a - b]
+
+	return p
+
+
+func _generate_l4(cfg: MathConfig) -> MathProblem:
+	var p: MathProblem = MathProblem.new()
+	var step_options: Array[int] = [5, 10, 10, 20]
+	var s: int = step_options.pick_random()
+
+	var do_add = (cfg.operation == MathConfig.Operation.ADDITION) or (cfg.operation != MathConfig.Operation.SUBTRACTION and randf() < 0.5)
+	if do_add:
+		p.operator_symbol = "+"
+		var a: int
+		if s == 5:
+			a = randi_range(1, 18) * 5
+		elif s == 10:
+			a = randi_range(1, 8) * 10 if randf() < 0.5 else randi_range(11, 88)
+		else:
+			a = randi_range(1, 4) * 20 if randf() < 0.5 else randi_range(10, 75)
+
+		p.operand_a = a
+		p.operand_b = s
+		p.correct_answer = a + s
+		p.question_text = str(a) + "+" + str(s)
+		p.hint_text = "Schrittweise im Hunderterraum: %d + %d = %d" % [a, s, a + s]
+		p.display_note = "↗️ Sprung um +%d auf %d" % [s, a + s]
+	else:
+		p.operator_symbol = "-"
+		var a: int
+		if s == 5:
+			a = randi_range(2, 20) * 5
+		elif s == 10:
+			a = randi_range(2, 10) * 10 if randf() < 0.5 else randi_range(21, 99)
+		else:
+			a = randi_range(2, 5) * 20 if randf() < 0.5 else randi_range(30, 99)
+
+		p.operand_a = a
+		p.operand_b = s
+		p.correct_answer = a - s
+		p.question_text = str(a) + "-" + str(s)
+		p.hint_text = "Schrittweise zurückzählen: %d - %d = %d" % [a, s, a - s]
+		p.display_note = "↘️ Sprung um -%d auf %d" % [s, a - s]
+
+	return p
+
+
+func _generate_l5(cfg: MathConfig) -> MathProblem:
+	var p: MathProblem = MathProblem.new()
+	p.operator_symbol = "×"
+
+	var a: int
+	var b: int
+
+	if cfg.target_times_table in range(1, 11):
+		a = cfg.target_times_table
+		b = randi_range(1, 10)
+	else:
+		a = randi_range(1, 10)
+		b = randi_range(1, 10)
+
+	p.operand_a = a
+	p.operand_b = b
+	p.correct_answer = a * b
+	p.question_text = str(a) + "×" + str(b)
+
+	var repeated_terms: Array[String] = []
+	var limit = min(a, 6)
+	for i in range(limit):
+		repeated_terms.append(str(b))
+	var repeated_str: String = " + ".join(repeated_terms)
+	if a > 6:
+		repeated_str += " + ..."
+
+	p.display_note = "%s = %d" % [repeated_str, a * b]
+	p.hint_text = "%d mal die %d: %s = %d" % [a, b, repeated_str, a * b]
+
+	return p
+
+
+func _generate_l6(cfg: MathConfig) -> MathProblem:
+	var p: MathProblem = MathProblem.new()
+	p.operator_symbol = "÷"
+
+	var divisor: int
+	var quotient: int
+
+	if cfg.target_times_table in range(1, 11):
+		divisor = cfg.target_times_table
+		quotient = randi_range(1, 10)
+	else:
+		divisor = randi_range(1, 10)
+		quotient = randi_range(1, 10)
+
+	var dividend = divisor * quotient
+
+	p.operand_a = dividend
+	p.operand_b = divisor
+	p.correct_answer = quotient
+	p.question_text = str(dividend) + "÷" + str(divisor)
+
+	p.display_note = "Umkehraufgabe: %d × %d = %d" % [quotient, divisor, dividend]
+	p.hint_text = "Welche Zahl mal %d ergibt %d? (%d × ? = %d)" % [divisor, dividend, divisor, dividend]
+
+	return p

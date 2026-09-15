@@ -1,10 +1,29 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scenes/forge/BlacksmithForge.gd" id="1_forge"]
 [ext_resource type="FontFile" path="res://assets/fonts/LilitaOne-Regular.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forge/anvil_sword_top.png" id="3_anvil_bg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forge/forge_hammer.png" id="4_hammer"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forge/spark_star.png" id="5_spark_star"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forge/impact_burst.png" id="6_impact_burst"]
 
 [sub_resource type="Gradient" id="Gradient_sparks"]
-colors = PackedColorArray(1, 1, 0.2, 1, 1, 0.4, 0.1, 0)
+offsets = PackedFloat32Array(0, 0.4, 0.8, 1)
+colors = PackedColorArray(1, 1, 0.8, 1, 1, 0.75, 0.2, 1, 1, 0.35, 0.05, 0.9, 0.8, 0.1, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_result"]
+bg_color = Color(0.11, 0.08, 0.06, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.78, 0.25, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.85)
+shadow_size = 12
 
 [node name="BlacksmithForge" type="Control"]
 layout_mode = 3
@@ -15,221 +34,294 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_forge")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.12, 0.08, 0.06, 1)
-
-[node name="FurnaceGlow" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -140.0
-offset_right = 260.0
-offset_bottom = 140.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.24, 0.12, 0.06, 0.75)
+texture = ExtResource("3_anvil_bg")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="TopBar" type="HBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 15.0
-offset_top = 10.0
-offset_right = -15.0
-offset_bottom = 45.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 58.0
 grow_horizontal = 2
+theme_override_constants/separation = 8
 
-[node name="BackBtn" type="Button" parent="TopBar"]
-custom_minimum_size = Vector2(90, 32)
+[node name="LeftContainer" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="BackBtn" type="Button" parent="TopBar/LeftContainer"]
+custom_minimum_size = Vector2(85, 34)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 12
 text = "← ZURÜCK"
 
-[node name="Title" type="Label" parent="TopBar"]
+[node name="CenterContainer" type="MarginContainer" parent="TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-text = "🔨 DIE ZAHLEN-SCHMIEDE"
-horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="TopBar"]
-custom_minimum_size = Vector2(90, 0)
+[node name="VBox" type="VBoxContainer" parent="TopBar/CenterContainer"]
 layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
 
-[node name="MainBox" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -115.0
-offset_right = 220.0
-offset_bottom = 145.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 12
-
-[node name="FurnaceArea" type="VBoxContainer" parent="MainBox"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="EquationLabel" type="Label" parent="MainBox/FurnaceArea"]
+[node name="EquationLabel" type="Label" parent="TopBar/CenterContainer/VBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 28
-theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 0.9, 0.25, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
 text = "7 × 8 = ?"
 horizontal_alignment = 1
 
-[node name="RhythmLabel" type="Label" parent="MainBox/FurnaceArea"]
+[node name="SubtitleLabel" type="Label" parent="TopBar/CenterContainer/VBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
-text = "Schlage im 4. Takt zu! (clink.. clink.. CLANG!)"
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(1, 0.95, 0.85, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+text = "Schlage zu, wenn der Zeiger auf dem richtigen Ergebnis steht!"
 horizontal_alignment = 1
 
-[node name="BeatIndicators" type="HBoxContainer" parent="MainBox/FurnaceArea"]
+[node name="RightContainer" type="HBoxContainer" parent="TopBar"]
 layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="VBox" type="VBoxContainer" parent="TopBar/RightContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_constants/separation = 3
 alignment = 1
-theme_override_constants/separation = 16
 
-[node name="B1" type="Label" parent="MainBox/FurnaceArea/BeatIndicators"]
+[node name="QualityLabel" type="Label" parent="TopBar/RightContainer/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "●"
-
-[node name="B2" type="Label" parent="MainBox/FurnaceArea/BeatIndicators"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "●"
-
-[node name="B3" type="Label" parent="MainBox/FurnaceArea/BeatIndicators"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "●"
-
-[node name="B4" type="Label" parent="MainBox/FurnaceArea/BeatIndicators"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "🔨"
-
-[node name="AnvilArea" type="VBoxContainer" parent="MainBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="HammerVisual" type="Label" parent="MainBox/AnvilArea"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "🔨"
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+text = "Qualität: 0 Pkt (0/8)"
 horizontal_alignment = 1
 
-[node name="AnvilSprite" type="ColorRect" parent="MainBox/AnvilArea"]
-custom_minimum_size = Vector2(280, 16)
-layout_mode = 2
-size_flags_horizontal = 4
-color = Color(0.35, 0.38, 0.45, 1)
-
-[node name="IngotsContainer" type="HBoxContainer" parent="MainBox/AnvilArea"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 12
-
-[node name="QualityBox" type="VBoxContainer" parent="MainBox"]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="QualityBar" type="ProgressBar" parent="MainBox/QualityBox"]
-custom_minimum_size = Vector2(260, 14)
+[node name="QualityBar" type="ProgressBar" parent="TopBar/RightContainer/VBox"]
+custom_minimum_size = Vector2(145, 12)
 layout_mode = 2
 size_flags_horizontal = 4
 show_percentage = false
 
-[node name="QualityLabel" type="Label" parent="MainBox/QualityBox"]
+[node name="StreakBadge" type="PanelContainer" parent="TopBar/RightContainer/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="StreakLabel" type="Label" parent="TopBar/RightContainer/VBox/StreakBadge"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
-text = "Qualität: 0 Punkte (0/8 Schläge)"
+theme_override_colors/font_color = Color(1, 0.6, 0.1, 1)
+text = "KOMBO: x0"
 horizontal_alignment = 1
 
+[node name="SwordTrackLayer" type="Node2D" parent="."]
+
+[node name="TrackLine" type="Line2D" parent="SwordTrackLayer"]
+points = PackedVector2Array(110, 182, 445, 182)
+width = 4.0
+default_color = Color(1, 0.6, 0.1, 0.75)
+
+[node name="AnswerNodes" type="Node2D" parent="SwordTrackLayer"]
+
+[node name="TargetReticle" type="Node2D" parent="SwordTrackLayer"]
+position = Vector2(125, 182)
+
+[node name="ReticleLine" type="Line2D" parent="SwordTrackLayer/TargetReticle"]
+points = PackedVector2Array(0, -32, 0, 32)
+width = 3.5
+default_color = Color(1, 0.95, 0.2, 0.95)
+
+[node name="TopArrow" type="Label" parent="SwordTrackLayer/TargetReticle"]
+offset_left = -12.0
+offset_top = -48.0
+offset_right = 12.0
+offset_bottom = -26.0
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 15
+text = "▼"
+horizontal_alignment = 1
+
+[node name="BottomArrow" type="Label" parent="SwordTrackLayer/TargetReticle"]
+offset_left = -12.0
+offset_top = 28.0
+offset_right = 12.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 15
+text = "▲"
+horizontal_alignment = 1
+
+[node name="Shockwave" type="Line2D" parent="."]
+visible = false
+width = 3.0
+default_color = Color(1, 0.9, 0.4, 0.9)
+
+[node name="ImpactBurst" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(280, 182)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("6_impact_burst")
+
+[node name="HammerLayer" type="Node2D" parent="."]
+
+[node name="HammerPivot" type="Node2D" parent="HammerLayer"]
+position = Vector2(160, 95)
+rotation = -0.261799
+
+[node name="HammerSprite" type="Sprite2D" parent="HammerLayer/HammerPivot"]
+scale = Vector2(0.22, 0.22)
+texture = ExtResource("4_hammer")
+centered = false
+offset = Vector2(-159, -520)
+
 [node name="Sparks" type="CPUParticles2D" parent="."]
+position = Vector2(280, 182)
 emitting = false
-amount = 24
-lifetime = 0.5
+amount = 45
+lifetime = 0.55
 one_shot = true
-explosiveness = 0.95
+explosiveness = 0.98
+texture = ExtResource("5_spark_star")
 spread = 180.0
-gravity = Vector2(0, -30)
-initial_velocity_min = 45.0
-initial_velocity_max = 110.0
-scale_amount_min = 2.0
-scale_amount_max = 5.0
+gravity = Vector2(0, 160)
+initial_velocity_min = 160.0
+initial_velocity_max = 360.0
+angular_velocity_min = -360.0
+angular_velocity_max = 360.0
+scale_amount_min = 0.35
+scale_amount_max = 0.85
 color_ramp = SubResource("Gradient_sparks")
 
-[node name="ResultPanel" type="Panel" parent="."]
+[node name="Embers" type="CPUParticles2D" parent="."]
+position = Vector2(280, 182)
+emitting = false
+amount = 30
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.85
+spread = 120.0
+gravity = Vector2(0, -90)
+initial_velocity_min = 40.0
+initial_velocity_max = 120.0
+scale_amount_min = 2.0
+scale_amount_max = 4.5
+color_ramp = SubResource("Gradient_sparks")
+
+[node name="StrikeFlash" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 0.98, 0.85, 1)
+
+[node name="HitButtonContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -115.0
+offset_top = -64.0
+offset_right = 115.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HitBtn" type="Button" parent="HitButtonContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.92, 0.35, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.6, 1)
+text = "SCHLAGEN!"
+
+[node name="ResultPanel" type="Control" parent="."]
 visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="ResultPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.03, 0.02, 0.9)
+
+[node name="ModalBox" type="PanelContainer" parent="ResultPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -100.0
-offset_right = 160.0
-offset_bottom = 100.0
+offset_left = -180.0
+offset_top = -115.0
+offset_right = 180.0
+offset_bottom = 115.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_result")
 
-[node name="VBox" type="VBoxContainer" parent="ResultPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 15.0
-offset_top = 15.0
-offset_right = -15.0
-offset_bottom = -15.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="VBox" type="VBoxContainer" parent="ResultPanel/ModalBox"]
+layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="ResultPanel/VBox"]
+[node name="Title" type="Label" parent="ResultPanel/ModalBox/VBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 text = "SCHWERT GESCHMIEDET!"
 horizontal_alignment = 1
 
-[node name="Desc" type="Label" parent="ResultPanel/VBox"]
+[node name="Desc" type="Label" parent="ResultPanel/ModalBox/VBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.95, 0.92, 0.85, 1)
 text = "Verzauberung: Keine"
 horizontal_alignment = 1
 
-[node name="ClaimBtn" type="Button" parent="ResultPanel/VBox"]
-custom_minimum_size = Vector2(120, 32)
+[node name="ClaimBtn" type="Button" parent="ResultPanel/ModalBox/VBox"]
+custom_minimum_size = Vector2(140, 36)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.92, 0.35, 1)
 text = "EINPACKEN & WEITER"

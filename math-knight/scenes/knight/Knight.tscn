@@ -119,7 +119,7 @@ script = ExtResource("1_kn")
 position = Vector2(0, -14)
 script = ExtResource("2_ascii")
 entity_type = "knight"
-facing_direction = -1.0
+facing_direction = 1.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 visible = false
@@ -128,6 +128,7 @@ position = Vector2(0, -14)
 sprite_frames = SubResource("SpriteFrames_kn")
 animation = &"idle"
 autoplay = "idle"
+flip_h = true
 
 [node name="HitFlashTimer" type="Timer" parent="."]
 wait_time = 0.1
@@ -136,7 +137,7 @@ one_shot = true
 [node name="AttackArea" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
-position = Vector2(-40, 0)
+position = Vector2(40, 0)
 shape = SubResource("RectangleShape2D_1")
 disabled = true
 

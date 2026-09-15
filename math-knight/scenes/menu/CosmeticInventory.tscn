@@ -132,7 +132,7 @@ primary_color = Color(1, 0.09, 0.27, 1)
 position = Vector2(55, 58)
 script = ExtResource("8_ascii")
 entity_type = "knight"
-facing_direction = -1.0
+facing_direction = 1.0
 
 [node name="ItemTitle" type="Label" parent="MarginContainer/MainLayout/Body/PreviewFrame/PreviewPanel"]
 layout_mode = 2

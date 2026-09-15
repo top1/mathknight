@@ -41,6 +41,7 @@ func _ready() -> void:
 
 	_base_position = position
 	if sprite:
+		sprite.flip_h = true
 		sprite.play("idle")
 		sprite.animation_finished.connect(_on_animation_finished)
 
@@ -63,6 +64,7 @@ func _apply_cosmetics() -> void:
 		var frames: SpriteFrames = sm_node.get_knight_sprite_frames_for_cosmetics(equipped)
 		if frames and sprite:
 			sprite.sprite_frames = frames
+			sprite.flip_h = true
 			sprite.play("idle")
 
 	# Subtle aura tint overlay
@@ -189,7 +191,7 @@ func take_damage(amount: float) -> void:
 		if has_node("/root/AudioManager"):
 			get_node("/root/AudioManager").play_sfx("sword_slash", 1.8, 0.6)
 		var dodge_tween: Tween = create_tween()
-		dodge_tween.tween_property(self, "position:x", _base_position.x + 18.0, 0.1).set_trans(Tween.TRANS_BACK)
+		dodge_tween.tween_property(self, "position:x", _base_position.x - 18.0, 0.1).set_trans(Tween.TRANS_BACK)
 		dodge_tween.tween_property(self, "position:x", _base_position.x, 0.15).set_trans(Tween.TRANS_SINE)
 		return
 
@@ -297,7 +299,7 @@ func rush_attack(target_enemy_x: float, on_impact: Callable = Callable()) -> voi
 	if sprite:
 		sprite.play("windup")
 
-	var rush_dest_x: float = maxf(180.0, target_enemy_x + 36.0)
+	var rush_dest_x: float = minf(540.0, target_enemy_x - 36.0)
 	var rush_duration: float = 0.11
 	var impact_duration: float = 0.13
 	var return_duration: float = 0.14
@@ -358,7 +360,7 @@ func multi_slash_attack(target_enemy_x: float, _chain_count: int, on_impact: Cal
 
 	# Glow golden aura
 	modulate = Color(2.5, 2.0, 0.6)
-	var leap_x: float = maxf(180.0, target_enemy_x + 28.0)
+	var leap_x: float = minf(540.0, target_enemy_x - 28.0)
 	var leap_duration: float = 0.14
 	var strike_duration: float = 0.16
 	var return_duration: float = 0.14
@@ -403,11 +405,11 @@ func multi_slash_attack(target_enemy_x: float, _chain_count: int, on_impact: Cal
 
 
 func slash_attack() -> void:
-	rush_attack(_base_position.x - 100.0)
+	rush_attack(_base_position.x + 100.0)
 
 
 func stab_attack() -> void:
-	rush_attack(_base_position.x - 100.0)
+	rush_attack(_base_position.x + 100.0)
 
 
 func _on_animation_finished() -> void:

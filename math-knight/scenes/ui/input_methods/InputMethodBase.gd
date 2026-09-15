@@ -10,6 +10,13 @@ var current_config: Resource = null
 var is_active: bool = false
 
 
+func to_local_pos(screen_pos: Vector2, target_item: CanvasItem = null) -> Vector2:
+	var item: CanvasItem = target_item if target_item else self
+	if item.is_inside_tree():
+		return item.get_screen_transform().affine_inverse() * screen_pos
+	return screen_pos - item.global_position
+
+
 func setup(config: Resource) -> void:
 	current_config = config
 

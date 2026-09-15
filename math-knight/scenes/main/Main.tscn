@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scenes/main/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/utils/ShakeCamera.gd" id="2_cam"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/InputArea.tscn" id="5_input"]
 [ext_resource type="PackedScene" path="res://scenes/knight/Knight.tscn" id="6_knight"]
 [ext_resource type="Script" path="res://scenes/enemy/EnemyQueue.gd" id="7_eq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/arena_battle_lane.png" id="8_lane"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -15,23 +16,25 @@ script = ExtResource("1_main")
 position = Vector2(320, 180)
 script = ExtResource("2_cam")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 offset_right = 640.0
 offset_bottom = 216.0
 mouse_filter = 2
-color = Color(0.04, 0.03, 0.08, 1)
+texture = ExtResource("8_lane")
+expand_mode = 1
 
 [node name="BattleArea" type="Node2D" parent="."]
 
 [node name="Ground" type="ColorRect" parent="BattleArea"]
+visible = false
 offset_top = 190.0
 offset_right = 640.0
 offset_bottom = 216.0
 mouse_filter = 2
-color = Color(0.08, 0.06, 0.14, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="Knight" parent="BattleArea" instance=ExtResource("6_knight")]
-position = Vector2(540, 176)
+position = Vector2(100, 176)
 
 [node name="EnemyQueue" type="Node2D" parent="BattleArea"]
 position = Vector2(0, 172)
@@ -47,7 +50,7 @@ offset_top = 216.0
 offset_right = 640.0
 offset_bottom = 218.0
 mouse_filter = 2
-color = Color(0.15, 0.12, 0.2, 1)
+color = Color(0.24, 0.18, 0.12, 1)
 
 [node name="InputAreaContainer" type="Control" parent="."]
 anchors_preset = 0

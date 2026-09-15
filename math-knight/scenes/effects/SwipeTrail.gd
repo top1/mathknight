@@ -211,18 +211,6 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	# 1. Weapon Particles
-	if font:
-		for p in trail_particles:
-			var col: Color = Color(p.col, p.a)
-			draw_char(font, p.p, p.c, p.size, col)
-
-	# 2. Glowing Math Runes
-	if font:
-		for r in trail_runes:
-			var aura_c: Color = Color(default_color, float(r.a) * 0.4)
-			draw_char(font, Vector2(r.p) + Vector2(-1, 1), r.c, r.size + 1, aura_c)
-			draw_char(font, r.p, r.c, r.size, Color(r.col, r.a))
 
 	# 3. Triple layered glow on stroke points if active
 	if get_point_count() >= 2:

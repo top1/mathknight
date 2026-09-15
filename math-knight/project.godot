@@ -37,9 +37,13 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation="sensor_landscape"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/math_knight_mlkit/plugin.cfg")
+
 [gui]
 
-theme/custom_font="res://assets/fonts/Silkscreen-Regular.ttf"
+theme/custom_font="res://assets/fonts/Fredoka-Bold.ttf"
 
 [input_devices]
 

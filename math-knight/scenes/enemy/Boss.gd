@@ -103,7 +103,7 @@ func die() -> void:
 	boss_fully_defeated.emit()
 
 	if ascii_entity:
-		ascii_entity.trigger_splatter()
+		ascii_entity.play_splatter()
 		var timer = get_tree().create_timer(1.5)
 		timer.timeout.connect(queue_free)
 	else:

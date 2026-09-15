@@ -13,7 +13,7 @@ class_name Enemy
 var problem: MathProblem
 var problem_text: String = ""
 var answer_value: int = 0
-var target_x: float = 500.0
+var target_x: float = 150.0
 var state: String = "queued"  # queued, walking, attacking, hurt, defeated
 var _base_y: float = 0.0
 var _walk_time: float = 0.0
@@ -110,7 +110,7 @@ func _apply_ascii_config() -> void:
 	if ascii_entity:
 		ascii_entity.entity_type = enemy_type_name
 		ascii_entity.is_elite = is_elite
-		ascii_entity.facing_direction = 1.0
+		ascii_entity.facing_direction = -1.0
 
 
 func _update_label_display() -> void:
@@ -179,13 +179,13 @@ func _process(delta: float) -> void:
 	match state:
 		"walking":
 			_walk_time += delta
-			position.x += speed * delta
+			position.x -= speed * delta
 			if enemy_type_name == "slime":
 				position.y = _base_y
 			else:
 				position.y = _base_y + sin(_walk_time * 8.0) * 1.5
 
-			if position.x >= target_x:
+			if position.x <= target_x:
 				position.x = target_x
 				position.y = _base_y
 				_start_attacking()
@@ -222,7 +222,7 @@ func _on_attack_timer_timeout() -> void:
 		get_node("/root/EventBus").enemy_attacks_knight.emit(attack_damage)
 
 	var tween: Tween = create_tween()
-	tween.tween_property(self, "position:x", position.x + 14.0, 0.08) \
+	tween.tween_property(self, "position:x", position.x - 14.0, 0.08) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(self, "position:x", target_x, 0.15) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
@@ -257,7 +257,7 @@ func take_hit(damage: float) -> void:
 		flash_tween.tween_property(self, "modulate", Color(1.15, 0.85, 1.3), 0.15)
 
 		var knockback_tween: Tween = create_tween()
-		knockback_tween.tween_property(self, "position:x", position.x - 20.0, 0.06)
+		knockback_tween.tween_property(self, "position:x", position.x + 20.0, 0.06)
 		knockback_tween.tween_property(self, "position:x", position.x, 0.12)
 		return
 
@@ -271,7 +271,7 @@ func take_hit(damage: float) -> void:
 
 	var knockback_dist: float = minf(32.0, 14.0 + (damage * 3.0))
 	var knockback_tween: Tween = create_tween()
-	knockback_tween.tween_property(self, "position:x", position.x - knockback_dist, 0.05)
+	knockback_tween.tween_property(self, "position:x", position.x + knockback_dist, 0.05)
 	knockback_tween.tween_property(self, "position:x", position.x, 0.1)
 
 	if hp <= 0.0:
@@ -305,7 +305,7 @@ func take_hit(damage: float) -> void:
 		resume_tween.tween_interval(0.2)
 		resume_tween.tween_callback(func():
 			if state == "hurt":
-				if position.x >= target_x - 5.0:
+				if position.x <= target_x + 5.0:
 					state = "attacking"
 					attack_timer.start()
 				else:
@@ -325,7 +325,7 @@ func defeat() -> void:
 
 	# Trigger numerical ASCII splatter explosion!
 	if ascii_entity:
-		ascii_entity.trigger_splatter()
+		ascii_entity.play_splatter()
 		# Wait for splatter particles to expand & fade
 		var timer = get_tree().create_timer(1.2)
 		timer.timeout.connect(queue_free)

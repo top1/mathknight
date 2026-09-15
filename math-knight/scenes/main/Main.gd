@@ -72,7 +72,7 @@ func _on_answer_selected(_value: int, method: String, _bubble: Area2D, _slice_di
 
 func _on_answer_correct(_problem: RefCounted, chain_count: int = 1) -> void:
 	var front_enemy: Node2D = enemy_queue.get_front_enemy()
-	var enemy_pos: Vector2 = front_enemy.global_position if (front_enemy and is_instance_valid(front_enemy)) else Vector2(480, 170)
+	var enemy_pos: Vector2 = front_enemy.global_position if (front_enemy and is_instance_valid(front_enemy)) else Vector2(440, 170)
 
 	# Calculate RPG attack damage with speed, combo, and crit multipliers
 	var answer_time: float = GameManager.last_answer_time_sec if ("last_answer_time_sec" in GameManager) else 2.0

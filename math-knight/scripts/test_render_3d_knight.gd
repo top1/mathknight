@@ -13,18 +13,18 @@ func _init() -> void:
 	bg.size = Vector2(640, 360)
 	root_node.add_child(bg)
 	
-	# 1. Idle Knight (Facing Left)
+	# 1. Idle Knight (Facing Right)
 	var knight1 = AsciiEntity.new()
 	knight1.entity_type = "knight"
-	knight1.facing_direction = -1.0
+	knight1.facing_direction = 1.0
 	knight1.position = Vector2(180, 180)
 	knight1.scale = Vector2(2.0, 2.0)
 	root_node.add_child(knight1)
 	
-	# 2. Windup / Slashing Knight (Facing Left)
+	# 2. Windup / Slashing Knight (Facing Right)
 	var knight2 = AsciiEntity.new()
 	knight2.entity_type = "knight"
-	knight2.facing_direction = -1.0
+	knight2.facing_direction = 1.0
 	knight2.position = Vector2(440, 180)
 	knight2.scale = Vector2(2.0, 2.0)
 	knight2.equipped_sword = "sword_flame"

@@ -35,7 +35,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _setup_render_mode_button() -> void:
-	render_mode_btn = Button.new()
+	return # Disabled: MathKnight now uses unified clean 2D cartoon graphics
 	render_mode_btn.name = "RenderModeBtn"
 	render_mode_btn.focus_mode = Control.FOCUS_NONE
 	var top_bar = $MarginContainer/TopBar

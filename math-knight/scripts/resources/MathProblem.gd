@@ -11,6 +11,14 @@ var correct_answer: int = 0
 var choices: Array[int] = []
 var question_text: String = ""
 
+## Curriculum metadata (L1..L6)
+var curriculum_level: int = 0
+var curriculum_subtype: int = 0
+## Didactic feedback / explanation for training mode or visual aids
+var hint_text: String = ""
+## Auxiliary display (e.g. repeated addition "3 + 3 + 3 + 3" or inverse "3 × 4 = 12")
+var display_note: String = ""
+
 ## In RESULT_TO_EQUATION mode: -1 = completely open, 0 = operand_a is pre-given, 1 = operand_b is pre-given
 var given_operand_index: int = -1
 

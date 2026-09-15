@@ -210,63 +210,24 @@ func _draw() -> void:
 		draw_string(_font, Vector2(0, text_y1), "Rast", HORIZONTAL_ALIGNMENT_CENTER, int(size.x), font_size, Color(0.4, 0.9, 1.0, alpha))
 		draw_string(_font, Vector2(0, text_y2), "+40% ❤", HORIZONTAL_ALIGNMENT_CENTER, int(size.x), 8, Color(0.8, 0.9, 1.0, alpha))
 
-func _draw_ascii_icon(center: Vector2, type: String, core_col: Color, aura_col: Color, is_boss: bool, alpha: float) -> void:
-	match type:
-		"combat":
-			# ASCII Crossed Blades (/ \ + 7)
-			var chars = [
-				{"p": center + Vector2(-6, -6), "c": "\\", "sz": 9},
-				{"p": center + Vector2(6, -6), "c": "/", "sz": 9},
-				{"p": center + Vector2(0, 0), "c": "X", "sz": 10},
-				{"p": center + Vector2(-6, 6), "c": "/", "sz": 9},
-				{"p": center + Vector2(6, 6), "c": "\\", "sz": 9},
-			]
-			_render_ascii_glyph_group(chars, core_col, aura_col)
+const NODE_ICONS: Dictionary = {
+	"combat": "res://assets/sprites/map/map_node_combat.png",
+	"elite": "res://assets/sprites/map/map_node_elite.png",
+	"boss": "res://assets/sprites/map/map_node_boss.png",
+	"shop": "res://assets/sprites/map/map_node_shop.png",
+	"rest": "res://assets/sprites/map/map_node_rest.png",
+	"treasure": "res://assets/sprites/map/map_node_treasure.png",
+}
 
-		"elite":
-			# ASCII Horned Skull (^ 0 0 -)
-			var chars = [
-				{"p": center + Vector2(-6, -8), "c": "\\", "sz": 8},
-				{"p": center + Vector2(6, -8), "c": "/", "sz": 8},
-				{"p": center + Vector2(-4, -1), "c": "0", "sz": 9},
-				{"p": center + Vector2(4, -1), "c": "0", "sz": 9},
-				{"p": center + Vector2(0, 6), "c": "=", "sz": 8},
-			]
-			_render_ascii_glyph_group(chars, core_col, aura_col)
-
-		"boss":
-			# Imperial Crown ASCII (W M W ★)
-			var crown_y = center.y - 2
-			var chars = [
-				{"p": Vector2(center.x - 7, crown_y), "c": "W", "sz": 9},
-				{"p": Vector2(center.x, crown_y - 2), "c": "M", "sz": 10},
-				{"p": Vector2(center.x + 7, crown_y), "c": "W", "sz": 9},
-				{"p": Vector2(center.x, crown_y + 7), "c": "=", "sz": 9},
-			]
-			_render_ascii_glyph_group(chars, core_col, aura_col)
-			# Jewels
-			draw_circle(center + Vector2(0, crown_y + 2), 2.0, Color(1.0, 0.2, 0.3, alpha))
-			draw_circle(center + Vector2(-6, crown_y + 3), 1.5, Color(0.2, 0.9, 1.0, alpha))
-			draw_circle(center + Vector2(6, crown_y + 3), 1.5, Color(0.2, 0.9, 1.0, alpha))
-
-		"shop":
-			# Merchant Coin ASCII ([ $ ])
-			var chars = [
-				{"p": center + Vector2(-6, 3), "c": "[", "sz": 10},
-				{"p": center + Vector2(0, 3), "c": "$", "sz": 10},
-				{"p": center + Vector2(6, 3), "c": "]", "sz": 10},
-			]
-			_render_ascii_glyph_group(chars, core_col, aura_col)
-
-		"rest":
-			# Campfire / Flame ASCII (^ * .)
-			var chars = [
-				{"p": center + Vector2(0, -6), "c": "^", "sz": 11},
-				{"p": center + Vector2(-3, 0), "c": "*", "sz": 9},
-				{"p": center + Vector2(3, 0), "c": "*", "sz": 9},
-				{"p": center + Vector2(0, 6), "c": "=", "sz": 8},
-			]
-			_render_ascii_glyph_group(chars, core_col, aura_col)
+func _draw_ascii_icon(center: Vector2, type: String, _core_col: Color, _aura_col: Color, is_boss: bool, alpha: float) -> void:
+	var path: String = NODE_ICONS.get(type, NODE_ICONS["combat"])
+	if ResourceLoader.exists(path):
+		var tex: Texture2D = load(path)
+		if tex:
+			var icon_sz: float = 44.0 if is_boss else 38.0
+			var rect := Rect2(center.x - icon_sz * 0.5, center.y - icon_sz * 0.5, icon_sz, icon_sz)
+			draw_texture_rect(tex, rect, false, Color(1, 1, 1, alpha))
+			return
 
 func _render_ascii_glyph_group(items: Array, core_col: Color, aura_col: Color) -> void:
 	# Aura Bloom pass

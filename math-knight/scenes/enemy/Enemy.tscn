@@ -12,7 +12,7 @@ script = ExtResource("1_enemy")
 position = Vector2(0, -14)
 script = ExtResource("4_ascii")
 entity_type = "goblin"
-facing_direction = 1.0
+facing_direction = -1.0
 
 [node name="Sprite" type="Sprite2D" parent="."]
 visible = false

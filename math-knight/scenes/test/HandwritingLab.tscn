@@ -1,0 +1,281 @@
+[gd_scene load_steps=7 format=3 uid="uid://hw1ab7estm0de"]
+
+[ext_resource type="Script" path="res://scenes/test/HandwritingLab.gd" id="1_lab"]
+[ext_resource type="FontFile" path="res://assets/fonts/Silkscreen-Bold.ttf" id="2_silk_bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_press_start"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_canvas"]
+bg_color = Color(0.07, 0.06, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.74, 0.97, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.09, 0.08, 0.15, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.26, 0.45, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
+bg_color = Color(0.12, 0.1, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.3, 0.55, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="HandwritingLab" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lab")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.04, 0.08, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TopBar" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackBtn" type="Button" parent="VBox/TopBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 9
+text = "← ZURÜCK"
+
+[node name="TitleLabel" type="Label" parent="VBox/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 10
+text = "✍️ SCHRIFTERKENNUNG (ML KIT LAB)"
+
+[node name="Spacer" type="Control" parent="VBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BackendBadge" type="Label" parent="VBox/TopBar"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+theme_override_styles/normal = SubResource("StyleBoxFlat_badge")
+text = " Initialisiere... "
+
+[node name="MainHBox" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="LeftCol" type="VBoxContainer" parent="VBox/MainHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="CanvasPanel" type="PanelContainer" parent="VBox/MainHBox/LeftCol"]
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_canvas")
+
+[node name="DrawSurface" type="Control" parent="VBox/MainHBox/LeftCol/CanvasPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="DebounceBar" type="ProgressBar" parent="VBox/MainHBox/LeftCol"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+max_value = 1.0
+show_percentage = false
+
+[node name="CanvasBtnRow" type="HBoxContainer" parent="VBox/MainHBox/LeftCol"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BtnClear" type="Button" parent="VBox/MainHBox/LeftCol/CanvasBtnRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+text = "🗑️ Leeren"
+
+[node name="BtnUndo" type="Button" parent="VBox/MainHBox/LeftCol/CanvasBtnRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+text = "↩️ Undo"
+
+[node name="BtnRecognize" type="Button" parent="VBox/MainHBox/LeftCol/CanvasBtnRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+text = "⚡ Erkennen"
+
+[node name="ChkAutoDebounce" type="CheckBox" parent="VBox/MainHBox/LeftCol/CanvasBtnRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+button_pressed = true
+text = "Auto"
+
+[node name="RightCol" type="VBoxContainer" parent="VBox/MainHBox"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ResultPanel" type="PanelContainer" parent="VBox/MainHBox/RightCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="VBox/MainHBox/RightCol/ResultPanel"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ResultHeader" type="Label" parent="VBox/MainHBox/RightCol/ResultPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+text = "ERGEBNIS"
+horizontal_alignment = 1
+
+[node name="ResultDisplay" type="Label" parent="VBox/MainHBox/RightCol/ResultPanel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22, 0.74, 0.97, 1)
+theme_override_fonts/font = ExtResource("3_press_start")
+theme_override_font_sizes/font_size = 32
+text = "—"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VerdictBadge" type="Label" parent="VBox/MainHBox/RightCol/ResultPanel/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 9
+text = "Bereit zum Zeichnen"
+horizontal_alignment = 1
+
+[node name="StatusInfoLabel" type="Label" parent="VBox/MainHBox/RightCol/ResultPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 7
+text = "Zeichne eine Ziffer..."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TargetSection" type="VBoxContainer" parent="VBox/MainHBox/RightCol"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TargetHeader" type="HBoxContainer" parent="VBox/MainHBox/RightCol/TargetSection"]
+layout_mode = 2
+
+[node name="TargetLabel" type="Label" parent="VBox/MainHBox/RightCol/TargetSection/TargetHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+text = "🎯 Modus: Frei"
+
+[node name="ScoreLabel" type="Label" parent="VBox/MainHBox/RightCol/TargetSection/TargetHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.85, 0.45, 1)
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 8
+text = "0/0"
+
+[node name="TargetGrid" type="GridContainer" parent="VBox/MainHBox/RightCol/TargetSection"]
+layout_mode = 2
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 6
+
+[node name="SettingsSection" type="VBoxContainer" parent="VBox/MainHBox/RightCol"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DebounceRow" type="HBoxContainer" parent="VBox/MainHBox/RightCol/SettingsSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="VBox/MainHBox/RightCol/SettingsSection/DebounceRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 7
+text = "Timer:"
+
+[node name="DebounceSlider" type="HSlider" parent="VBox/MainHBox/RightCol/SettingsSection/DebounceRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.2
+max_value = 1.5
+step = 0.05
+value = 0.65
+
+[node name="DebounceVal" type="Label" parent="VBox/MainHBox/RightCol/SettingsSection/DebounceRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 7
+text = "0.65s"
+horizontal_alignment = 2
+
+[node name="BtnToggleJson" type="Button" parent="VBox/MainHBox/RightCol/SettingsSection"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_silk_bold")
+theme_override_font_sizes/font_size = 7
+text = "Raw JSON: AUS"
+
+[node name="JsonReadout" type="TextEdit" parent="VBox/MainHBox/RightCol"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 7
+editable = false
+wrap_mode = 1
+
+[node name="DebounceTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="draw" from="VBox/MainHBox/LeftCol/CanvasPanel/DrawSurface" to="." method="_on_draw_surface_draw"]

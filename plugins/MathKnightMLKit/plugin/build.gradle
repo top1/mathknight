@@ -1,0 +1,27 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'org.godotengine.plugin.android.mathknight'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    compileOnly files('libs/godot-lib-classes.jar')
+
+    implementation 'com.google.mlkit:digital-ink-recognition:18.1.0'
+    implementation 'com.google.android.gms:play-services-tasks:18.2.0'
+}

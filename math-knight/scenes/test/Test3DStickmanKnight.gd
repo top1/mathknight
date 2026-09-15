@@ -136,7 +136,7 @@ func _ready() -> void:
 	# 8. Instantiate Legacy 2D Entity (Left)
 	legacy_entity = AsciiEntityScript.new()
 	legacy_entity.entity_type = "knight"
-	legacy_entity.facing_direction = -1.0
+	legacy_entity.facing_direction = 1.0
 	legacy_entity.position = Vector2(160, 220)
 	add_child(legacy_entity)
 	if legacy_entity.renderer_3d:

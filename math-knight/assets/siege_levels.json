@@ -1,0 +1,248 @@
+﻿{
+  "levels": [
+    {
+      "level_name": "Waldburg-Belagerung",
+      "starting_soldiers": 12,
+      "castle_defense_value": 40,
+      "hint_text": "Wähle weise! Multiplikation kann trügen...",
+      "stages": [
+        {
+          "branches": [
+            {
+              "entry_y": 0.5,
+              "choices": [
+                {
+                  "label": "×2",
+                  "exit_y": 0.25,
+                  "operations": [{"op": "mul", "value": 2}]
+                },
+                {
+                  "label": "+10",
+                  "exit_y": 0.75,
+                  "operations": [{"op": "add", "value": 10}]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "branches": [
+            {
+              "entry_y": 0.25,
+              "choices": [
+                {
+                  "label": "-5 ×2",
+                  "exit_y": 0.15,
+                  "operations": [{"op": "sub", "value": 5}, {"op": "mul", "value": 2}]
+                },
+                {
+                  "label": "+20 ÷3",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "add", "value": 20}, {"op": "div", "value": 3}]
+                }
+              ]
+            },
+            {
+              "entry_y": 0.75,
+              "choices": [
+                {
+                  "label": "+20 ÷3",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "add", "value": 20}, {"op": "div", "value": 3}]
+                },
+                {
+                  "label": "-8 ×3",
+                  "exit_y": 0.85,
+                  "operations": [{"op": "sub", "value": 8}, {"op": "mul", "value": 3}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level_name": "Steinburg-Angriff",
+      "starting_soldiers": 10,
+      "castle_defense_value": 55,
+      "hint_text": "Mehr Soldaten, härtere Wachen!",
+      "stages": [
+        {
+          "branches": [
+            {
+              "entry_y": 0.5,
+              "choices": [
+                {
+                  "label": "×3",
+                  "exit_y": 0.25,
+                  "operations": [{"op": "mul", "value": 3}]
+                },
+                {
+                  "label": "+15",
+                  "exit_y": 0.75,
+                  "operations": [{"op": "add", "value": 15}]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "branches": [
+            {
+              "entry_y": 0.25,
+              "choices": [
+                {
+                  "label": "-8 ×3",
+                  "exit_y": 0.15,
+                  "operations": [{"op": "sub", "value": 8}, {"op": "mul", "value": 3}]
+                },
+                {
+                  "label": "+25 ÷2",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "add", "value": 25}, {"op": "div", "value": 2}]
+                }
+              ]
+            },
+            {
+              "entry_y": 0.75,
+              "choices": [
+                {
+                  "label": "+25 ÷2",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "add", "value": 25}, {"op": "div", "value": 2}]
+                },
+                {
+                  "label": "-5 ×4",
+                  "exit_y": 0.85,
+                  "operations": [{"op": "sub", "value": 5}, {"op": "mul", "value": 4}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level_name": "Eisenfestung",
+      "starting_soldiers": 15,
+      "castle_defense_value": 80,
+      "hint_text": "Achtung bei Division!",
+      "stages": [
+        {
+          "branches": [
+            {
+              "entry_y": 0.5,
+              "choices": [
+                {
+                  "label": "×4",
+                  "exit_y": 0.25,
+                  "operations": [{"op": "mul", "value": 4}]
+                },
+                {
+                  "label": "+30",
+                  "exit_y": 0.75,
+                  "operations": [{"op": "add", "value": 30}]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "branches": [
+            {
+              "entry_y": 0.25,
+              "choices": [
+                {
+                  "label": "-10 ×2",
+                  "exit_y": 0.15,
+                  "operations": [{"op": "sub", "value": 10}, {"op": "mul", "value": 2}]
+                },
+                {
+                  "label": "÷2 ×3",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "div", "value": 2}, {"op": "mul", "value": 3}]
+                }
+              ]
+            },
+            {
+              "entry_y": 0.75,
+              "choices": [
+                {
+                  "label": "÷3 ×5",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "div", "value": 3}, {"op": "mul", "value": 5}]
+                },
+                {
+                  "label": "+40",
+                  "exit_y": 0.85,
+                  "operations": [{"op": "add", "value": 40}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level_name": "Drachenfels",
+      "starting_soldiers": 20,
+      "castle_defense_value": 120,
+      "hint_text": "Der Drache erwartet ein riesiges Heer!",
+      "stages": [
+        {
+          "branches": [
+            {
+              "entry_y": 0.5,
+              "choices": [
+                {
+                  "label": "×5",
+                  "exit_y": 0.25,
+                  "operations": [{"op": "mul", "value": 5}]
+                },
+                {
+                  "label": "+40",
+                  "exit_y": 0.75,
+                  "operations": [{"op": "add", "value": 40}]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "branches": [
+            {
+              "entry_y": 0.25,
+              "choices": [
+                {
+                  "label": "-15 ×3",
+                  "exit_y": 0.15,
+                  "operations": [{"op": "sub", "value": 15}, {"op": "mul", "value": 3}]
+                },
+                {
+                  "label": "+30 ÷2",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "add", "value": 30}, {"op": "div", "value": 2}]
+                }
+              ]
+            },
+            {
+              "entry_y": 0.75,
+              "choices": [
+                {
+                  "label": "×3",
+                  "exit_y": 0.5,
+                  "operations": [{"op": "mul", "value": 3}]
+                },
+                {
+                  "label": "-10 ×4",
+                  "exit_y": 0.85,
+                  "operations": [{"op": "sub", "value": 10}, {"op": "mul", "value": 4}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

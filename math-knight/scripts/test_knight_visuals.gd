@@ -20,7 +20,7 @@ func _init() -> void:
 
 	_ascii_knight = AsciiEntity.new()
 	_ascii_knight.entity_type = "knight"
-	_ascii_knight.facing_direction = -1.0
+	_ascii_knight.facing_direction = 1.0
 	_ascii_knight.position = Vector2(320, 200)
 	_test_node.add_child(_ascii_knight)
 

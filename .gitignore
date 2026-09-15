@@ -3,9 +3,12 @@
 **/android/
 **/.godot/
 
-# Android build outputs
+# Android / Gradle build outputs
 *.apk
 *.apk.idsig
+**/build/
+.gradle/
+**/.gradle/
 
 # Python cache
 __pycache__/
@@ -15,3 +18,4 @@ __pycache__/
 # Temporary / OS files
 .DS_Store
 Thumbs.db
+

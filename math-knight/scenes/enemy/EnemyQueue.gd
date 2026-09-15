@@ -7,9 +7,9 @@ class_name EnemyQueue
 @export var set_size: int = 5
 @export var bubble_pool_size: int = 10
 @export var enemy_scene: PackedScene = preload("res://scenes/enemy/Enemy.tscn")
-@export var knight_x: float = 540.0
+@export var knight_x: float = 100.0
 @export var queue_slot_spacing: float = 48.0
-@export var front_slot_x: float = 200.0
+@export var front_slot_x: float = 440.0
 
 var current_set_number: int = 1
 ## Active enemies in current set, ordered from rightmost (index 0) to leftmost (index N-1)
@@ -145,11 +145,11 @@ func start_new_set() -> void:
 			prob_idx += 1
 			enemy.setup(prob, enemy_spd, stage_cfg.damage, stage_cfg.interval, chosen_type, current_set_number)
 
-		enemy.target_x = knight_x - 50.0
+		enemy.target_x = knight_x + 50.0
 		enemy.enemy_defeated.connect(_on_enemy_defeated)
 		enemy.enemy_reached_knight.connect(_on_enemy_reached_knight)
 
-		var slot_x: float = front_slot_x - (float(i) * queue_slot_spacing)
+		var slot_x: float = front_slot_x + (float(i) * queue_slot_spacing)
 		enemy.position = Vector2(slot_x, 0.0)
 		enemy.z_index = 20 - i
 
@@ -240,7 +240,7 @@ func _advance_queue() -> void:
 		if not is_instance_valid(enemy):
 			continue
 		if enemy.state == "queued":
-			var target_slot_x: float = front_slot_x - (float(i) * queue_slot_spacing)
+			var target_slot_x: float = front_slot_x + (float(i) * queue_slot_spacing)
 			var tween: Tween = create_tween()
 			tween.tween_property(enemy, "position:x", target_slot_x, 0.28) \
 				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)

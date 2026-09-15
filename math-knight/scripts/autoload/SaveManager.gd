@@ -35,9 +35,18 @@ func spend_gold(amount: int) -> bool:
 
 
 var wood: int = 0
+var bread: int = 0
 var weapon_affix: String = "" # "flame", "frost", "greed", "storm"
 var forge_level: int = 1
 var lumber_level: int = 1
+var bakery_level: int = 1
+
+# === Village Economy ===
+var hut_count: int = 0              # Gebaute Hütten
+var villagers: int = 0              # Aktuelle Dorfbewohner
+var soldiers: int = 0               # Permanente Soldaten (wachsend!)
+var weapons_stock: int = 0          # Waffen aus der Schmiede
+var last_tax_time_msec: int = 0     # Timestamp letzte Steuereinnahme (5 Min Cooldown)
 
 
 func add_wood(amount: int) -> void:
@@ -57,6 +66,27 @@ func spend_wood(amount: int) -> bool:
 	return false
 
 
+func add_bread(amount: int) -> void:
+	if amount <= 0:
+		return
+	bread += amount
+	save_data()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").bread_changed.emit(bread)
+
+
+func spend_bread(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if bread >= amount:
+		bread -= amount
+		save_data()
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").bread_changed.emit(bread)
+		return true
+	return false
+
+
 func set_weapon_affix(affix: String) -> void:
 	weapon_affix = affix
 	save_data()
@@ -68,6 +98,7 @@ func get_building_level(building: String) -> int:
 	match building.to_lower():
 		"forge": return forge_level
 		"lumber": return lumber_level
+		"bakery": return bakery_level
 		_: return 1
 
 func get_building_upgrade_cost(building: String) -> Dictionary:
@@ -85,6 +116,11 @@ func get_building_upgrade_cost(building: String) -> Dictionary:
 			return {"gold": 80, "wood": 30, "maxed": false}
 		else:
 			return {"gold": 250, "wood": 100, "maxed": false}
+	elif building.to_lower() == "bakery":
+		if cur_level == 1:
+			return {"gold": 70, "wood": 40, "maxed": false}
+		else:
+			return {"gold": 220, "wood": 120, "maxed": false}
 	return {"gold": 999, "wood": 999, "maxed": false}
 
 func can_upgrade_building(building: String) -> bool:
@@ -104,10 +140,185 @@ func upgrade_building(building: String) -> bool:
 			forge_level += 1
 		"lumber":
 			lumber_level += 1
+		"bakery":
+			bakery_level += 1
 	save_data()
 	if has_node("/root/EventBus"):
 		get_node("/root/EventBus").gold_changed.emit(gold)
 	return true
+
+
+# =========================================================================
+# VILLAGE ECONOMY — Hütten, Bewohner, Steuern, Waffen, Soldaten
+# =========================================================================
+
+const TAX_COOLDOWN_MSEC: int = 300_000  # 5 Minuten in Millisekunden
+const TAX_GOLD_PER_VILLAGER: int = 3
+const VILLAGERS_PER_HUT: int = 5
+const BASE_VILLAGER_CAPACITY: int = 10  # Burg-Basiskapazität
+const SOLDIER_RECRUIT_GOLD_COST: int = 5
+
+## Max Hütten basierend auf Ritter-Level
+func get_max_huts() -> int:
+	if knight_level < 2:
+		return 0
+	elif knight_level < 5:
+		return 1
+	elif knight_level < 8:
+		return 2
+	elif knight_level < 10:
+		return 3
+	elif knight_level < 15:
+		return 4
+	elif knight_level < 20:
+		return 5
+	elif knight_level < 25:
+		return 6
+	elif knight_level < 30:
+		return 8
+	else:
+		return 10
+
+
+## Max Bewohner: Burg-Basis + Hütten * 5
+func get_max_villagers() -> int:
+	return BASE_VILLAGER_CAPACITY + hut_count * VILLAGERS_PER_HUT
+
+
+## Kosten für die nächste Hütte (steigende Kosten)
+func get_hut_cost() -> Dictionary:
+	return {
+		"wood": 20 + hut_count * 10,
+		"gold": 10 + hut_count * 5
+	}
+
+
+## Kann eine Hütte gebaut werden?
+func can_build_hut() -> bool:
+	if hut_count >= get_max_huts():
+		return false
+	var cost: Dictionary = get_hut_cost()
+	return wood >= cost["wood"] and gold >= cost["gold"]
+
+
+## Hütte bauen
+func build_hut() -> bool:
+	if not can_build_hut():
+		return false
+	var cost: Dictionary = get_hut_cost()
+	wood -= cost["wood"]
+	gold -= cost["gold"]
+	hut_count += 1
+	save_data()
+	if has_node("/root/EventBus"):
+		var bus = get_node("/root/EventBus")
+		bus.hut_built.emit(hut_count)
+		bus.gold_changed.emit(gold)
+	return true
+
+
+## Bewohner automatisch anlocken wenn Platz + Brot vorhanden
+## Gibt Anzahl neue Bewohner zurück
+func try_attract_villagers() -> int:
+	var max_v: int = get_max_villagers()
+	var free_slots: int = max_v - villagers
+	if free_slots <= 0 or bread <= 0:
+		return 0
+	# Pro Einzug: 1 Brot verbraucht
+	var can_attract: int = mini(free_slots, bread)
+	# Maximal 3 auf einmal (damit es sich nach und nach füllt)
+	can_attract = mini(can_attract, 3)
+	bread -= can_attract
+	villagers += can_attract
+	save_data()
+	if has_node("/root/EventBus"):
+		var bus = get_node("/root/EventBus")
+		bus.villager_arrived.emit(villagers)
+		bus.villagers_changed.emit(villagers)
+		bus.bread_changed.emit(bread)
+	return can_attract
+
+
+## Können Steuern kassiert werden? (Cooldown + Bewohner + Brot)
+func can_collect_taxes() -> bool:
+	if villagers <= 0:
+		return false
+	if bread < villagers:
+		return false
+	var now: int = Time.get_ticks_msec()
+	return (now - last_tax_time_msec) >= TAX_COOLDOWN_MSEC
+
+
+## Verbleibende Cooldown-Zeit in Sekunden
+func get_tax_cooldown_remaining() -> float:
+	var now: int = Time.get_ticks_msec()
+	var elapsed: int = now - last_tax_time_msec
+	if elapsed >= TAX_COOLDOWN_MSEC:
+		return 0.0
+	return float(TAX_COOLDOWN_MSEC - elapsed) / 1000.0
+
+
+## Steuern kassieren: Brot verbrauchen, Gold generieren
+func collect_taxes() -> int:
+	if not can_collect_taxes():
+		return 0
+	var fed: int = mini(villagers, bread)
+	bread -= fed
+	var tax_gold: int = fed * TAX_GOLD_PER_VILLAGER
+	gold += tax_gold
+	total_gold_earned += tax_gold
+	last_tax_time_msec = Time.get_ticks_msec()
+	save_data()
+	if has_node("/root/EventBus"):
+		var bus = get_node("/root/EventBus")
+		bus.taxes_collected.emit(tax_gold, fed)
+		bus.gold_changed.emit(gold)
+		bus.bread_changed.emit(bread)
+	return tax_gold
+
+
+## Waffen aus der Schmiede hinzufügen
+func add_weapons(amount: int) -> void:
+	if amount <= 0:
+		return
+	weapons_stock += amount
+	save_data()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").weapons_changed.emit(weapons_stock)
+
+
+## Kann ein Soldat rekrutiert werden?
+func can_recruit_soldier() -> bool:
+	return villagers >= 1 and weapons_stock >= 1 and gold >= SOLDIER_RECRUIT_GOLD_COST
+
+
+## Soldat rekrutieren: 1 Bewohner + 1 Waffe + 5 Gold → 1 Soldat
+func recruit_soldier() -> bool:
+	if not can_recruit_soldier():
+		return false
+	villagers -= 1
+	weapons_stock -= 1
+	gold -= SOLDIER_RECRUIT_GOLD_COST
+	soldiers += 1
+	save_data()
+	if has_node("/root/EventBus"):
+		var bus = get_node("/root/EventBus")
+		bus.soldier_recruited.emit(soldiers)
+		bus.soldiers_changed.emit(soldiers)
+		bus.villagers_changed.emit(villagers)
+		bus.weapons_changed.emit(weapons_stock)
+		bus.gold_changed.emit(gold)
+	return true
+
+
+## Soldaten direkt hinzufügen (z.B. Siege-Reward)
+func add_soldiers(amount: int) -> void:
+	if amount <= 0:
+		return
+	soldiers += amount
+	save_data()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").soldiers_changed.emit(soldiers)
 
 
 # Knight permanent stats
@@ -145,6 +356,7 @@ signal render_mode_changed(is_3d: bool)
 
 # Settings
 var tutorial_tips_enabled: bool = true
+var master_muted: bool = false
 var sfx_enabled: bool = true
 var music_enabled: bool = true
 var render_mode_3d_shader: bool = true
@@ -217,12 +429,14 @@ func add_xp(amount: int) -> void:
 	if knight_level >= MAX_LEVEL:
 		return
 	knight_xp += amount
-	EventBus.knight_xp_gained.emit(amount)
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").knight_xp_gained.emit(amount)
 
 	while knight_level < MAX_LEVEL and knight_xp >= xp_for_next_level():
 		knight_level += 1
 		knight_stat_points += 1
-		EventBus.knight_leveled_up.emit(knight_level)
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").knight_leveled_up.emit(knight_level)
 
 	save_data()
 
@@ -254,7 +468,8 @@ func upgrade_stat(stat_name: String) -> bool:
 
 	knight_stats[stat_name] += 1
 	knight_stat_points -= 1
-	EventBus.knight_stat_upgraded.emit(stat_name, knight_stats[stat_name])
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").knight_stat_upgraded.emit(stat_name, knight_stats[stat_name])
 	save_data()
 	return true
 
@@ -295,7 +510,8 @@ func award_mastery_badge(badge_id: String) -> void:
 
 func add_diamonds(amount: int) -> void:
 	diamonds += amount
-	EventBus.diamonds_earned.emit(amount)
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").diamonds_earned.emit(amount)
 	save_data()
 
 
@@ -312,14 +528,16 @@ func spend_diamonds(amount: int) -> bool:
 func unlock_cosmetic(cosmetic_id: String) -> void:
 	if cosmetic_id not in unlocked_cosmetics:
 		unlocked_cosmetics.append(cosmetic_id)
-		EventBus.cosmetic_unlocked.emit(cosmetic_id)
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").cosmetic_unlocked.emit(cosmetic_id)
 		save_data()
 
 
 func equip_cosmetic(cosmetic_id: String, slot: String) -> void:
 	if cosmetic_id in unlocked_cosmetics and equipped_cosmetics.has(slot):
 		equipped_cosmetics[slot] = cosmetic_id
-		EventBus.cosmetic_equipped.emit(cosmetic_id, slot)
+		if has_node("/root/EventBus"):
+			get_node("/root/EventBus").cosmetic_equipped.emit(cosmetic_id, slot)
 		save_data()
 
 
@@ -352,17 +570,57 @@ func get_best_score() -> int:
 	return best_scores[0].get("score", 0)
 
 
+# === Curriculum Progression (L1 to L6) ===
+
+var highest_unlocked_curriculum: int = 1
+var curriculum_progress: Dictionary = {
+	"L1": {"stars": 0, "mastered": false, "problems_solved": 0},
+	"L2": {"stars": 0, "mastered": false, "problems_solved": 0},
+	"L3": {"stars": 0, "mastered": false, "problems_solved": 0},
+	"L4": {"stars": 0, "mastered": false, "problems_solved": 0},
+	"L5": {"stars": 0, "mastered": false, "problems_solved": 0},
+	"L6": {"stars": 0, "mastered": false, "problems_solved": 0}
+}
+
+
+func get_curriculum_progress(level_key: String) -> Dictionary:
+	return curriculum_progress.get(level_key, {"stars": 0, "mastered": false, "problems_solved": 0})
+
+
+func record_curriculum_success(level_idx: int, stars_earned: int = 3) -> void:
+	var key = "L%d" % level_idx
+	if not curriculum_progress.has(key):
+		curriculum_progress[key] = {"stars": 0, "mastered": false, "problems_solved": 0}
+	var entry = curriculum_progress[key]
+	entry["problems_solved"] = entry.get("problems_solved", 0) + 1
+	entry["stars"] = max(entry.get("stars", 0), stars_earned)
+	if entry["stars"] >= 3:
+		entry["mastered"] = true
+		if level_idx >= highest_unlocked_curriculum and level_idx < 6:
+			highest_unlocked_curriculum = level_idx + 1
+	save_data()
+
+
 # === Save / Load ===
 
 func save_data() -> void:
 	var data: Dictionary = {
-		"version": 2,
+		"version": 3,
 		"diamonds": diamonds,
 		"gold": gold,
 		"wood": wood,
+		"bread": bread,
 		"weapon_affix": weapon_affix,
 		"forge_level": forge_level,
 		"lumber_level": lumber_level,
+		"bakery_level": bakery_level,
+		# Village Economy
+		"hut_count": hut_count,
+		"villagers": villagers,
+		"soldiers": soldiers,
+		"weapons_stock": weapons_stock,
+		"last_tax_time_msec": last_tax_time_msec,
+		# Stats & tracking
 		"mastery_badges": mastery_badges,
 		"arena_last_played_date": arena_last_played_date,
 		"best_arena_wave": best_arena_wave,
@@ -377,9 +635,12 @@ func save_data() -> void:
 		"equipped_cosmetics": equipped_cosmetics,
 		"best_scores": best_scores,
 		"tutorial_tips_enabled": tutorial_tips_enabled,
+		"master_muted": master_muted,
 		"sfx_enabled": sfx_enabled,
 		"music_enabled": music_enabled,
-		"render_mode_3d_shader": render_mode_3d_shader
+		"render_mode_3d_shader": render_mode_3d_shader,
+		"highest_unlocked_curriculum": highest_unlocked_curriculum,
+		"curriculum_progress": curriculum_progress
 	}
 
 	var json_string: String = JSON.stringify(data, "\t")
@@ -415,9 +676,17 @@ func load_data() -> void:
 	diamonds = d.get("diamonds", 0)
 	gold = d.get("gold", 0)
 	wood = d.get("wood", 0)
+	bread = d.get("bread", 0)
 	weapon_affix = str(d.get("weapon_affix", ""))
 	forge_level = d.get("forge_level", 1)
 	lumber_level = d.get("lumber_level", 1)
+	bakery_level = d.get("bakery_level", 1)
+	# Village Economy (v3 migration: defaults to 0 for v2 saves)
+	hut_count = int(d.get("hut_count", 0))
+	villagers = int(d.get("villagers", 0))
+	soldiers = int(d.get("soldiers", 0))
+	weapons_stock = int(d.get("weapons_stock", 0))
+	last_tax_time_msec = int(d.get("last_tax_time_msec", 0))
 	total_gold_earned = d.get("total_gold_earned", 0)
 	total_runs_completed = d.get("total_runs_completed", 0)
 	total_runs_started = d.get("total_runs_started", 0)
@@ -455,9 +724,15 @@ func load_data() -> void:
 	best_arena_wave = int(d.get("best_arena_wave", 0))
 
 	tutorial_tips_enabled = d.get("tutorial_tips_enabled", true)
+	master_muted = d.get("master_muted", false)
 	sfx_enabled = d.get("sfx_enabled", true)
 	music_enabled = d.get("music_enabled", true)
 	render_mode_3d_shader = d.get("render_mode_3d_shader", true)
+	highest_unlocked_curriculum = int(d.get("highest_unlocked_curriculum", 1))
+
+	if d.has("curriculum_progress") and d["curriculum_progress"] is Dictionary:
+		for key in d["curriculum_progress"]:
+			curriculum_progress[key] = d["curriculum_progress"][key]
 
 
 func set_render_mode_3d_shader(enabled: bool) -> void:
@@ -479,6 +754,12 @@ func reset_all_data() -> void:
 	weapon_affix = ""
 	forge_level = 1
 	lumber_level = 1
+	# Village Economy reset
+	hut_count = 0
+	villagers = 0
+	soldiers = 0
+	weapons_stock = 0
+	last_tax_time_msec = 0
 	total_gold_earned = 0
 	total_runs_completed = 0
 	total_runs_started = 0

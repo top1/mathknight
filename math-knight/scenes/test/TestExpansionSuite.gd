@@ -69,6 +69,10 @@ func _test_xp_and_leveling() -> void:
 	_assert(sm.knight_stat_points > initial_pts, "Leveling up granted talent points")
 	
 	# Test stat point distribution
+	if sm.knight_stats["strength"] >= sm.MAX_STAT_LEVEL:
+		sm.knight_stats["strength"] = 0
+	if sm.knight_stat_points <= 0:
+		sm.knight_stat_points = 1
 	var pts_before = sm.knight_stat_points
 	var str_before = sm.knight_stats["strength"]
 	var upgraded = sm.upgrade_stat("strength")
@@ -126,6 +130,6 @@ func _test_village_hub_instantiation() -> void:
 	
 	var hub = hub_scene.instantiate()
 	add_child(hub)
-	var grid = hub.get_node_or_null("Margin/MainVBox/Scroll/BuildingsGrid")
-	_assert(grid != null and grid.get_child_count() == 6, "VillageHub displays all 6 medieval town buildings")
+	var has_districts = (hub.adventure_district != null and hub.craft_district != null and hub.hero_district != null)
+	_assert(has_districts, "VillageHub displays all thematic districts (Abenteuer, Handwerk, Ritterburg)")
 	hub.queue_free()
